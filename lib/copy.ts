@@ -6,6 +6,22 @@ export const copy = {
     title: 'Natal Chart Calculator',
     description:
       'Calculate your Western astrology natal chart with precise planetary positions and Placidus house system.',
+    tagline: 'Western Astrology · Placidus Houses · Tropical Zodiac',
+  },
+
+  nav: {
+    home: 'Home',
+    chart: 'Natal Chart',
+    ariaLabel: 'Main navigation',
+  },
+
+  footer: {
+    tagline: 'Western Astrology · Placidus Houses · Tropical Zodiac',
+    copyright: '© {year} Natal Chart Calculator. All rights reserved.',
+    links: [
+      { label: 'Home', href: '/' },
+      { label: 'Natal Chart', href: '/chart' },
+    ],
   },
 
   home: {
