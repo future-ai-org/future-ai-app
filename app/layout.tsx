@@ -1,18 +1,19 @@
 import type { Metadata } from 'next';
-import { Playfair_Display } from 'next/font/google';
+import { Inter } from 'next/font/google';
+import { copy } from '@/lib/copy';
 import './globals.css';
 
-const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-serif' });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'Natal Chart Calculator',
-  description: 'Calculate your Western astrology natal chart with precise planetary positions and Placidus house system.',
+  title: copy.site.title,
+  description: copy.site.description,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={playfair.variable}>
-      <body className="bg-[#0d0d1a] text-[#e0d8f0] min-h-screen antialiased">{children}</body>
+    <html lang="en" className={inter.variable}>
+      <body className="bg-[#0d0d1a] text-[#e0d8f0] min-h-screen antialiased font-sans">{children}</body>
     </html>
   );
 }

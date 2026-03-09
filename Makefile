@@ -1,6 +1,6 @@
 .PHONY: dev build start lint install clean
 
-dev:
+server:
 	npm run dev
 
 build:

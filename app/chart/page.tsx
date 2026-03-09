@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { BirthDataForm } from '@/components/chart/BirthDataForm';
 import { ChartResults } from '@/components/chart/ChartResults';
 import { useChartCalculation } from '@/hooks/useChartCalculation';
+import { copy } from '@/lib/copy';
 
 export default function ChartPage() {
   const { state, calculate } = useChartCalculation();
@@ -11,13 +12,13 @@ export default function ChartPage() {
     <main className="max-w-5xl mx-auto px-4 pb-20">
       <div className="pt-8 pb-6 text-center">
         <Link href="/" className="text-[#7c6b9e] text-sm hover:text-violet-400 transition-colors">
-          ← Back
+          {copy.chart.back}
         </Link>
         <h1 className="text-4xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
-          ✦ Natal Chart
+          {copy.chart.titlePrefix} {copy.chart.title}
         </h1>
         <p className="text-[#7c6b9e] text-sm tracking-widest uppercase">
-          Western Astrology · Placidus Houses · Tropical Zodiac
+          {copy.chart.tagline}
         </p>
       </div>
 

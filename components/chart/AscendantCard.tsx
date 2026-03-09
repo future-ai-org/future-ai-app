@@ -1,4 +1,5 @@
 import { Card } from '@/components/ui/Card';
+import { copy } from '@/lib/copy';
 import { formatLon } from '@/lib/astro/format';
 import type { ChartResult } from '@/lib/astro/types';
 
@@ -13,7 +14,7 @@ export function AscendantCard({ result }: Props) {
   return (
     <Card className="mb-4">
       <h2 className="text-xs text-violet-400 tracking-widest uppercase mb-3 border-b border-[#2a2450] pb-2">
-        Ascendant (Rising Sign)
+        {copy.ascendant.title}
       </h2>
 
       <div className="text-center py-3 mb-4">
@@ -21,13 +22,13 @@ export function AscendantCard({ result }: Props) {
           {ascInfo.glyph} {ascInfo.sign}
         </div>
         <div className="text-sm text-[#9d8ec0]">
-          {ascInfo.deg}° {ascInfo.min}&apos; — your rising sign
+          {ascInfo.deg}° {ascInfo.min}&apos; {copy.ascendant.risingSuffix}
         </div>
       </div>
 
       <div className="text-xs text-[#7c6b9e] leading-relaxed">
         <p className="mb-2">
-          <span className="text-fuchsia-400 font-medium">MC (Midheaven):</span>{' '}
+          <span className="text-fuchsia-400 font-medium">{copy.ascendant.mcLabel}</span>{' '}
           {mcInfo.glyph} {mcInfo.deg}°{mcInfo.min}&apos; {mcInfo.sign}
         </p>
         <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
@@ -35,7 +36,7 @@ export function AscendantCard({ result }: Props) {
             const ci = formatLon(c);
             return (
               <span key={i}>
-                <span className="text-[#9d8ec0]">House {i + 1}:</span>{' '}
+                <span className="text-[#9d8ec0]">{copy.ascendant.houseLabel(i + 1)}</span>{' '}
                 {ci.glyph} {ci.deg}°{ci.min}&apos;
               </span>
             );

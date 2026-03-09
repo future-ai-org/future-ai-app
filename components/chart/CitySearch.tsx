@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, KeyboardEvent } from 'react';
 import { useGeocoding } from '@/hooks/useGeocoding';
+import { copy } from '@/lib/copy';
 import type { GeoResult } from '@/lib/astro/types';
 
 interface Props {
@@ -43,7 +44,7 @@ export function CitySearch({ onResult, onReset }: Props) {
           value={city}
           onChange={e => handleChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="e.g. New York, London, Tokyo"
+          placeholder={copy.citySearch.placeholder}
           className="flex-1 bg-[#0d0d1a] border border-[#2a2450] rounded-lg px-3 py-2.5 text-[#e0d8f0] text-sm outline-none focus:border-violet-500 transition-colors"
         />
         <button
@@ -52,12 +53,12 @@ export function CitySearch({ onResult, onReset }: Props) {
           disabled={state.status === 'loading'}
           className="bg-[#2a2450] border border-violet-500 rounded-lg text-violet-400 px-4 py-2 text-sm whitespace-nowrap hover:bg-[#3a3470] transition-colors disabled:opacity-50 cursor-pointer"
         >
-          {state.status === 'loading' ? 'Searching…' : 'Search'}
+          {state.status === 'loading' ? copy.citySearch.searching : copy.citySearch.search}
         </button>
       </div>
 
       {state.status === 'success' && (
-        <p className="text-green-400 text-xs">✓ {state.result.displayName}</p>
+        <p className="text-green-400 text-xs">{copy.citySearch.foundPrefix} {state.result.displayName}</p>
       )}
       {state.status === 'error' && (
         <p className="text-red-400 text-xs">{state.message}</p>

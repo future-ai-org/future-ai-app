@@ -3,6 +3,7 @@ import { useState, useCallback, FormEvent } from 'react';
 import { CitySearch } from './CitySearch';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { copy } from '@/lib/copy';
 import type { BirthData, GeoResult } from '@/lib/astro/types';
 
 interface Props {
@@ -31,12 +32,12 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
     e.preventDefault();
     setError('');
 
-    if (!date) { setError('Please enter your birth date.'); return; }
-    if (!time) { setError('Please enter your birth time.'); return; }
-    if (!geoResult) { setError('Please search for and select a birth city.'); return; }
+    if (!date) { setError(copy.form.errors.noDate); return; }
+    if (!time) { setError(copy.form.errors.noTime); return; }
+    if (!geoResult) { setError(copy.form.errors.noCity); return; }
 
     const parsedOffset = parseFloat(utcOffset);
-    if (isNaN(parsedOffset)) { setError('Please enter a valid UTC offset.'); return; }
+    if (isNaN(parsedOffset)) { setError(copy.form.errors.invalidUtc); return; }
 
     onSubmit({
       date,
@@ -50,11 +51,11 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
 
   return (
     <Card className="mb-6">
-      <h2 className="text-sm text-violet-400 tracking-widest uppercase mb-5">Birth Data</h2>
+      <h2 className="text-sm text-violet-400 tracking-widest uppercase mb-5">{copy.form.sectionTitle}</h2>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-[#9d8ec0] tracking-wider">Date of Birth</label>
+            <label className="text-xs text-[#9d8ec0] tracking-wider">{copy.form.dateLabel}</label>
             <input
               type="date"
               value={date}
@@ -64,7 +65,7 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-[#9d8ec0] tracking-wider">Time of Birth</label>
+            <label className="text-xs text-[#9d8ec0] tracking-wider">{copy.form.timeLabel}</label>
             <input
               type="time"
               value={time}
@@ -74,21 +75,21 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
           </div>
 
           <div className="flex flex-col gap-1.5 sm:col-span-2">
-            <label className="text-xs text-[#9d8ec0] tracking-wider">Birth City</label>
+            <label className="text-xs text-[#9d8ec0] tracking-wider">{copy.form.cityLabel}</label>
             <CitySearch onResult={handleGeoResult} onReset={handleGeoReset} />
           </div>
 
           {geoResult && (
             <div className="flex flex-col gap-1.5">
               <label className="text-xs text-[#9d8ec0] tracking-wider">
-                UTC Offset — adjust if DST applies
+                {copy.form.utcLabel}
               </label>
               <input
                 type="number"
                 step="0.5"
                 value={utcOffset}
                 onChange={e => setUtcOffset(e.target.value)}
-                placeholder="e.g. -5 or +1"
+                placeholder={copy.form.utcPlaceholder}
                 className="bg-[#0d0d1a] border border-[#2a2450] rounded-lg px-3 py-2.5 text-[#e0d8f0] text-sm outline-none focus:border-violet-500 transition-colors"
               />
             </div>
@@ -103,7 +104,7 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
           disabled={isLoading}
           className="w-full justify-center text-base py-3"
         >
-          {isLoading ? 'Calculating…' : 'Calculate My Chart'}
+          {isLoading ? copy.form.calculating : copy.form.submit}
         </Button>
       </form>
     </Card>

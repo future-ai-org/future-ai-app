@@ -23,7 +23,7 @@ npm run dev
 make dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Use the home page to go to the chart tool, enter birth data, and view the chart.
+Open [http://localhost:8066](http://localhost:8066). Use the home page to go to the chart tool, enter birth data, and view the chart.
 
 ## Scripts
 

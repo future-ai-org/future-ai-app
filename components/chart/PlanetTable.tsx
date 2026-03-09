@@ -1,4 +1,5 @@
 import { Card } from '@/components/ui/Card';
+import { copy } from '@/lib/copy';
 import { PLANET_GLYPHS } from '@/lib/astro/constants';
 import { formatLon } from '@/lib/astro/format';
 import type { ChartResult } from '@/lib/astro/types';
@@ -11,15 +12,15 @@ export function PlanetTable({ result }: Props) {
   return (
     <Card>
       <h2 className="text-xs text-violet-400 tracking-widest uppercase mb-3 border-b border-[#2a2450] pb-2">
-        Planets
+        {copy.planetTable.title}
       </h2>
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr>
-            <th className="text-left text-xs text-[#7c6b9e] font-normal tracking-wider pb-2 px-1">Planet</th>
-            <th className="text-left text-xs text-[#7c6b9e] font-normal tracking-wider pb-2 px-1">Sign</th>
-            <th className="text-left text-xs text-[#7c6b9e] font-normal tracking-wider pb-2 px-1">Degree</th>
-            <th className="text-left text-xs text-[#7c6b9e] font-normal tracking-wider pb-2 px-1">House</th>
+            <th className="text-left text-xs text-[#7c6b9e] font-normal tracking-wider pb-2 px-1">{copy.planetTable.planet}</th>
+            <th className="text-left text-xs text-[#7c6b9e] font-normal tracking-wider pb-2 px-1">{copy.planetTable.sign}</th>
+            <th className="text-left text-xs text-[#7c6b9e] font-normal tracking-wider pb-2 px-1">{copy.planetTable.degree}</th>
+            <th className="text-left text-xs text-[#7c6b9e] font-normal tracking-wider pb-2 px-1">{copy.planetTable.house}</th>
           </tr>
         </thead>
         <tbody>
