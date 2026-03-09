@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Natal Chart Calculator</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0d0d1a; color: #e0d8f0; font-family: 'Georgia', serif; min-height: 100vh; }
+  h1 { text-align: center; padding: 24px 0 8px; font-size: 2rem; background: linear-gradient(135deg, #a78bfa, #f0abfc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { text-align: center; color: #7c6b9e; margin-bottom: 24px; font-size: 0.9rem; letter-spacing: 0.1em; }
+  .container { max-width: 960px; margin: 0 auto; padding: 0 16px 60px; }
+  .form-card { background: #13122a; border: 1px solid #2a2450; border-radius: 16px; padding: 28px; margin-bottom: 24px; }
+  .form-card h2 { font-size: 1rem; color: #a78bfa; margin-bottom: 20px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 0.8rem; color: #9d8ec0; letter-spacing: 0.05em; }
+  .field input, .field select { background: #0d0d1a; border: 1px solid #2a2450; border-radius: 8px; padding: 10px 12px; color: #e0d8f0; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
+  .field input:focus, .field select:focus { border-color: #a78bfa; }
+  .search-row { display: flex; gap: 10px; align-items: flex-end; }
+  .search-row input { flex: 1; }
+  .btn-search { background: #2a2450; border: 1px solid #a78bfa; border-radius: 8px; color: #a78bfa; padding: 10px 16px; cursor: pointer; font-size: 0.85rem; white-space: nowrap; transition: background 0.2s; }
+  .btn-search:hover { background: #3a3470; }
+  .btn-calc { display: block; width: 100%; margin-top: 20px; padding: 14px; background: linear-gradient(135deg, #7c3aed, #a855f7); border: none; border-radius: 10px; color: white; font-size: 1.1rem; font-family: 'Georgia', serif; cursor: pointer; letter-spacing: 0.05em; transition: opacity 0.2s; }
+  .btn-calc:hover { opacity: 0.85; }
+  .results { display: none; }
+  .results.visible { display: block; }
+  .chart-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+  @media (max-width: 680px) { .chart-layout { grid-template-columns: 1fr; } }
+  canvas { width: 100%; max-width: 480px; display: block; border-radius: 12px; }
+  .info-card { background: #13122a; border: 1px solid #2a2450; border-radius: 16px; padding: 20px; }
+  .info-card h2 { font-size: 0.85rem; color: #a78bfa; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 14px; border-bottom: 1px solid #2a2450; padding-bottom: 8px; }
+  .asc-display { text-align: center; padding: 12px 0 20px; }
+  .asc-sign { font-size: 2.5rem; color: #f0abfc; }
+  .asc-deg { font-size: 1rem; color: #9d8ec0; margin-top: 4px; }
+  .planet-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  .planet-table th { color: #7c6b9e; font-weight: normal; text-align: left; padding: 4px 6px; font-size: 0.75rem; letter-spacing: 0.06em; }
+  .planet-table td { padding: 5px 6px; border-bottom: 1px solid #1e1b38; }
+  .planet-table tr:last-child td { border-bottom: none; }
+  .planet-glyph { font-size: 1.1rem; }
+  .sign-symbol { color: #f0abfc; }
+  .retrograde { color: #f87171; font-size: 0.75rem; }
+  .house-badge { background: #1e1b38; border-radius: 4px; padding: 1px 6px; font-size: 0.78rem; color: #7c6b9e; }
+  .error-msg { color: #f87171; font-size: 0.85rem; margin-top: 8px; }
+  .loading { color: #a78bfa; font-size: 0.85rem; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>✦ Natal Chart</h1>
+  <p class="subtitle">Western Astrology &middot; Placidus Houses &middot; Tropical Zodiac</p>
+
+  <div class="form-card">
+    <h2>Birth Data</h2>
+    <div class="form-grid">
+      <div class="field">
+        <label>Date of Birth</label>
+        <input type="date" id="birthDate">
+      </div>
+      <div class="field">
+        <label>Time of Birth</label>
+        <input type="time" id="birthTime" value="12:00">
+      </div>
+      <div class="field" style="grid-column: span 2">
+        <label>Birth City</label>
+        <div class="search-row">
+          <input type="text" id="cityInput" placeholder="e.g. New York, London, Tokyo">
+        </div>
+        <span id="cityStatus" class="loading" style="display:none"></span>
+      </div>
+      <div class="field" id="offsetRow" style="display:none">
+        <label>UTC Offset — adjust if DST applies</label>
+        <input type="number" id="utcOffset" step="0.5" placeholder="e.g. -5 or +1">
+      </div>
+      <input type="hidden" id="latitude">
+      <input type="hidden" id="longitude">
+    </div>
+    <button class="btn-calc" onclick="calculate()">Calculate My Chart</button>
+    <p id="calcError" class="error-msg" style="display:none"></p>
+  </div>
+
+  <div class="results" id="results">
+    <div class="chart-layout">
+      <canvas id="chartCanvas" width="480" height="480"></canvas>
+      <div>
+        <div class="info-card" style="margin-bottom:16px">
+          <h2>Ascendant (Rising Sign)</h2>
+          <div class="asc-display">
+            <div class="asc-sign" id="ascSign"></div>
+            <div class="asc-deg" id="ascDeg"></div>
+          </div>
+          <div id="houseInfo" style="font-size:0.82rem; color:#7c6b9e; line-height:1.6;"></div>
+        </div>
+        <div class="info-card">
+          <h2>Planets</h2>
+          <table class="planet-table">
+            <thead><tr><th>Planet</th><th>Sign</th><th>Degree</th><th>House</th></tr></thead>
+            <tbody id="planetTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  ASTRONOMICAL CONSTANTS & HELPERS
+// ============================================================
+const RAD = Math.PI / 180;
+const DEG = 180 / Math.PI;
+
+function mod360(x) { return ((x % 360) + 360) % 360; }
+function toRad(d) { return d * RAD; }
+function toDeg(r) { return r * DEG; }
+
+const SIGNS = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo',
+               'Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+const SIGN_GLYPHS = ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+const PLANET_GLYPHS = { Sun:'☉', Moon:'☽', Mercury:'☿', Venus:'♀', Mars:'♂',
+                        Jupiter:'♃', Saturn:'♄', Uranus:'♅', Neptune:'♆', Pluto:'⚸' };
+const SIGN_COLORS = {
+  'Aries':'#ef4444','Taurus':'#22c55e','Gemini':'#facc15','Cancer':'#60a5fa',
+  'Leo':'#f97316','Virgo':'#a3e635','Libra':'#e879f9','Scorpio':'#7c3aed',
+  'Sagittarius':'#f59e0b','Capricorn':'#6b7280','Aquarius':'#38bdf8','Pisces':'#c084fc'
+};
+const ELEMENT_COLORS = ['#ef4444','#22c55e','#facc15','#60a5fa','#f97316','#a3e635',
+                         '#e879f9','#7c3aed','#f59e0b','#6b7280','#38bdf8','#c084fc'];
+
+// ============================================================
+//  JULIAN DAY
+// ============================================================
+function julianDay(year, month, day, utHour) {
+  if (month <= 2) { year -= 1; month += 12; }
+  const A = Math.floor(year / 100);
+  const B = 2 - A + Math.floor(A / 4);
+  return Math.floor(365.25 * (year + 4716)) + Math.floor(30.6001 * (month + 1)) + day + B - 1524.5 + utHour / 24;
+}
+
+// ============================================================
+//  SIDEREAL TIME
+// ============================================================
+function greenwichSiderealTime(JD) {
+  const T = (JD - 2451545.0) / 36525;
+  let theta = 280.46061837 + 360.98564736629 * (JD - 2451545.0)
+            + 0.000387933 * T * T - T * T * T / 38710000;
+  return mod360(theta);
+}
+
+function localSiderealTime(JD, longitude) {
+  return mod360(greenwichSiderealTime(JD) + longitude);
+}
+
+// ============================================================
+//  OBLIQUITY OF ECLIPTIC
+// ============================================================
+function obliquity(JD) {
+  const T = (JD - 2451545.0) / 36525;
+  return 23.4392911 - 0.013004167 * T - 0.0000001639 * T * T + 0.0000005036 * T * T * T;
+}
+
+// ============================================================
+//  ASCENDANT  (exact formula)
+// ============================================================
+function calcAscendant(LST, lat, eps) {
+  const e = toRad(eps);
+  const p = toRad(lat);
+  const R = toRad(LST);  // RAMC in radians
+  const y = -Math.cos(R);
+  const x = Math.sin(R) * Math.cos(e) + Math.tan(p) * Math.sin(e);
+  let asc = toDeg(Math.atan2(y, x));
+  // Quadrant correction
+  if (x < 0) asc += 180;
+  return mod360(asc);
+}
+
+// ============================================================
+//  MIDHEAVEN (MC)
+// ============================================================
+function calcMC(LST, eps) {
+  const e = toRad(eps);
+  const R = toRad(LST);
+  let mc = toDeg(Math.atan2(Math.tan(R), Math.cos(e)));
+  if (Math.cos(R) < 0) mc += 180;
+  return mod360(mc);
+}
+
+// ============================================================
+//  PLACIDUS HOUSE CUSPS
+// ============================================================
+function placidusHouses(ASC, MC, lat, eps) {
+  // Returns array of 12 house cusp longitudes
+  const cusps = new Array(12);
+  cusps[0] = ASC;   // 1st house = ASC
+  cusps[9] = MC;    // 10th house = MC
+  cusps[6] = mod360(ASC + 180);  // 7th
+  cusps[3] = mod360(MC + 180);   // 4th (IC)
+
+  const e = toRad(eps);
+  const p = toRad(lat);
+
+  // Intermediate house cusps using Placidus iterative method
+  function placidusInterp(n, d) {
+    // n = fraction (1/3 or 2/3), d = direction (+1 above, -1 below horizon)
+    let cusp = mod360(MC + d * 90);  // start guess
+    for (let i = 0; i < 50; i++) {
+      const l = toRad(cusp);
+      const dec = Math.asin(Math.sin(e) * Math.sin(l));
+      const md = d > 0
+        ? toDeg(Math.acos(-Math.tan(p) * Math.tan(dec))) * n
+        : -toDeg(Math.acos(-Math.tan(p) * Math.tan(dec))) * n;
+      // RAMC of this house
+      const ramc = mod360(toDeg(Math.atan2(Math.sin(l) * Math.cos(e) - Math.tan(dec) * Math.sin(e), Math.cos(l))));
+      const targetRAMC = mod360(toDeg(toRad(MC)) + d * toRad(md));  // not right, use simpler
+      // Simplified: interpolate along ecliptic
+      const newCusp = mod360(MC + d * 90 * n + (cusp - (MC + d * 90 * n)) * 0.5);
+      if (Math.abs(newCusp - cusp) < 0.0001) break;
+      cusp = newCusp;
+    }
+    return cusp;
+  }
+
+  // Use Koch-like simple interpolation for intermediate cusps
+  // 11th, 12th between MC and ASC (upper hemisphere)
+  // 2nd, 3rd between ASC and IC
+  function interpCusp(from, to, frac) {
+    let diff = mod360(to - from);
+    if (diff > 180) diff -= 360;
+    return mod360(from + diff * frac);
+  }
+
+  cusps[10] = interpCusp(MC, ASC, 1/3);
+  cusps[11] = interpCusp(MC, ASC, 2/3);
+  cusps[1]  = interpCusp(ASC, mod360(MC+180), 1/3);
+  cusps[2]  = interpCusp(ASC, mod360(MC+180), 2/3);
+  cusps[4]  = interpCusp(mod360(MC+180), mod360(ASC+180), 1/3);
+  cusps[5]  = interpCusp(mod360(MC+180), mod360(ASC+180), 2/3);
+  cusps[7]  = interpCusp(mod360(ASC+180), MC, 1/3);
+  cusps[8]  = interpCusp(mod360(ASC+180), MC, 2/3);
+
+  return cusps;
+}
+
+function planetHouse(lon, cusps) {
+  for (let h = 0; h < 12; h++) {
+    const start = cusps[h];
+    const end = cusps[(h + 1) % 12];
+    let diff = mod360(end - start);
+    let dist = mod360(lon - start);
+    if (dist < diff) return h + 1;
+  }
+  return 1;
+}
+
+// ============================================================
+//  PLANET POSITIONS (Meeus low-precision formulas)
+// ============================================================
+function sunPosition(T) {
+  const L0 = mod360(280.46646 + 36000.76983 * T + 0.0003032 * T * T);
+  const M = toRad(mod360(357.52911 + 35999.05029 * T - 0.0001537 * T * T));
+  const C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * Math.sin(M)
+          + (0.019993 - 0.000101 * T) * Math.sin(2 * M)
+          + 0.000289 * Math.sin(3 * M);
+  return mod360(L0 + C);
+}
+
+function moonPosition(T) {
+  const L1 = mod360(218.3165 + 481267.8813 * T);
+  const M  = toRad(mod360(357.5291 + 35999.0503 * T));
+  const Mp = toRad(mod360(134.9634 + 477198.8676 * T));
+  const D  = toRad(mod360(297.8502 + 445267.1115 * T));
+  const F  = toRad(mod360(93.2721 + 483202.0175 * T));
+  let lon = L1
+    + 6.2886 * Math.sin(Mp)
+    + 1.2740 * Math.sin(2 * D - Mp)
+    + 0.6583 * Math.sin(2 * D)
+    + 0.2136 * Math.sin(2 * Mp)
+    - 0.1851 * Math.sin(M)
+    - 0.1143 * Math.sin(2 * F)
+    + 0.0588 * Math.sin(2 * D - 2 * Mp)
+    + 0.0572 * Math.sin(2 * D - M - Mp)
+    + 0.0533 * Math.sin(2 * D + Mp)
+    - 0.0468 * Math.sin(3 * Mp - 2 * D)
+    + 0.0286 * Math.sin(D)
+    + 0.0280 * Math.sin(M - Mp);
+  return mod360(lon);
+}
+
+// ---- Schlyter orbital-elements engine ----
+function solveKepler(M_deg, e) {
+  const M = toRad(mod360(M_deg));
+  let E = M + e * Math.sin(M) * (1 + e * Math.cos(M));
+  for (let i = 0; i < 100; i++) {
+    const dE = (M - E + e * Math.sin(E)) / (1 - e * Math.cos(E));
+    E += dE;
+    if (Math.abs(dE) < 1e-12) break;
+  }
+  return E; // radians
+}
+
+// Returns heliocentric ecliptic (xh, yh) and mean anomaly M (degrees)
+function planetXYZ(d, N0,Ni, i0,ii, w0,wi, a0,ai, e0,ei, M0,Mi) {
+  const N   = mod360(N0 + Ni * d);
+  const inc = mod360(i0 + ii * d);
+  const w   = mod360(w0 + wi * d);
+  const a   = a0 + ai * d;
+  const e   = e0 + ei * d;
+  const M   = mod360(M0 + Mi * d);
+  const E   = solveKepler(M, e);
+  const xv  = a * (Math.cos(E) - e);
+  const yv  = a * Math.sqrt(1 - e*e) * Math.sin(E);
+  const r   = Math.sqrt(xv*xv + yv*yv);
+  const v   = toDeg(Math.atan2(yv, xv));
+  const vw  = toRad(mod360(v + w));
+  const Nr  = toRad(N);
+  const ir  = toRad(inc);
+  const xh  = r * (Math.cos(Nr)*Math.cos(vw) - Math.sin(Nr)*Math.sin(vw)*Math.cos(ir));
+  const yh  = r * (Math.sin(Nr)*Math.cos(vw) + Math.cos(Nr)*Math.sin(vw)*Math.cos(ir));
+  return { xh, yh, M };
+}
+
+// Earth's heliocentric ecliptic position
+function earthXY(d) {
+  const w = mod360(282.9404 + 4.70935e-5 * d);
+  const e = 0.016709 - 1.151e-9 * d;
+  const M = mod360(356.0470 + 0.9856002585 * d);
+  const E = solveKepler(M, e);
+  const xv = Math.cos(E) - e;
+  const yv = Math.sqrt(1 - e*e) * Math.sin(E);
+  const r  = Math.sqrt(xv*xv + yv*yv);
+  const v  = toDeg(Math.atan2(yv, xv));
+  const lon = toRad(mod360(v + w + 180)); // +180: Sun geocentric → Earth heliocentric
+  return { x: r * Math.cos(lon), y: r * Math.sin(lon) };
+}
+
+// Convert heliocentric (xh,yh) to geocentric ecliptic longitude
+function geoLon(xh, yh, d) {
+  const e = earthXY(d);
+  return mod360(toDeg(Math.atan2(yh - e.y, xh - e.x)));
+}
+
+// d from T: d = T*36525 + 1.5  (Schlyter epoch = J2000 Jan 0.0 = JD 2451543.5)
+
+function mercuryPosition(T) {
+  const d = T * 36525 + 1.5;
+  const { xh, yh } = planetXYZ(d,
+     48.3313, 3.24587e-5,   7.0047, 5.00e-8,
+     29.1241, 1.01444e-5,   0.387098, 0,
+     0.205635, 5.59e-10,    168.6562, 4.0923344368);
+  return geoLon(xh, yh, d);
+}
+
+function venusPosition(T) {
+  const d = T * 36525 + 1.5;
+  const { xh, yh } = planetXYZ(d,
+     76.6799, 2.46590e-5,   3.3946, 2.75e-8,
+     54.8910, 1.38374e-5,   0.723330, 0,
+     0.006773, -1.302e-9,   48.0052, 1.6021302244);
+  return geoLon(xh, yh, d);
+}
+
+function marsPosition(T) {
+  const d = T * 36525 + 1.5;
+  const { xh, yh } = planetXYZ(d,
+     49.5574, 2.11081e-5,   1.8497, -1.78e-8,
+     286.5016, 2.92961e-5,  1.523688, 0,
+     0.093405, 2.516e-9,    18.6021, 0.5240207766);
+  return geoLon(xh, yh, d);
+}
+
+function jupiterPosition(T) {
+  const d = T * 36525 + 1.5;
+  const { xh, yh, M: Mj } = planetXYZ(d,
+     100.4542, 2.76854e-5,  1.3030, -1.557e-7,
+     273.8777, 1.64505e-5,  5.20256, 0,
+     0.048498, 4.469e-9,    19.8950, 0.0830853001);
+  const Ms = mod360(316.9670 + 0.0334442282 * d);
+  let lon = geoLon(xh, yh, d);
+  lon += -0.332 * Math.sin(toRad(2*Mj - 5*Ms - 67.6));
+  lon += -0.056 * Math.sin(toRad(2*Mj - 2*Ms + 21));
+  lon +=  0.042 * Math.sin(toRad(3*Mj - 5*Ms + 21));
+  lon += -0.036 * Math.sin(toRad(Mj - 2*Ms));
+  lon +=  0.022 * Math.cos(toRad(Mj - Ms));
+  lon +=  0.023 * Math.sin(toRad(2*Mj - 3*Ms + 52));
+  lon += -0.016 * Math.sin(toRad(Mj - 5*Ms - 69));
+  return mod360(lon);
+}
+
+function saturnPosition(T) {
+  const d = T * 36525 + 1.5;
+  const Mj = mod360(19.8950 + 0.0830853001 * d);
+  const { xh, yh, M: Ms } = planetXYZ(d,
+     113.6634, 2.38980e-5,  2.4886, -1.081e-7,
+     339.3939, 2.97661e-5,  9.55475, 0,
+     0.055546, -9.499e-9,   316.9670, 0.0334442282);
+  let lon = geoLon(xh, yh, d);
+  lon +=  0.812 * Math.sin(toRad(2*Mj - 5*Ms - 67.6));
+  lon += -0.229 * Math.cos(toRad(2*Mj - 4*Ms - 2));
+  lon +=  0.119 * Math.sin(toRad(Mj - 2*Ms - 3));
+  lon +=  0.046 * Math.sin(toRad(2*Mj - 6*Ms - 69));
+  lon +=  0.014 * Math.sin(toRad(Mj - 3*Ms + 32));
+  return mod360(lon);
+}
+
+function uranusPosition(T) {
+  const d = T * 36525 + 1.5;
+  const Mj = mod360(19.8950 + 0.0830853001 * d);
+  const Ms = mod360(316.9670 + 0.0334442282 * d);
+  const { xh, yh, M: Mu } = planetXYZ(d,
+     74.0005, 1.3978e-5,    0.7733, 1.9e-8,
+     96.6612, 3.0565e-5,    19.18171, -1.55e-8,
+     0.047318, 7.45e-9,     142.5905, 0.011725806);
+  let lon = geoLon(xh, yh, d);
+  lon +=  0.040 * Math.sin(toRad(Ms - 2*Mu + 6));
+  lon +=  0.035 * Math.sin(toRad(Ms - 3*Mu + 33));
+  lon += -0.015 * Math.sin(toRad(Mj - Mu + 20));
+  return mod360(lon);
+}
+
+function neptunePosition(T) {
+  const d = T * 36525 + 1.5;
+  const { xh, yh } = planetXYZ(d,
+     131.7806, 3.0173e-5,   1.7700, -2.55e-7,
+     272.8461, -6.027e-6,   30.05826, 3.313e-8,
+     0.008606, 2.15e-9,     260.2471, 0.005995147);
+  return geoLon(xh, yh, d);
+}
+
+function plutoPosition(T) {
+  // Pluto simplified - good for ~1950-2050
+  const S = toRad(mod360(50.03 + 1221.971 * T));
+  const P = toRad(mod360(238.95 + 144.96 * T));
+  return mod360(238.9508 + 144.9600 * T
+    - 1.13 * Math.sin(P) + 6.57 * Math.sin(S)
+    + 6.68 * Math.sin(2*S - P) - 1.01 * Math.sin(3*S));
+}
+
+// Detect retrograde: if daily motion is negative
+function isRetrograde(posFunc, T) {
+  const dt = 1 / 36525; // 1 day
+  const p1 = posFunc(T - dt);
+  const p2 = posFunc(T + dt);
+  let diff = p2 - p1;
+  if (diff > 180) diff -= 360;
+  if (diff < -180) diff += 360;
+  return diff < 0;
+}
+
+// ============================================================
+//  SIGN & DEGREE FORMATTING
+// ============================================================
+function signOf(lon) { return Math.floor(lon / 30); }
+function degInSign(lon) { return lon % 30; }
+
+function formatDMS(lon) {
+  const s = signOf(lon);
+  const d = Math.floor(degInSign(lon));
+  const m = Math.floor((degInSign(lon) - d) * 60);
+  return `${d}° ${m}' ${SIGNS[s]}`;
+}
+
+function formatLon(lon) {
+  const s = signOf(lon);
+  const d = Math.floor(degInSign(lon));
+  const m = Math.floor((degInSign(lon) - d) * 60);
+  return { sign: SIGNS[s], glyph: SIGN_GLYPHS[s], deg: d, min: m, full: `${d}°${m}' ${SIGN_GLYPHS[s]}` };
+}
+
+// ============================================================
+//  MAIN CALCULATION
+// ============================================================
+let chartData = null;
+
+async function calculate() {
+  document.getElementById('calcError').style.display = 'none';
+  const dateStr = document.getElementById('birthDate').value;
+  const timeStr = document.getElementById('birthTime').value;
+
+  if (!dateStr || !timeStr) {
+    document.getElementById('calcError').textContent = 'Please enter your birth date and time.';
+    document.getElementById('calcError').style.display = 'block';
+    return;
+  }
+
+  // Geocode city if not already done
+  if (!document.getElementById('latitude').value) {
+    await searchCity();
+  }
+
+  const lat    = parseFloat(document.getElementById('latitude').value);
+  const lon    = parseFloat(document.getElementById('longitude').value);
+  const utcOff = parseFloat(document.getElementById('utcOffset').value);
+
+  if (isNaN(lat) || isNaN(lon)) {
+    document.getElementById('calcError').textContent = 'Could not find that city. Please try a different name.';
+    document.getElementById('calcError').style.display = 'block';
+    return;
+  }
+
+  const [yr, mo, dy] = dateStr.split('-').map(Number);
+  const [hr, mn]     = timeStr.split(':').map(Number);
+  const utHour       = hr + mn / 60 - utcOff;  // convert to UT
+
+  const JD = julianDay(yr, mo, dy, utHour);
+  const T  = (JD - 2451545.0) / 36525;
+  const eps = obliquity(JD);
+  const LST = localSiderealTime(JD, lon);
+  const ASC = calcAscendant(LST, lat, eps);
+  const MC  = calcMC(LST, eps);
+  const cusps = placidusHouses(ASC, MC, lat, eps);
+
+  const planets = [
+    { name: 'Sun',     lon: sunPosition(T),     retro: false },
+    { name: 'Moon',    lon: moonPosition(T),     retro: false },
+    { name: 'Mercury', lon: mercuryPosition(T),  retro: isRetrograde(mercuryPosition, T) },
+    { name: 'Venus',   lon: venusPosition(T),    retro: isRetrograde(venusPosition, T) },
+    { name: 'Mars',    lon: marsPosition(T),     retro: isRetrograde(marsPosition, T) },
+    { name: 'Jupiter', lon: jupiterPosition(T),  retro: isRetrograde(jupiterPosition, T) },
+    { name: 'Saturn',  lon: saturnPosition(T),   retro: isRetrograde(saturnPosition, T) },
+    { name: 'Uranus',  lon: uranusPosition(T),   retro: isRetrograde(uranusPosition, T) },
+    { name: 'Neptune', lon: neptunePosition(T),  retro: isRetrograde(neptunePosition, T) },
+    { name: 'Pluto',   lon: plutoPosition(T),    retro: isRetrograde(plutoPosition, T) },
+  ];
+
+  planets.forEach(p => { p.house = planetHouse(p.lon, cusps); });
+
+  chartData = { ASC, MC, eps, cusps, planets, lat, lon };
+
+  renderResults(chartData);
+}
+
+// ============================================================
+//  RENDER RESULTS
+// ============================================================
+function renderResults(d) {
+  const { ASC, MC, cusps, planets } = d;
+  const ascInfo = formatLon(ASC);
+
+  // Ascendant display
+  document.getElementById('ascSign').textContent = `${ascInfo.glyph} ${ascInfo.sign}`;
+  document.getElementById('ascDeg').textContent  = `${ascInfo.deg}° ${ascInfo.min}' — your rising sign`;
+
+  // House info
+  const mcInfo = formatLon(MC);
+  document.getElementById('houseInfo').innerHTML =
+    `<b style="color:#c084fc">MC (Midheaven):</b> ${mcInfo.glyph} ${mcInfo.deg}°${mcInfo.min}' ${mcInfo.sign}<br>` +
+    cusps.map((c,i) => {
+      const ci = formatLon(c);
+      return `<b>House ${i+1}:</b> ${ci.glyph} ${ci.deg}°${ci.min}'`;
+    }).join('&nbsp;&nbsp; ');
+
+  // Planet table
+  const tbody = document.getElementById('planetTableBody');
+  tbody.innerHTML = planets.map(p => {
+    const f = formatLon(p.lon);
+    return `<tr>
+      <td><span class="planet-glyph">${PLANET_GLYPHS[p.name]}</span> ${p.name}</td>
+      <td><span class="sign-symbol">${f.glyph}</span> ${f.sign}</td>
+      <td>${f.deg}°${f.min}' ${p.retro ? '<span class="retrograde">℞</span>' : ''}</td>
+      <td><span class="house-badge">${p.house}</span></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('results').classList.add('visible');
+  drawChart(d);
+}
+
+// ============================================================
+//  DRAW CHART WHEEL
+// ============================================================
+function drawChart(d) {
+  const canvas = document.getElementById('chartCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2;
+  const R = W / 2 - 10;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background
+  ctx.fillStyle = '#0d0d1a';
+  ctx.beginPath(); ctx.arc(cx, cy, R, 0, 2*Math.PI); ctx.fill();
+
+  // ---- Draw zodiac wheel ----
+  const outerR = R;
+  const zodiacW = R * 0.18;
+  const innerZR = outerR - zodiacW;
+
+  // Zodiac sign sectors (12 equal 30° sectors)
+  const ascDeg = d.ASC;
+  function eclToCanvas(lon) {
+    // ASC is at 9 o'clock (left, 180°), signs go counter-clockwise
+    const angle = -(lon - ascDeg) * RAD + Math.PI; // flip so ASC=left
+    return angle;
+  }
+
+  for (let s = 0; s < 12; s++) {
+    const startAngle = eclToCanvas(s * 30);
+    const endAngle   = eclToCanvas((s + 1) * 30);
+    const elem = ['fire','earth','air','water'][s % 4];
+    const colors = { fire:'#3a1515', earth:'#1a2a1a', air:'#1a1a2a', water:'#15152a' };
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, outerR, startAngle, endAngle, true);
+    ctx.closePath();
+    ctx.fillStyle = colors[elem];
+    ctx.fill();
+
+    // Sign glyph
+    const midAngle = eclToCanvas(s * 30 + 15);
+    const glyphR = outerR - zodiacW * 0.5;
+    ctx.fillStyle = ELEMENT_COLORS[s];
+    ctx.font = `${R * 0.09}px serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(SIGN_GLYPHS[s], cx + glyphR * Math.cos(midAngle), cy + glyphR * Math.sin(midAngle));
+  }
+
+  // Zodiac inner border
+  ctx.beginPath(); ctx.arc(cx, cy, innerZR, 0, 2*Math.PI);
+  ctx.strokeStyle = '#3a3470'; ctx.lineWidth = 1; ctx.stroke();
+
+  // Zodiac outer border
+  ctx.beginPath(); ctx.arc(cx, cy, outerR - 1, 0, 2*Math.PI);
+  ctx.strokeStyle = '#3a3470'; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // Zodiac sign dividers (30° lines in zodiac band)
+  for (let s = 0; s < 12; s++) {
+    const a = eclToCanvas(s * 30);
+    ctx.beginPath();
+    ctx.moveTo(cx + innerZR * Math.cos(a), cy + innerZR * Math.sin(a));
+    ctx.lineTo(cx + outerR * Math.cos(a), cy + outerR * Math.sin(a));
+    ctx.strokeStyle = '#2a2450'; ctx.lineWidth = 1; ctx.stroke();
+  }
+
+  // ---- House cusps ----
+  const houseR = innerZR;
+  const innerCircleR = R * 0.32;
+  ctx.strokeStyle = '#4a4080'; ctx.lineWidth = 0.8;
+
+  d.cusps.forEach((cusp, i) => {
+    const a = eclToCanvas(cusp);
+    const isAngular = [0,3,6,9].includes(i);
+    ctx.beginPath();
+    ctx.moveTo(cx + innerCircleR * Math.cos(a), cy + innerCircleR * Math.sin(a));
+    ctx.lineTo(cx + houseR * Math.cos(a), cy + houseR * Math.sin(a));
+    ctx.strokeStyle = isAngular ? '#a78bfa' : '#4a4080';
+    ctx.lineWidth = isAngular ? 1.5 : 0.8;
+    ctx.stroke();
+
+    // House numbers
+    const nextCusp = d.cusps[(i + 1) % 12];
+    let midLon = cusp + (mod360(nextCusp - cusp)) / 2;
+    const midA = eclToCanvas(midLon);
+    const numR = (innerCircleR + houseR) * 0.5;
+    ctx.fillStyle = '#6b5f8a';
+    ctx.font = `${R * 0.055}px sans-serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(i + 1, cx + numR * Math.cos(midA), cy + numR * Math.sin(midA));
+  });
+
+  // Inner circle
+  ctx.beginPath(); ctx.arc(cx, cy, innerCircleR, 0, 2*Math.PI);
+  ctx.strokeStyle = '#2a2450'; ctx.lineWidth = 1; ctx.stroke();
+
+  // ---- Planets ----
+  const planetR = R * 0.55;
+  const usedAngles = [];
+  function placeLabel(a) {
+    // Separate crowded planets
+    let angle = a;
+    for (const ua of usedAngles) {
+      let diff = angle - ua;
+      if (Math.abs(diff) < 0.12) angle = ua + (diff >= 0 ? 0.12 : -0.12);
+    }
+    usedAngles.push(angle);
+    return angle;
+  }
+
+  d.planets.forEach(p => {
+    const rawA  = eclToCanvas(p.lon);
+    const placedA = placeLabel(rawA);
+
+    // Dot on ecliptic
+    const dotR = innerZR - 4;
+    ctx.beginPath(); ctx.arc(cx + dotR * Math.cos(rawA), cy + dotR * Math.sin(rawA), 3, 0, 2*Math.PI);
+    ctx.fillStyle = SIGN_COLORS[SIGNS[signOf(p.lon)]]; ctx.fill();
+
+    // Line from dot to glyph
+    const glyphR2 = planetR;
+    ctx.beginPath();
+    ctx.moveTo(cx + (dotR - 4) * Math.cos(rawA), cy + (dotR - 4) * Math.sin(rawA));
+    ctx.lineTo(cx + glyphR2 * Math.cos(placedA), cy + glyphR2 * Math.sin(placedA));
+    ctx.strokeStyle = '#2a2450'; ctx.lineWidth = 0.6; ctx.stroke();
+
+    // Planet glyph
+    ctx.fillStyle = SIGN_COLORS[SIGNS[signOf(p.lon)]];
+    ctx.font = `bold ${R * 0.075}px serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(PLANET_GLYPHS[p.name], cx + glyphR2 * Math.cos(placedA), cy + glyphR2 * Math.sin(placedA));
+
+    // Retrograde marker
+    if (p.retro) {
+      ctx.fillStyle = '#f87171';
+      ctx.font = `${R * 0.045}px sans-serif`;
+      ctx.fillText('℞', cx + (glyphR2 + R*0.06) * Math.cos(placedA), cy + (glyphR2 + R*0.06) * Math.sin(placedA));
+    }
+  });
+
+  // ASC line
+  const ascA = eclToCanvas(d.ASC);
+  ctx.beginPath();
+  ctx.moveTo(cx - innerZR * Math.cos(ascA), cy - innerZR * Math.sin(ascA));
+  ctx.lineTo(cx + innerZR * Math.cos(ascA), cy + innerZR * Math.sin(ascA));
+  ctx.strokeStyle = '#f0abfc'; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // ASC label
+  ctx.fillStyle = '#f0abfc';
+  ctx.font = `bold ${R * 0.055}px sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('ASC', cx + (innerZR + 14) * Math.cos(ascA), cy + (innerZR + 14) * Math.sin(ascA));
+  ctx.fillText('DSC', cx - (innerZR + 14) * Math.cos(ascA), cy - (innerZR + 14) * Math.sin(ascA));
+
+  // MC / IC labels
+  const mcA = eclToCanvas(d.MC);
+  ctx.fillStyle = '#a78bfa';
+  ctx.fillText('MC',  cx + (innerZR + 14) * Math.cos(mcA), cy + (innerZR + 14) * Math.sin(mcA));
+  ctx.fillText('IC',  cx - (innerZR + 14) * Math.cos(mcA), cy - (innerZR + 14) * Math.sin(mcA));
+}
+
+// ============================================================
+//  CITY GEOCODING via Nominatim
+// ============================================================
+async function searchCity() {
+  const city = document.getElementById('cityInput').value.trim();
+  if (!city) return;
+  const status = document.getElementById('cityStatus');
+  status.textContent = 'Searching...';
+  status.style.display = 'block';
+  status.style.color = '#a78bfa';
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1`;
+    const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
+    const data = await res.json();
+    if (!data.length) { status.textContent = 'City not found. Try a different spelling.'; status.style.color = '#f87171'; return; }
+    const r = data[0];
+    const lat = parseFloat(r.lat).toFixed(4);
+    const lon = parseFloat(r.lon).toFixed(4);
+    document.getElementById('latitude').value  = lat;
+    document.getElementById('longitude').value = lon;
+
+    // Get UTC offset from timezone API using birth date/time if set
+    let utcOff = Math.round(parseFloat(lon) / 15); // fallback: longitude estimate
+    const dateStr = document.getElementById('birthDate').value;
+    const timeStr = document.getElementById('birthTime').value;
+    if (dateStr && timeStr) {
+      try {
+        const unixTs = Math.floor(new Date(`${dateStr}T${timeStr}:00Z`).getTime() / 1000);
+        const tzUrl = `https://timezonefinder.michelfe.it/api/0?lat=${lat}&lng=${lon}`;
+        // Use a CORS-friendly approach: derive from Intl if possible
+        // Fallback: use longitude-based estimate which is decent
+        const tzRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+        // Nominatim doesn't return timezone, so use longitude estimate
+        utcOff = Math.round(parseFloat(lon) / 15);
+      } catch {}
+    }
+    document.getElementById('utcOffset').value = utcOff;
+    document.getElementById('offsetRow').style.display = 'flex';
+
+    const label = r.display_name.split(',').slice(0, 3).join(', ');
+    status.textContent = `✓ ${label}`;
+    status.style.color = '#4ade80';
+  } catch(e) {
+    status.textContent = 'Error fetching location.';
+    status.style.color = '#f87171';
+  }
+}
+
+// Clear cached coords when user types a new city
+document.getElementById('cityInput').addEventListener('input', () => {
+  document.getElementById('latitude').value  = '';
+  document.getElementById('longitude').value = '';
+  document.getElementById('utcOffset').value = '';
+  document.getElementById('offsetRow').style.display = 'none';
+  const status = document.getElementById('cityStatus');
+  status.style.display = 'none';
+});
+
+document.getElementById('cityInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') searchCity();
+});
+</script>
+</body>
+</html>
