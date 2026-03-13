@@ -1,0 +1,50 @@
+'use client';
+import { useRef, useEffect } from 'react';
+import { drawChartWheel } from '@/lib/astro/draw';
+import type { ChartResult } from '@/lib/astro/types';
+import { useTheme } from '@/components/providers/ThemeProvider';
+import { cn } from '@/lib/utils';
+
+interface Props {
+  result: ChartResult;
+  /** Canvas size in px. Default 520. Use a larger value (e.g. 700) for hero sections. */
+  size?: number;
+}
+
+const DEFAULT_SIZE = 520;
+
+export function ChartWheel({ result, size = DEFAULT_SIZE }: Props) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { theme } = useTheme();
+  const chartTheme = theme === 'light' ? 'light' : 'dark';
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = size * dpr;
+    canvas.height = size * dpr;
+    ctx.scale(dpr, dpr);
+    drawChartWheel(ctx, size, size, result, chartTheme);
+  }, [result, size, chartTheme]);
+
+  return (
+    <div
+      className="inline-block transition-transform duration-200 ease-out origin-center hover:scale-110"
+      style={{ maxWidth: size }}
+    >
+      <canvas
+        ref={canvasRef}
+        className={cn(
+          'rounded-2xl border shadow-[0_0_40px_-8px_rgba(99,102,241,0.2)]',
+          theme === 'light'
+            ? 'border-border bg-card'
+            : 'border-white/10 bg-[#0a0a14] shadow-[0_8px_32px_rgba(0,0,0,0.4)]',
+        )}
+        style={{ width: '100%', maxWidth: size, display: 'block' }}
+      />
+    </div>
+  );
+}

@@ -1,0 +1,66 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
+import { copy } from '@/lib/copy';
+import { cn } from '@/lib/utils';
+import { ThemeToggle } from '@/components/layout/ThemeToggle';
+
+export function Header() {
+  const pathname = usePathname();
+  const { status } = useSession();
+
+  const navLinkClass = (path: string) =>
+    cn(
+      'rounded-lg px-3 py-2 text-sm font-bold transition-colors hover:bg-border/60 hover:text-foreground',
+      pathname === path
+        ? 'bg-border/50 text-violet-800 dark:text-violet-300'
+        : 'text-muted-foreground',
+    );
+
+  return (
+    <header className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/95 backdrop-blur-sm">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
+        <Link
+          href="/#chart-of-the-moment"
+          className="flex items-center gap-2 text-foreground no-underline transition-opacity hover:opacity-90"
+          aria-label={`${copy.site.title} — chart of the moment`}
+          onClick={(e) => {
+            if (pathname === '/') {
+              e.preventDefault();
+              document.getElementById('chart-of-the-moment')?.scrollIntoView({ behavior: 'smooth' });
+            }
+          }}
+        >
+          <span className="inline-block text-xl text-violet-500 dark:text-violet-400 scale-x-[-1]" aria-hidden>☽</span>
+          <span className="font-semibold tracking-tight text-foreground">{copy.site.title}</span>
+        </Link>
+        <nav aria-label={copy.nav.ariaLabel} className="flex items-center gap-1">
+          <Link href="/chart" className={navLinkClass('/chart')}>
+            {copy.nav.chart}
+          </Link>
+          {status === 'authenticated' && (
+            <Link href="/dashboard" className={navLinkClass('/dashboard')}>
+              {copy.nav.dashboard}
+            </Link>
+          )}
+          {status === 'authenticated' ? (
+            <button
+              type="button"
+              onClick={() => signOut({ callbackUrl: '/' })}
+              className={cn(navLinkClass(''), 'border-0 bg-transparent cursor-pointer')}
+            >
+              {copy.nav.signOut}
+            </button>
+          ) : (
+            <Link href="/login" className={navLinkClass('/login')}>
+              {copy.nav.signIn}
+            </Link>
+          )}
+          <ThemeToggle className="ml-1" />
+        </nav>
+      </div>
+    </header>
+  );
+}
