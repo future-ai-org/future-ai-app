@@ -23,6 +23,14 @@ export function Footer() {
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
           <p className="text-[0.65rem] text-muted-foreground">{copyrightText}</p>
           <div className="flex items-center gap-4 text-[0.65rem] text-muted-foreground">
+            <Link
+              href="https://donationvonsteinkirchcom.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground/80 transition-colors"
+            >
+              support this work
+            </Link>
             <Link href="/privacy" className="hover:text-foreground/80 transition-colors">Privacy</Link>
             <Link href="/terms" className="hover:text-foreground/80 transition-colors">Terms</Link>
           </div>
