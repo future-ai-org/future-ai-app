@@ -174,7 +174,7 @@ function CompatibilityContent() {
               ) : (
                 <div className="mt-2">
                   <BirthDataForm
-                    onSubmit={data => calculate(data)}
+                    onSubmit={(data, options) => calculate(data, options)}
                     isLoading={calcState.status === 'calculating'}
                   />
                   <button
@@ -266,7 +266,7 @@ function CompatibilityContent() {
               ) : (
                 <div className="mt-2">
                   <BirthDataForm
-                    onSubmit={data => calculate(data)}
+                    onSubmit={(data, options) => calculate(data, options)}
                     isLoading={calcState.status === 'calculating'}
                   />
                   <button

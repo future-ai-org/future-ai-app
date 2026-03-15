@@ -45,14 +45,13 @@ export function SaveChart({ result, onSaved }: Props) {
   if (status === 'loading') return null;
   if (status !== 'authenticated') {
     return (
-      <Card className="mt-6">
-        <p className="text-muted-foreground text-sm mb-2">{copy.saveChart.signInToSave}</p>
+      <div className="mt-6 flex justify-center">
         <Link href={`/login?callbackUrl=${encodeURIComponent('/chart')}`}>
           <Button variant="secondary" type="button">
-            {copy.nav.signIn}
+            {copy.saveChart.signInToSave}
           </Button>
         </Link>
-      </Card>
+      </div>
     );
   }
 

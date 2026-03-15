@@ -1,17 +1,21 @@
 'use client';
 import { useState } from 'react';
-import { BirthDataForm } from '@/components/chart/BirthDataForm';
+import { BirthDataForm, type ChartFormMeta } from '@/components/chart/BirthDataForm';
 import { ChartResults } from '@/components/chart/ChartResults';
 import { SaveChart } from '@/components/chart/SaveChart';
 import { useChartCalculation } from '@/hooks/useChartCalculation';
 import { copy } from '@/lib/copy';
 import type { BirthData, ChartOptions } from '@/lib/astro/types';
 
+const DEFAULT_CHART_META: ChartFormMeta = { timeNotKnown: false, cityNotKnown: false };
+
 export default function ChartPage() {
   const { state, calculate, reset } = useChartCalculation();
   const [formKey, setFormKey] = useState(0);
+  const [chartMeta, setChartMeta] = useState<ChartFormMeta>(DEFAULT_CHART_META);
 
-  const handleSubmit = (data: BirthData, options: ChartOptions) => {
+  const handleSubmit = (data: BirthData, options: ChartOptions, meta: ChartFormMeta) => {
+    setChartMeta(meta);
     calculate(data, options);
   };
 
@@ -40,7 +44,10 @@ export default function ChartPage() {
 
       {state.status === 'success' && (
         <>
-          <ChartResults result={state.result} />
+          <ChartResults
+            result={state.result}
+            showAscendant={!chartMeta.timeNotKnown && !chartMeta.cityNotKnown}
+          />
           <SaveChart result={state.result} onSaved={handleSaved} />
         </>
       )}

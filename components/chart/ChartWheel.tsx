@@ -9,11 +9,13 @@ interface Props {
   result: ChartResult;
   /** Canvas size in px. Default 520. Use a larger value (e.g. 700) for hero sections. */
   size?: number;
+  /** When false, ASC/DSC/MC/IC are not drawn on the wheel. Default true. */
+  showAngles?: boolean;
 }
 
 const DEFAULT_SIZE = 520;
 
-export function ChartWheel({ result, size = DEFAULT_SIZE }: Props) {
+export function ChartWheel({ result, size = DEFAULT_SIZE, showAngles = true }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { theme } = useTheme();
   const chartTheme = theme === 'light' ? 'light' : 'dark';
@@ -27,8 +29,8 @@ export function ChartWheel({ result, size = DEFAULT_SIZE }: Props) {
     canvas.width = size * dpr;
     canvas.height = size * dpr;
     ctx.scale(dpr, dpr);
-    drawChartWheel(ctx, size, size, result, chartTheme);
-  }, [result, size, chartTheme]);
+    drawChartWheel(ctx, size, size, result, chartTheme, { showAngles });
+  }, [result, size, chartTheme, showAngles]);
 
   return (
     <div

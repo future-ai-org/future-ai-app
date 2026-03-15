@@ -10,13 +10,20 @@ export type ChartWheelTheme = 'light' | 'dark';
 
 const CHART_PADDING = 38;
 
+export interface DrawChartWheelOptions {
+  /** When false, ASC/DSC/MC/IC are not drawn (e.g. when birth time or place unknown). Default true. */
+  showAngles?: boolean;
+}
+
 export function drawChartWheel(
   ctx: CanvasRenderingContext2D,
   W: number,
   H: number,
   d: ChartResult,
   theme: ChartWheelTheme = 'dark',
+  options: DrawChartWheelOptions = {},
 ): void {
+  const { showAngles = true } = options;
   const cx = W / 2;
   const cy = H / 2;
   const available = Math.min(W, H) - 2 * CHART_PADDING;
@@ -180,36 +187,37 @@ export function drawChartWheel(
   ctx.lineWidth = 1;
   ctx.stroke();
 
-  // ---- ASC / DSC / MC / IC: small thin circles + labels ----
-  const ascA = eclToCanvas(d.asc);
-  const mcA = eclToCanvas(d.mc);
-  const dotR = 3; // radius of each small circle
-  const axisAngles = [ascA, ascA + Math.PI, mcA, mcA + Math.PI];
-  ctx.strokeStyle = isLight ? 'rgba(80, 65, 120, 0.5)' : 'rgba(200, 190, 220, 0.55)';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  axisAngles.forEach((a) => {
-    const x = cx + outerR * Math.cos(a);
-    const y = cy + outerR * Math.sin(a);
-    ctx.moveTo(x + dotR, y);
-    ctx.arc(x, y, dotR, 0, 2 * Math.PI);
-  });
-  ctx.stroke();
+  // ---- ASC / DSC / MC / IC: small thin circles + labels (omit when showAngles false) ----
+  if (showAngles) {
+    const ascA = eclToCanvas(d.asc);
+    const mcA = eclToCanvas(d.mc);
+    const dotR = 3; // radius of each small circle
+    const axisAngles = [ascA, ascA + Math.PI, mcA, mcA + Math.PI];
+    ctx.strokeStyle = isLight ? 'rgba(80, 65, 120, 0.5)' : 'rgba(200, 190, 220, 0.55)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    axisAngles.forEach((a) => {
+      const x = cx + outerR * Math.cos(a);
+      const y = cy + outerR * Math.sin(a);
+      ctx.moveTo(x + dotR, y);
+      ctx.arc(x, y, dotR, 0, 2 * Math.PI);
+    });
+    ctx.stroke();
 
-  // Labels outside the plot: far enough so text does not overlap the circle
-  const fontPx = Math.max(9, R * 0.032);
-  const labelR = outerR + fontPx * 1.8;
-  ctx.font = `700 ${fontPx}px sans-serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillStyle = isLight ? 'rgba(70, 55, 110, 0.95)' : 'rgba(200, 190, 220, 0.95)';
-  ctx.fillText('ASC', cx + labelR * Math.cos(ascA), cy + labelR * Math.sin(ascA));
-  ctx.fillText('DSC', cx - labelR * Math.cos(ascA), cy - labelR * Math.sin(ascA));
-  ctx.fillStyle = isLight ? 'rgba(80, 65, 120, 0.9)' : 'rgba(185, 178, 205, 0.95)';
-  ctx.fillText('MC', cx + labelR * Math.cos(mcA), cy + labelR * Math.sin(mcA));
-  ctx.fillText('IC', cx - labelR * Math.cos(mcA), cy - labelR * Math.sin(mcA));
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'alphabetic';
+    const fontPx = Math.max(9, R * 0.032);
+    const labelR = outerR + fontPx * 1.8;
+    ctx.font = `700 ${fontPx}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = isLight ? 'rgba(70, 55, 110, 0.95)' : 'rgba(200, 190, 220, 0.95)';
+    ctx.fillText('ASC', cx + labelR * Math.cos(ascA), cy + labelR * Math.sin(ascA));
+    ctx.fillText('DSC', cx - labelR * Math.cos(ascA), cy - labelR * Math.sin(ascA));
+    ctx.fillStyle = isLight ? 'rgba(80, 65, 120, 0.9)' : 'rgba(185, 178, 205, 0.95)';
+    ctx.fillText('MC', cx + labelR * Math.cos(mcA), cy + labelR * Math.sin(mcA));
+    ctx.fillText('IC', cx - labelR * Math.cos(mcA), cy - labelR * Math.sin(mcA));
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+  }
 
   // ---- Planets and points (drawn last so they are never covered) ----
   const planetRBase = R * 0.76; // just inward so glyphs don’t touch innerZR (0.84R)
