@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/Button';
 import { copy } from '@/lib/copy';
 
 const DEFAULT_PLOT_WIDTH = 800;
-const MARGIN = { top: 24, right: 24, bottom: 56, left: 148 };
-/** Minimum height per pair row so all possibilities are readable */
+const MARGIN = { top: 24, right: 24, bottom: 56 };
+/** Bands view: left margin for pair labels. Gaussian view: smaller margin. */
+const MARGIN_LEFT_BANDS = 148;
+const MARGIN_LEFT_LINES = 52;
 const MIN_ROW_HEIGHT = 40;
 const MIN_PLOT_HEIGHT = 280;
 /** Min horizontal pixels per x-axis date label so they never overlap */
@@ -18,7 +20,34 @@ function pairKey(p1: string, p2: string): string {
   return [p1, p2].sort().join('–');
 }
 
+/** Intensity by distance from sun (outer planets = stronger influence). 0–1 scale. */
+const PLANET_INTENSITY: Record<string, number> = {
+  Moon: 0.1,
+  Mercury: 0.2,
+  Venus: 0.25,
+  Sun: 0.3,
+  Mars: 0.4,
+  Jupiter: 0.6,
+  Saturn: 0.75,
+  Uranus: 0.9,
+  Neptune: 0.95,
+  Pluto: 1,
+};
+
+function pairIntensity(pair: string): number {
+  const [a, b] = pair.split('–');
+  const ia = PLANET_INTENSITY[a] ?? 0.5;
+  const ib = PLANET_INTENSITY[b] ?? 0.5;
+  // When Moon or Sun is involved, use least intensity (min); otherwise outer planet = stronger (max).
+  if (a === 'Moon' || b === 'Moon' || a === 'Sun' || b === 'Sun') return Math.min(ia, ib);
+  return Math.max(ia, ib);
+}
+
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+/** Gaussian sigma for influence bells (~4 days half-width). */
+const GAUSS_SIGMA_MS = 4 * MS_PER_DAY;
+/** Min peak value in range to consider the Gaussian "visible" (hide flat lines). */
+const GAUSS_VISIBLE_THRESHOLD = 0.2;
 
 function formatAxisDate(d: Date): string {
   return d.toLocaleDateString('en-US', {
@@ -225,26 +254,149 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
     return out;
   }, [seriesByPair]);
 
-  const { plotHeight, innerHeight } = useMemo(() => {
-    const n = Math.max(1, pairs.length);
-    const height = Math.max(MIN_PLOT_HEIGHT, MARGIN.top + MARGIN.bottom + n * MIN_ROW_HEIGHT);
-    return { plotHeight: height, innerHeight: height - MARGIN.top - MARGIN.bottom };
-  }, [pairs.length]);
+  /** In Gaussian view, only show pairs that have a visible Gaussian (peak in range, not a flat line). */
+  const pairsWithGaussian = useMemo(() => {
+    const sigmaSq = GAUSS_SIGMA_MS * GAUSS_SIGMA_MS;
+    const t0 = startDate.getTime();
+    const t1 = endDate.getTime();
+    return pairs.filter((pair) => {
+      const points = seriesWithExactPeak.get(pair);
+      if (!points || points.length === 0) return false;
+      let peakDates = points.filter((p) => p.separationDeg === 0).map((p) => p.date.getTime());
+      if (peakDates.length === 0) {
+        const minSep = Math.min(...points.map((p) => p.separationDeg));
+        const minPoint = points.find((p) => p.separationDeg === minSep);
+        if (!minPoint) return false;
+        peakDates = [minPoint.date.getTime()];
+      }
+      let maxVal = 0;
+      for (let i = 0; i <= 80; i++) {
+        const t = t0 + (i / 80) * (t1 - t0);
+        let value = 0;
+        for (const tPeak of peakDates) {
+          const diff = t - tPeak;
+          value += Math.exp(-(diff * diff) / (2 * sigmaSq));
+        }
+        if (value > maxVal) maxVal = value;
+      }
+      return maxVal >= GAUSS_VISIBLE_THRESHOLD;
+    });
+  }, [pairs, seriesWithExactPeak, startDate, endDate]);
 
-  const innerWidth = plotWidth - MARGIN.left - MARGIN.right;
+  const displayPairs = useMemo(
+    () => (viewMode === 'lines' ? pairsWithGaussian : pairs),
+    [viewMode, pairs, pairsWithGaussian]
+  );
+
+  const displayPairIndex = useMemo(() => {
+    const m = new Map<string, number>();
+    displayPairs.forEach((p, i) => m.set(p, i));
+    return m;
+  }, [displayPairs]);
+
+  const marginLeft = viewMode === 'bands' ? MARGIN_LEFT_BANDS : MARGIN_LEFT_LINES;
+
+  const { plotHeight, innerHeight } = useMemo(() => {
+    if (viewMode === 'bands') {
+      const n = Math.max(1, pairs.length);
+      const height = Math.max(MIN_PLOT_HEIGHT, MARGIN.top + MARGIN.bottom + n * MIN_ROW_HEIGHT);
+      return { plotHeight: height, innerHeight: height - MARGIN.top - MARGIN.bottom };
+    }
+    const height = Math.max(MIN_PLOT_HEIGHT, MARGIN.top + MARGIN.bottom + 320);
+    return { plotHeight: height, innerHeight: height - MARGIN.top - MARGIN.bottom };
+  }, [viewMode, pairs.length]);
+
+  const innerWidth = plotWidth - marginLeft - MARGIN.right;
 
   const xScale = (d: Date) => {
     const t = d.getTime();
     const t0 = startDate.getTime();
     const t1 = endDate.getTime();
-    return MARGIN.left + (innerWidth * (t - t0)) / (t1 - t0);
+    return marginLeft + (innerWidth * (t - t0)) / (t1 - t0);
   };
+  /** Bands view: row center y for a pair. */
   const yCenter = (pair: string) => {
-    const i = pairIndex.get(pair) ?? 0;
-    const n = Math.max(1, pairs.length);
+    const i = displayPairIndex.get(pair) ?? 0;
+    const n = Math.max(1, displayPairs.length);
     const step = innerHeight / n;
     return MARGIN.top + step * (i + 0.5);
   };
+  /** Gaussian view: y pixel for intensity 0..1 (0 = bottom, 1 = top). */
+  const yScale = (intensity: number) => {
+    const y = plotHeight - MARGIN.bottom - intensity * innerHeight;
+    return y;
+  };
+
+  /** Gaussian labels: positions nudged so they never overlap (uses lines-view dimensions). */
+  const gaussianLabelPositions = useMemo(() => {
+    const left = MARGIN_LEFT_LINES;
+    const linesInnerWidth = plotWidth - left - MARGIN.right;
+    const linesInnerHeight = 320;
+    const linesPlotHeight = MARGIN.top + MARGIN.bottom + linesInnerHeight;
+    const t0 = startDate.getTime();
+    const t1 = endDate.getTime();
+    const xScaleL = (t: number) => left + (linesInnerWidth * (t - t0)) / (t1 - t0);
+    const yScaleL = (intensity: number) => linesPlotHeight - MARGIN.bottom - intensity * linesInnerHeight;
+
+    const PAD = 6;
+    const LABEL_H = 18;
+    const NUDGE = 14;
+    const yMin = MARGIN.top + LABEL_H / 2 + PAD;
+    const yMax = linesPlotHeight - MARGIN.bottom - LABEL_H / 2 - PAD;
+
+    type Box = { pair: string; x: number; y: number; w: number; h: number };
+    const overlaps = (a: Box, b: Box) =>
+      a.x - a.w / 2 - PAD < b.x + b.w / 2 + PAD &&
+      b.x - b.w / 2 - PAD < a.x + a.w / 2 + PAD &&
+      a.y - a.h / 2 - PAD < b.y + b.h / 2 + PAD &&
+      b.y - b.h / 2 - PAD < a.y + a.h / 2 + PAD;
+
+    const initial: Box[] = [];
+    for (const pair of pairsWithGaussian) {
+      const points = seriesWithExactPeak.get(pair);
+      if (!points?.length) continue;
+      let peakDates = points.filter((p) => p.separationDeg === 0).map((p) => p.date.getTime());
+      if (peakDates.length === 0) {
+        const minSep = Math.min(...points.map((p) => p.separationDeg));
+        const minPoint = points.find((p) => p.separationDeg === minSep);
+        if (minPoint) peakDates = [minPoint.date.getTime()];
+      }
+      const peakT = peakDates[0];
+      if (peakT == null) continue;
+      const baseInt = pairIntensity(pair);
+      const x = xScaleL(peakT);
+      const y = yScaleL(baseInt) - 8;
+      const w = Math.max(60, pair.length * 6.5);
+      const h = LABEL_H;
+      initial.push({ pair, x, y, w, h });
+    }
+    initial.sort((a, b) => a.x - b.x);
+
+    const placed: Box[] = [];
+    for (const box of initial) {
+      const tryY = (y: number) => !placed.some((p) => overlaps({ ...box, y }, p));
+      let y = Math.max(yMin, Math.min(yMax, box.y));
+      if (!tryY(y)) {
+        for (let k = 1; k <= 20; k++) {
+          const up = Math.max(yMin, Math.min(yMax, box.y - NUDGE * k));
+          if (tryY(up)) {
+            y = up;
+            break;
+          }
+          const down = Math.max(yMin, Math.min(yMax, box.y + NUDGE * k));
+          if (tryY(down)) {
+            y = down;
+            break;
+          }
+        }
+      }
+      placed.push({ ...box, y });
+    }
+
+    const map = new Map<string, { x: number; y: number }>();
+    for (const b of placed) map.set(b.pair, { x: b.x, y: b.y });
+    return map;
+  }, [pairsWithGaussian, startDate, endDate, plotWidth, seriesWithExactPeak]);
 
   const { xTicks } = useMemo(() => {
     const out: Date[] = [];
@@ -255,7 +407,7 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
     const span = t1 - t0;
     if (!Number.isFinite(span) || span < 0) return { xTicks: out };
     const numDaysInclusive = Math.floor(span / MS_PER_DAY) + 1;
-    const safeWidth = Number.isFinite(innerWidth) && innerWidth > 0 ? innerWidth : DEFAULT_PLOT_WIDTH - MARGIN.left - MARGIN.right;
+    const safeWidth = Number.isFinite(innerWidth) && innerWidth > 0 ? innerWidth : DEFAULT_PLOT_WIDTH - marginLeft - MARGIN.right;
     const maxTicks = Math.max(2, Math.floor(safeWidth / MIN_PX_PER_X_LABEL));
     if (numDaysInclusive <= maxTicks) {
       for (let i = 0; i < numDaysInclusive; i++) {
@@ -308,10 +460,11 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
     return path;
   }
 
+  /** Bands view: one row per pair, smooth round bulge (tapered to baseline at both ends). */
   function buildCurvePath(pair: string): string {
     const points = seriesWithExactPeak.get(pair);
     if (!points || points.length === 0) return '';
-    const n = Math.max(1, pairs.length);
+    const n = Math.max(1, displayPairs.length);
     const rowHeight = innerHeight / n;
     const maxHalfHeight = rowHeight * 0.4;
     const yC = yCenter(pair);
@@ -324,6 +477,12 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
       top.push({ x, y: yC - halfH });
       bottom.push({ x, y: yC + halfH });
     }
+    const firstX = top[0].x;
+    const lastX = top[top.length - 1].x;
+    top.unshift({ x: firstX, y: yC });
+    top.push({ x: lastX, y: yC });
+    bottom.unshift({ x: firstX, y: yC });
+    bottom.push({ x: lastX, y: yC });
     const topPath = smoothPathThrough(top);
     const bottomReversed = [...bottom].reverse();
     const bottomPath = smoothPathThrough(bottomReversed).replace(/^M [\d.,]+ /, '');
@@ -331,26 +490,29 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
     return `${topPath} L ${lastBottom.x},${lastBottom.y} ${bottomPath} Z`;
   }
 
-  /** Gaussian view: one bell curve per conjunction, peak at top of each Gaussian. */
-  const GAUSS_SIGMA_MS = 4 * MS_PER_DAY; // ~4 days half-width for each bell
+  /** Gaussian view: one bell curve per conjunction; y=0 at row baseline, peak at conjunction day; path closed for fill. */
   const GAUSS_SAMPLES = 120; // samples across the range for smooth curves
 
-  function buildGaussianPath(pair: string): string {
+  function getPeakDatesForPair(pair: string): number[] {
     const points = seriesWithExactPeak.get(pair);
-    if (!points || points.length === 0) return '';
+    if (!points || points.length === 0) return [];
     const peakDates = points.filter((p) => p.separationDeg === 0).map((p) => p.date.getTime());
     if (peakDates.length === 0) {
       const minSep = Math.min(...points.map((p) => p.separationDeg));
       const minPoint = points.find((p) => p.separationDeg === minSep);
-      if (!minPoint) return '';
+      if (!minPoint) return [];
       peakDates.push(minPoint.date.getTime());
     }
-    const n = Math.max(1, pairs.length);
-    const rowHeight = innerHeight / n;
-    const maxHalfHeight = rowHeight * 0.4;
-    const yC = yCenter(pair);
+    return peakDates;
+  }
+
+  function buildGaussianPath(pair: string): string {
+    const peakDates = getPeakDatesForPair(pair);
+    if (peakDates.length === 0) return '';
     const t0 = startDate.getTime();
     const t1 = endDate.getTime();
+    const baseIntensity = pairIntensity(pair);
+    const yBottom = yScale(0);
     const linePoints: { x: number; y: number }[] = [];
     for (let i = 0; i <= GAUSS_SAMPLES; i++) {
       const t = t0 + (i / GAUSS_SAMPLES) * (t1 - t0);
@@ -359,10 +521,13 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
         const diff = t - tPeak;
         value += Math.exp(-(diff * diff) / (2 * GAUSS_SIGMA_MS * GAUSS_SIGMA_MS));
       }
-      const y = yC - maxHalfHeight * Math.min(1, value);
-      linePoints.push({ x: xScale(new Date(t)), y });
+      const intensity = baseIntensity * Math.min(1, value);
+      linePoints.push({ x: xScale(new Date(t)), y: yScale(intensity) });
     }
-    return smoothPathThrough(linePoints);
+    const curvePath = smoothPathThrough(linePoints);
+    const first = linePoints[0];
+    const last = linePoints[linePoints.length - 1];
+    return `M ${first.x},${yBottom} L ${first.x},${first.y} ${curvePath.replace(/^M [\d.,]+ /, '')} L ${last.x},${yBottom} Z`;
   }
 
   const viewToggle = (
@@ -379,7 +544,13 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
       <Button
         variant={viewMode === 'lines' ? 'secondary' : 'ghost'}
         className="!py-2 !px-3 text-sm font-bold"
-        onClick={() => setViewMode('lines')}
+        onClick={() => {
+          setViewMode('lines');
+          const oneYearAgo = new Date(today);
+          oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+          setStartStr(toDateString(oneYearAgo));
+          setEndStr(toDateString(today));
+        }}
         title={copy.influence.viewLinesHint}
         aria-pressed={viewMode === 'lines'}
       >
@@ -467,25 +638,26 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
             <svg width={plotWidth} height={plotHeight} className="min-w-0 block">
               <defs>
                 <clipPath id={clipId}>
-                  <rect x={MARGIN.left} y={MARGIN.top} width={innerWidth} height={plotHeight - MARGIN.top - MARGIN.bottom} />
+                  <rect x={marginLeft} y={MARGIN.top} width={innerWidth} height={plotHeight - MARGIN.top - MARGIN.bottom} />
                 </clipPath>
               </defs>
-              {/* Grid and axis only in inner area so plot does not overlap labels */}
-              {xTicks.map((d, i) => (
-                <line
-                  key={i}
-                  x1={xScale(d)}
-                  y1={MARGIN.top}
-                  x2={xScale(d)}
-                  y2={plotHeight - MARGIN.bottom}
-                  stroke="#2a2450"
-                  strokeDasharray="4 4"
-                />
-              ))}
+              {/* Grid and axis only in inner area; dashed verticals only in bands view */}
+              {viewMode === 'bands' &&
+                xTicks.map((d, i) => (
+                  <line
+                    key={i}
+                    x1={xScale(d)}
+                    y1={MARGIN.top}
+                    x2={xScale(d)}
+                    y2={plotHeight - MARGIN.bottom}
+                    stroke="#2a2450"
+                    strokeDasharray="4 4"
+                  />
+                ))}
               <line
-                x1={MARGIN.left}
+                x1={marginLeft}
                 y1={plotHeight - MARGIN.bottom}
-                x2={MARGIN.left + innerWidth}
+                x2={marginLeft + innerWidth}
                 y2={plotHeight - MARGIN.bottom}
                 stroke="#3d3560"
                 strokeWidth={1}
@@ -501,21 +673,44 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
                   {formatAxisDate(d)}
                 </text>
               ))}
-              {pairs.map((pair) => (
-                <text
-                  key={pair}
-                  x={MARGIN.left - 12}
-                  y={yCenter(pair)}
-                  textAnchor="end"
-                  dominantBaseline="middle"
-                  className="fill-[#c4b5e0] text-xs font-bold"
-                  style={{ fontWeight: 'bold' }}
-                >
-                  {pair}
-                </text>
-              ))}
+              {/* Bands: pair labels on left. Gaussian: intensity y-axis. */}
+              {viewMode === 'bands' &&
+                displayPairs.map((pair) => (
+                  <text
+                    key={pair}
+                    x={marginLeft - 12}
+                    y={yCenter(pair)}
+                    textAnchor="end"
+                    dominantBaseline="middle"
+                    className="fill-[#c4b5e0] text-xs font-bold"
+                  >
+                    {pair}
+                  </text>
+                ))}
+              {viewMode === 'lines' && (
+                <>
+                  <line
+                    x1={marginLeft}
+                    y1={MARGIN.top}
+                    x2={marginLeft}
+                    y2={plotHeight - MARGIN.bottom}
+                    stroke="#3d3560"
+                    strokeWidth={1}
+                  />
+                  <text
+                    x={marginLeft - 8}
+                    y={MARGIN.top + (plotHeight - MARGIN.top - MARGIN.bottom) / 2}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="fill-[#7c6b9e] text-[10px] uppercase tracking-wide"
+                    transform={`rotate(-90, ${marginLeft - 8}, ${MARGIN.top + (plotHeight - MARGIN.top - MARGIN.bottom) / 2})`}
+                  >
+                    Intensity
+                  </text>
+                </>
+              )}
               <g clipPath={`url(#${clipId})`}>
-              {pairs.map((pair, idx) => {
+              {displayPairs.map((pair, idx) => {
                 const pathD = viewMode === 'bands' ? buildCurvePath(pair) : buildGaussianPath(pair);
                 const color = PAIR_COLORS[idx % PAIR_COLORS.length];
                 const points = seriesByPair.get(pair) ?? [];
@@ -533,36 +728,50 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
                     )
                   : undefined;
                 const isLines = viewMode === 'lines';
+                const labelPos = isLines ? gaussianLabelPositions.get(pair) : null;
                 return (
-                  <path
-                    key={pair}
-                    d={pathD}
-                    fill={isLines ? 'none' : color}
-                    fillOpacity={isLines ? undefined : 0.6}
-                    stroke={color}
-                    strokeWidth={isLines ? 2.5 : 1.5}
-                    strokeOpacity={0.9}
-                    onMouseEnter={(e) => {
-                      setTooltip({
-                        pair,
-                        exactDate,
-                        minSep,
-                        lon1: eventAtExact?.lon1,
-                        lon2: eventAtExact?.lon2,
-                        planet1: eventAtExact?.planet1,
-                        planet2: eventAtExact?.planet2,
-                        x: e.clientX,
-                        y: e.clientY,
-                      });
-                    }}
-                    onMouseMove={(e) => {
-                      setTooltip((prev) =>
-                        prev && prev.pair === pair
-                          ? { ...prev, x: e.clientX, y: e.clientY }
-                          : prev
-                      );
-                    }}
-                  />
+                  <g key={pair}>
+                    <path
+                      d={pathD}
+                      fill={color}
+                      fillOpacity={isLines ? 0.5 : 0.6}
+                      stroke={color}
+                      strokeWidth={isLines ? 2.5 : 1.5}
+                      strokeOpacity={0.9}
+                      onMouseEnter={(e) => {
+                        setTooltip({
+                          pair,
+                          exactDate,
+                          minSep,
+                          lon1: eventAtExact?.lon1,
+                          lon2: eventAtExact?.lon2,
+                          planet1: eventAtExact?.planet1,
+                          planet2: eventAtExact?.planet2,
+                          x: e.clientX,
+                          y: e.clientY,
+                        });
+                      }}
+                      onMouseMove={(e) => {
+                        setTooltip((prev) =>
+                          prev && prev.pair === pair
+                            ? { ...prev, x: e.clientX, y: e.clientY }
+                            : prev
+                        );
+                      }}
+                    />
+                    {viewMode === 'lines' && labelPos != null && (
+                      <text
+                        x={labelPos.x}
+                        y={labelPos.y}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        className="fill-[#c4b5e0] text-[11px] font-bold pointer-events-none"
+                        style={{ paintOrder: 'stroke', stroke: '#1a1625', strokeWidth: 2 }}
+                      >
+                        {pair}
+                      </text>
+                    )}
+                  </g>
                 );
               })}
               </g>

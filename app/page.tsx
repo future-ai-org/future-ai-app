@@ -215,7 +215,7 @@ export default function Home() {
           {copy.chart.titlePrefix} {copy.today.title}
         </h1>
         <div className="mt-2 flex items-center justify-center gap-3">
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-sm font-bold">
             {todaySubtitle}
           </p>
           {status === 'authenticated' && (
@@ -279,12 +279,11 @@ export default function Home() {
           e.preventDefault();
           document.getElementById('influences')?.scrollIntoView({ behavior: 'smooth' });
         }}
-        className="mt-8 pt-10 flex items-center justify-center gap-3 w-full group cursor-pointer"
+        className="mt-8 pt-10 flex flex-col items-center gap-1 text-violet-400 hover:text-violet-300 transition-colors"
         aria-label="Scroll to major planetary influences this week"
       >
-        <span className="h-px flex-1 max-w-[4rem] bg-gradient-to-r from-transparent to-violet-400/50 group-hover:to-violet-400/80 transition-colors" aria-hidden />
-        <span className="text-violet-400/70 group-hover:text-violet-400 text-lg transition-colors" aria-hidden>✦</span>
-        <span className="h-px flex-1 max-w-[4rem] bg-gradient-to-l from-transparent to-violet-400/50 group-hover:to-violet-400/80 transition-colors" aria-hidden />
+        <span className="text-base font-bold">{copy.influence.arrowLabel}</span>
+        <span className="text-xl leading-none opacity-80" aria-hidden>↓</span>
       </a>
 
       <section id="influences" className="w-full mt-20 scroll-mt-24">
