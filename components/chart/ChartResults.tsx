@@ -54,7 +54,7 @@ export function ChartResults({ result, showAscendant = true, showAngles = showAs
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
           {wheelBlock}
           <div className="min-w-0">
-            <PlanetTable result={result} />
+            <PlanetTable result={result} showHouses={showAscendant} />
           </div>
         </div>
       )}

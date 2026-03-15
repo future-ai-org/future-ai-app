@@ -226,7 +226,7 @@ export const copy = {
     timeLabel: 'time of birth',
     timeNotKnown: 'time not known (use 12pm)',
     cityLabel: 'birth city',
-    cityNotKnown: 'city not known (use Austin)',
+    cityNotKnown: 'city not known',
     utcLabel: 'utc offset — adjust if DST applies',
     utcPlaceholder: 'e.g. -5 or +1',
     submit: 'calculate my chart',

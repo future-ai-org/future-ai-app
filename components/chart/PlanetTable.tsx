@@ -6,9 +6,11 @@ import type { ChartResult } from '@/lib/astro/types';
 
 interface Props {
   result: ChartResult;
+  /** When false, the house column is hidden (e.g. when birth time or place unknown). Default true. */
+  showHouses?: boolean;
 }
 
-export function PlanetTable({ result }: Props) {
+export function PlanetTable({ result, showHouses = true }: Props) {
   return (
     <Card>
       <h2 className="text-xs text-violet-400 tracking-widest uppercase mb-3 border-b border-border pb-2">
@@ -20,7 +22,9 @@ export function PlanetTable({ result }: Props) {
             <th className="text-left text-xs text-muted-foreground font-normal tracking-wider pb-2 px-1">{copy.planetTable.planet}</th>
             <th className="text-left text-xs text-muted-foreground font-normal tracking-wider pb-2 px-1">{copy.planetTable.sign}</th>
             <th className="text-left text-xs text-muted-foreground font-normal tracking-wider pb-2 px-1">{copy.planetTable.degree}</th>
-            <th className="text-left text-xs text-muted-foreground font-normal tracking-wider pb-2 px-1">{copy.planetTable.house}</th>
+            {showHouses && (
+              <th className="text-left text-xs text-muted-foreground font-normal tracking-wider pb-2 px-1">{copy.planetTable.house}</th>
+            )}
           </tr>
         </thead>
         <tbody>
@@ -42,11 +46,13 @@ export function PlanetTable({ result }: Props) {
                     <span className="text-red-400 text-xs">℞</span>
                   )}
                 </td>
-                <td className="py-1.5 px-1">
-                  <span className="bg-muted rounded px-1.5 py-0.5 text-xs text-muted-foreground">
-                    {p.house}
-                  </span>
-                </td>
+                {showHouses && (
+                  <td className="py-1.5 px-1">
+                    <span className="bg-muted rounded px-1.5 py-0.5 text-xs text-muted-foreground">
+                      {p.house}
+                    </span>
+                  </td>
+                )}
               </tr>
             );
           })}
@@ -69,11 +75,13 @@ export function PlanetTable({ result }: Props) {
                     <span className="text-red-400 text-xs">℞</span>
                   )}
                 </td>
-                <td className="py-1.5 px-1">
-                  <span className="bg-muted rounded px-1.5 py-0.5 text-xs text-muted-foreground">
-                    {p.house}
-                  </span>
-                </td>
+                {showHouses && (
+                  <td className="py-1.5 px-1">
+                    <span className="bg-muted rounded px-1.5 py-0.5 text-xs text-muted-foreground">
+                      {p.house}
+                    </span>
+                  </td>
+                )}
               </tr>
             );
           })}
