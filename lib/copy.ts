@@ -25,7 +25,6 @@ export const copy = {
 
   influence: {
     title: 'influences',
-    arrowLabel: 'major planetary influences this week',
     subtitle: 'planetary conjunctions this month — when two planets are within 10°.',
     viewBands: 'bands',
     viewLines: 'gaussian',

@@ -231,9 +231,9 @@ export default function Home() {
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3 md:gap-4 font-bold">
           <div className="flex items-center gap-1.5">
-            <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjust('day', -1)} title={copy.today.prevDay} aria-label={copy.today.prevDay}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">day</span></Button>
-            <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjust('month', -1)} title={copy.today.prevMonth} aria-label={copy.today.prevMonth}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">month</span></Button>
             <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjust('year', -1)} title={copy.today.prevYear} aria-label={copy.today.prevYear}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">year</span></Button>
+            <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjust('month', -1)} title={copy.today.prevMonth} aria-label={copy.today.prevMonth}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">month</span></Button>
+            <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjust('day', -1)} title={copy.today.prevDay} aria-label={copy.today.prevDay}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">day</span></Button>
           </div>
           <span className="min-w-[160px] text-base text-foreground font-bold tabular-nums">
             {formatChartDate(chartMoment, location)}
@@ -273,18 +273,15 @@ export default function Home() {
         <p className="text-muted-foreground text-center py-12">loading…</p>
       )}
 
-      <a
-        href="#influences"
-        onClick={(e) => {
-          e.preventDefault();
-          document.getElementById('influences')?.scrollIntoView({ behavior: 'smooth' });
-        }}
-        className="mt-8 pt-10 flex flex-col items-center gap-1 text-violet-400 hover:text-violet-300 transition-colors"
-        aria-label="Scroll to major planetary influences this week"
-      >
-        <span className="text-base font-bold">{copy.influence.arrowLabel}</span>
-        <span className="text-xl leading-none opacity-80" aria-hidden>↓</span>
-      </a>
+      <div className="mt-12 pt-8 flex items-center justify-center gap-2" aria-hidden>
+        <span className="h-px flex-1 max-w-20 bg-gradient-to-r from-transparent via-violet-400/30 to-violet-400/60 rounded-full" />
+        <span className="flex items-center gap-0.5 text-violet-400/90 text-sm drop-shadow-[0_0_8px_rgba(139,92,246,0.4)]" aria-hidden>
+          <span className="opacity-70">✧</span>
+          <span className="text-base">✦</span>
+          <span className="opacity-70">✧</span>
+        </span>
+        <span className="h-px flex-1 max-w-20 bg-gradient-to-l from-transparent via-violet-400/30 to-violet-400/60 rounded-full" />
+      </div>
 
       <section id="influences" className="w-full mt-20 scroll-mt-24">
         <ConjunctionPlot defaultStart={influenceRange.start} defaultEnd={influenceRange.end} />
