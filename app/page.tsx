@@ -279,11 +279,12 @@ export default function Home() {
           e.preventDefault();
           document.getElementById('influences')?.scrollIntoView({ behavior: 'smooth' });
         }}
-        className="mt-8 pt-10 flex flex-col items-center gap-1 text-violet-400 hover:text-violet-300 transition-colors"
+        className="mt-8 pt-10 flex items-center justify-center gap-3 w-full max-w-xs mx-auto group cursor-pointer"
         aria-label="Scroll to major planetary influences this week"
       >
-        <span className="text-base font-bold">{copy.influence.arrowLabel}</span>
-        <span className="text-xl leading-none opacity-80" aria-hidden>↓</span>
+        <span className="flex-1 h-px bg-gradient-to-r from-transparent via-violet-400/60 to-violet-400/60 group-hover:via-violet-300 group-hover:to-violet-300 transition-colors" aria-hidden />
+        <span className="text-violet-400/80 group-hover:text-violet-300 text-sm transition-colors" aria-hidden>✦</span>
+        <span className="flex-1 h-px bg-gradient-to-l from-transparent via-violet-400/60 to-violet-400/60 group-hover:via-violet-300 group-hover:to-violet-300 transition-colors" aria-hidden />
       </a>
 
       <section id="influences" className="w-full mt-20 scroll-mt-24">
