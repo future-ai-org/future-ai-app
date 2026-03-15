@@ -231,9 +231,9 @@ export default function Home() {
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3 md:gap-4 font-bold">
           <div className="flex items-center gap-1.5">
-            <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjust('day', -1)} title={copy.today.prevDay} aria-label={copy.today.prevDay}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">day</span></Button>
-            <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjust('month', -1)} title={copy.today.prevMonth} aria-label={copy.today.prevMonth}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">month</span></Button>
             <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjust('year', -1)} title={copy.today.prevYear} aria-label={copy.today.prevYear}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">year</span></Button>
+            <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjust('month', -1)} title={copy.today.prevMonth} aria-label={copy.today.prevMonth}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">month</span></Button>
+            <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjust('day', -1)} title={copy.today.prevDay} aria-label={copy.today.prevDay}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">day</span></Button>
           </div>
           <span className="min-w-[160px] text-base text-foreground font-bold tabular-nums">
             {formatChartDate(chartMoment, location)}

@@ -16,6 +16,19 @@ const MIN_PLOT_HEIGHT = 280;
 /** Min horizontal pixels per x-axis date label so they never overlap */
 const MIN_PX_PER_X_LABEL = 72;
 
+const PAIR_COLORS = [
+  '#a78bfa', // violet
+  '#f472b6', // pink
+  '#34d399', // emerald
+  '#fbbf24', // amber
+  '#60a5fa', // blue
+  '#f97316', // orange
+  '#22d3ee', // cyan
+  '#c084fc', // purple
+  '#4ade80', // green
+  '#fb923c', // orange-2
+];
+
 function pairKey(p1: string, p2: string): string {
   return [p1, p2].sort().join('–');
 }
@@ -192,14 +205,12 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
 
   const ORB_DEG = 10;
 
-  const { pairs, pairIndex, seriesByPair } = useMemo(() => {
+  const { pairs, seriesByPair } = useMemo(() => {
     const set = new Set<string>();
     for (const e of events) {
       set.add(pairKey(e.planet1, e.planet2));
     }
     const pairs = Array.from(set).sort();
-    const pairIndex = new Map<string, number>();
-    pairs.forEach((p, i) => pairIndex.set(p, i));
     const seriesByPair = new Map<string, { date: Date; separationDeg: number }[]>();
     for (const e of events) {
       const key = pairKey(e.planet1, e.planet2);
@@ -209,7 +220,7 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
     for (const arr of seriesByPair.values()) {
       arr.sort((a, b) => a.date.getTime() - b.date.getTime());
     }
-    return { pairs, pairIndex, seriesByPair };
+    return { pairs, seriesByPair };
   }, [events]);
 
   // Add an interpolated point at exact conjunction (sep=0) so the curve peaks at the right time
@@ -425,21 +436,9 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
     }
     while (out.length > maxTicks) out.pop();
     return { xTicks: out };
-  }, [startDate, endDate, innerWidth]);
+  }, [startDate, endDate, innerWidth, marginLeft]);
 
   const clipId = useId();
-  const PAIR_COLORS = [
-    '#a78bfa', // violet
-    '#f472b6', // pink
-    '#34d399', // emerald
-    '#fbbf24', // amber
-    '#60a5fa', // blue
-    '#f97316', // orange
-    '#22d3ee', // cyan
-    '#c084fc', // purple
-    '#4ade80', // green
-    '#fb923c', // orange-2
-  ];
 
   function smoothPathThrough(points: { x: number; y: number }[]): string {
     if (points.length === 0) return '';
@@ -572,9 +571,9 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
         <div className="flex flex-wrap items-center justify-center gap-1.5 md:gap-2 font-bold">
           <span className="text-sm font-bold text-violet-400 mr-1 uppercase tracking-wide">From</span>
           <div className="flex items-center gap-1.5">
-            <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjustStart('day', -1)} title={copy.today.prevDay} aria-label={copy.today.prevDay}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">day</span></Button>
-            <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjustStart('month', -1)} title={copy.today.prevMonth} aria-label={copy.today.prevMonth}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">month</span></Button>
             <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjustStart('year', -1)} title={copy.today.prevYear} aria-label={copy.today.prevYear}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">year</span></Button>
+            <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjustStart('month', -1)} title={copy.today.prevMonth} aria-label={copy.today.prevMonth}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">month</span></Button>
+            <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjustStart('day', -1)} title={copy.today.prevDay} aria-label={copy.today.prevDay}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">day</span></Button>
           </div>
           <span className="min-w-[140px] text-lg text-foreground font-bold tabular-nums text-center">
             {formatChartDate(startDate)}
@@ -591,9 +590,9 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
         <div className="flex flex-wrap items-center justify-center gap-1.5 md:gap-2 font-bold">
           <span className="text-sm font-bold text-violet-400 mr-1 uppercase tracking-wide">To</span>
           <div className="flex items-center gap-1.5">
-            <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjustEnd('day', -1)} title={copy.today.prevDay} aria-label={copy.today.prevDay} disabled={arrowDisabled.toDayBack}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">day</span></Button>
-            <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjustEnd('month', -1)} title={copy.today.prevMonth} aria-label={copy.today.prevMonth} disabled={arrowDisabled.toMonthBack}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">month</span></Button>
             <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjustEnd('year', -1)} title={copy.today.prevYear} aria-label={copy.today.prevYear} disabled={arrowDisabled.toYearBack}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">year</span></Button>
+            <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjustEnd('month', -1)} title={copy.today.prevMonth} aria-label={copy.today.prevMonth} disabled={arrowDisabled.toMonthBack}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">month</span></Button>
+            <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjustEnd('day', -1)} title={copy.today.prevDay} aria-label={copy.today.prevDay} disabled={arrowDisabled.toDayBack}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">day</span></Button>
           </div>
           <span className="min-w-[140px] text-lg text-foreground font-bold tabular-nums text-center">
             {formatChartDate(endDate)}
