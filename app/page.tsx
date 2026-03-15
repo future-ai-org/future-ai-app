@@ -267,7 +267,7 @@ export default function Home() {
 
       {result ? (
         <div className="w-full flex justify-center">
-          <ChartResults result={result} showAscendant={false} chartSize={720} onAdjustHours={adjustHours} />
+          <ChartResults result={result} chartSize={720} onAdjustHours={adjustHours} showAscendant={false} showAngles showHouses />
         </div>
       ) : (
         <p className="text-muted-foreground text-center py-12">loading…</p>
