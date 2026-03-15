@@ -10,6 +10,8 @@ const DEFAULT_CHART_SIZE = 520;
 interface Props {
   result: ChartResult;
   showAscendant?: boolean;
+  /** When false, ASC/DSC/MC/IC are not drawn on the wheel. Defaults to same as showAscendant. */
+  showAngles?: boolean;
   /** Canvas size in px for the chart wheel. Larger = more prominent, centered. */
   chartSize?: number;
   /** When set, shows birth time and ±15m / ±1 hr buttons under the wheel to nudge the chart. */
@@ -18,10 +20,10 @@ interface Props {
   wheelOnly?: boolean;
 }
 
-export function ChartResults({ result, showAscendant = true, chartSize = DEFAULT_CHART_SIZE, onAdjustHours, wheelOnly = false }: Props) {
+export function ChartResults({ result, showAscendant = true, showAngles = showAscendant, chartSize = DEFAULT_CHART_SIZE, onAdjustHours, wheelOnly = false }: Props) {
   const wheelBlock = (
     <div className="flex flex-col items-center justify-center gap-4 w-full">
-      <ChartWheel result={result} size={chartSize} />
+      <ChartWheel result={result} size={chartSize} showAngles={showAngles} />
       {onAdjustHours && (
         <div className="flex flex-wrap items-center justify-center gap-3 text-sm w-full">
           <span className="text-muted-foreground font-bold mr-1">{copy.chart.birthTime}:</span>
@@ -52,7 +54,7 @@ export function ChartResults({ result, showAscendant = true, chartSize = DEFAULT
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
           {wheelBlock}
           <div className="min-w-0">
-            <PlanetTable result={result} />
+            <PlanetTable result={result} showHouses={showAscendant} />
           </div>
         </div>
       )}

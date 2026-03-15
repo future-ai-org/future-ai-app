@@ -7,9 +7,9 @@ import { copy } from '@/lib/copy';
 import { validateBirthDate } from '@/lib/astro/validate';
 import type { BirthData, GeoResult, ChartOptions } from '@/lib/astro/types';
 
-const DENVER_LAT = 39.7392;
-const DENVER_LON = -104.9903;
-const DENVER_UTC_OFFSET = -7; // Mountain Time (MST)
+const AUSTIN_LAT = 30.2672;
+const AUSTIN_LON = -97.7431;
+const AUSTIN_UTC_OFFSET = -6; // Central Time (standard)
 
 const DEFAULT_OPTIONS: ChartOptions = {
   lilith: true,
@@ -23,8 +23,13 @@ const DEFAULT_OPTIONS: ChartOptions = {
   lotOfVictory: true,
 };
 
+export interface ChartFormMeta {
+  timeNotKnown: boolean;
+  cityNotKnown: boolean;
+}
+
 interface Props {
-  onSubmit: (data: BirthData, options: ChartOptions) => void;
+  onSubmit: (data: BirthData, options: ChartOptions, meta: ChartFormMeta) => void;
   isLoading?: boolean;
 }
 
@@ -58,12 +63,12 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
     if (!timeNotKnown && !time) { setError(copy.form.errors.noTime); return; }
     if (!cityNotKnown && !geoResult) { setError(copy.form.errors.noCity); return; }
 
-    const latitude = cityNotKnown ? DENVER_LAT : geoResult!.latitude;
-    const longitude = cityNotKnown ? DENVER_LON : geoResult!.longitude;
+    const latitude = cityNotKnown ? AUSTIN_LAT : geoResult!.latitude;
+    const longitude = cityNotKnown ? AUSTIN_LON : geoResult!.longitude;
     const parsedOffset = cityNotKnown
-      ? (Number(utcOffset) || DENVER_UTC_OFFSET)
+      ? (Number(utcOffset) || AUSTIN_UTC_OFFSET)
       : parseFloat(utcOffset);
-    const cityLabel = cityNotKnown ? 'Denver' : geoResult!.displayName;
+    const cityLabel = cityNotKnown ? 'Austin' : geoResult!.displayName;
 
     if (isNaN(parsedOffset)) { setError(copy.form.errors.invalidUtc); return; }
 
@@ -77,6 +82,7 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
         cityLabel,
       },
       options,
+      { timeNotKnown, cityNotKnown },
     );
   }
 
@@ -136,7 +142,7 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
                   setCityNotKnown(checked);
                   if (checked) {
                     setGeoResult(null);
-                    setUtcOffset(String(DENVER_UTC_OFFSET));
+                    setUtcOffset(String(AUSTIN_UTC_OFFSET));
                   } else {
                     setUtcOffset('');
                   }
