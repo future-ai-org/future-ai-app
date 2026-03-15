@@ -9,9 +9,12 @@ const DEFAULT_CHART_SIZE = 520;
 
 interface Props {
   result: ChartResult;
+  /** When false, the ascendant (rising sign) card is hidden. Default true. */
   showAscendant?: boolean;
   /** When false, ASC/DSC/MC/IC are not drawn on the wheel. Defaults to same as showAscendant. */
   showAngles?: boolean;
+  /** When false, the house column is hidden in the planet table. Defaults to same as showAscendant. */
+  showHouses?: boolean;
   /** Canvas size in px for the chart wheel. Larger = more prominent, centered. */
   chartSize?: number;
   /** When set, shows birth time and ±15m / ±1 hr buttons under the wheel to nudge the chart. */
@@ -20,7 +23,7 @@ interface Props {
   wheelOnly?: boolean;
 }
 
-export function ChartResults({ result, showAscendant = true, showAngles = showAscendant, chartSize = DEFAULT_CHART_SIZE, onAdjustHours, wheelOnly = false }: Props) {
+export function ChartResults({ result, showAscendant = true, showAngles = showAscendant, showHouses = showAscendant, chartSize = DEFAULT_CHART_SIZE, onAdjustHours, wheelOnly = false }: Props) {
   const wheelBlock = (
     <div className="flex flex-col items-center justify-center gap-4 w-full">
       <ChartWheel result={result} size={chartSize} showAngles={showAngles} />
@@ -54,7 +57,7 @@ export function ChartResults({ result, showAscendant = true, showAngles = showAs
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
           {wheelBlock}
           <div className="min-w-0">
-            <PlanetTable result={result} showHouses={showAscendant} />
+            <PlanetTable result={result} showHouses={showHouses} />
           </div>
         </div>
       )}

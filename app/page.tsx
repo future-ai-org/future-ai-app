@@ -267,7 +267,7 @@ export default function Home() {
 
       {result ? (
         <div className="w-full flex justify-center">
-          <ChartResults result={result} showAscendant={false} chartSize={720} onAdjustHours={adjustHours} />
+          <ChartResults result={result} chartSize={720} onAdjustHours={adjustHours} showAscendant={false} showAngles showHouses />
         </div>
       ) : (
         <p className="text-muted-foreground text-center py-12">loading…</p>
@@ -279,11 +279,12 @@ export default function Home() {
           e.preventDefault();
           document.getElementById('influences')?.scrollIntoView({ behavior: 'smooth' });
         }}
-        className="mt-8 pt-10 flex flex-col items-center gap-1 text-violet-400 hover:text-violet-300 transition-colors"
+        className="mt-8 pt-10 flex items-center justify-center gap-3 w-full group cursor-pointer"
         aria-label="Scroll to major planetary influences this week"
       >
-        <span className="text-base font-bold">{copy.influence.arrowLabel}</span>
-        <span className="text-xl leading-none opacity-80" aria-hidden>↓</span>
+        <span className="h-px flex-1 max-w-[4rem] bg-gradient-to-r from-transparent to-violet-400/50 group-hover:to-violet-400/80 transition-colors" aria-hidden />
+        <span className="text-violet-400/70 group-hover:text-violet-400 text-lg transition-colors" aria-hidden>✦</span>
+        <span className="h-px flex-1 max-w-[4rem] bg-gradient-to-l from-transparent to-violet-400/50 group-hover:to-violet-400/80 transition-colors" aria-hidden />
       </a>
 
       <section id="influences" className="w-full mt-20 scroll-mt-24">
