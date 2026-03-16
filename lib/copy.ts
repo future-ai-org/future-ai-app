@@ -64,6 +64,7 @@ export const copy = {
 
   dashboard: {
     title: 'dashboard',
+    backToDashboard: 'back to dashboard',
     subtitle: 'saved charts',
     tabCharts: 'charts',
     tabInfluences: 'influences',

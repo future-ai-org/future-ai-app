@@ -136,15 +136,15 @@ export default function ChartTransitsPage() {
     <main className="max-w-5xl mx-auto px-4 pb-20">
       <div className="pt-8 pb-6 text-center">
         <Link
-          href={`/chart/${id}`}
+          href="/dashboard"
           className="text-muted-foreground text-sm hover:text-violet-400 transition-colors"
         >
-          ← {chart.label}
+          ← {copy.dashboard.title}
         </Link>
-        <h1 className="text-4xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
+        <h1 className="text-5xl md:text-6xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
           {copy.chart.transitsTitle}
         </h1>
-        <p className="text-muted-foreground text-sm mt-2">
+        <p className="text-muted-foreground text-sm mt-2 font-bold">
           {copy.chart.transitsSubtitle(transitLabel)}
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-2 md:gap-3 font-bold">
