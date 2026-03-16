@@ -20,9 +20,9 @@ export function ThemeToggle({ className }: { className?: string }) {
       )}
     >
       {isDark ? (
-        <span className="text-lg leading-none" aria-hidden>☀️</span>
+        <span className="text-xl leading-none" aria-hidden>☀️</span>
       ) : (
-        <span className="text-lg leading-none" aria-hidden>🌙</span>
+        <span className="text-xl leading-none" aria-hidden>🌙</span>
       )}
     </button>
   );

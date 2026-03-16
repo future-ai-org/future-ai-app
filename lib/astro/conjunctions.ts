@@ -113,6 +113,64 @@ export function findConjunctionsInRange(
   return events;
 }
 
+function pairKey(p1: PlanetName, p2: PlanetName): string {
+  return [p1, p2].sort().join('–');
+}
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/**
+ * Find the next N conjunction peaks from fromDate. Each "peak" is the day of closest approach
+ * for a pair within a run of consecutive days within orb (one event per pair per run).
+ */
+export function findNextNConjunctions(
+  fromDate: Date,
+  n: number,
+  orbDeg: number = DEFAULT_ORB_DEG
+): ConjunctionEvent[] {
+  const peaks: ConjunctionEvent[] = [];
+  let start = new Date(fromDate);
+  start.setUTCHours(12, 0, 0, 0);
+  const chunkDays = 400;
+
+  while (peaks.length < n) {
+    const end = new Date(start);
+    end.setUTCDate(end.getUTCDate() + chunkDays);
+    const events = findConjunctionsInRange(start, end, orbDeg);
+    const byPair = new Map<string, ConjunctionEvent[]>();
+    for (const e of events) {
+      const key = pairKey(e.planet1, e.planet2);
+      if (!byPair.has(key)) byPair.set(key, []);
+      byPair.get(key)!.push({ ...e, date: new Date(e.date) });
+    }
+    for (const arr of byPair.values()) {
+      arr.sort((a, b) => a.date.getTime() - b.date.getTime());
+      let i = 0;
+      while (i < arr.length) {
+        const run: ConjunctionEvent[] = [arr[i]];
+        let j = i + 1;
+        while (
+          j < arr.length &&
+          arr[j].date.getTime() - arr[j - 1].date.getTime() <= MS_PER_DAY * 1.5
+        ) {
+          run.push(arr[j]);
+          j++;
+        }
+        const best = run.reduce((a, b) =>
+          a.separationDeg <= b.separationDeg ? a : b
+        );
+        peaks.push(best);
+        i = j;
+      }
+    }
+    peaks.sort((a, b) => a.date.getTime() - b.date.getTime());
+    if (peaks.length >= n) return peaks.slice(0, n);
+    start = new Date(end);
+    start.setUTCDate(start.getUTCDate() + 1);
+  }
+  return peaks.slice(0, n);
+}
+
 export interface TransitNatalEvent {
   date: Date;
   transitPlanet: PlanetName;
