@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { ChartResults } from '@/components/chart/ChartResults';
 import { ConjunctionPlot } from '@/components/chart/ConjunctionPlot';
+import { NextConjunctions } from '@/components/chart/NextConjunctions';
 import { CitySearch } from '@/components/chart/CitySearch';
 import { Button } from '@/components/ui/Button';
 import { calculateChart } from '@/lib/astro/calculate';
@@ -211,10 +212,10 @@ export default function Home() {
   return (
     <main className="max-w-6xl mx-auto px-4 pb-20 flex flex-col items-center">
       <div id="chart-of-the-moment" className="pt-8 pb-6 text-center scroll-mt-20">
-        <h1 className="text-5xl font-serif mt-4 mb-1 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
+        <h1 className="text-6xl font-serif mt-4 mb-1 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
           {copy.chart.titlePrefix} {copy.today.title}
         </h1>
-        <div className="mt-2 flex items-center justify-center gap-3">
+        <div className="mt-2 pb-3 flex items-center justify-center gap-3">
           <p className="text-muted-foreground text-sm font-bold">
             {todaySubtitle}
           </p>
@@ -282,6 +283,8 @@ export default function Home() {
         </span>
         <span className="h-px flex-1 max-w-20 bg-gradient-to-l from-transparent via-violet-400/30 to-violet-400/60 rounded-full" />
       </div>
+
+      <NextConjunctions />
 
       <section id="influences" className="w-full mt-20 scroll-mt-24">
         <ConjunctionPlot defaultStart={influenceRange.start} defaultEnd={influenceRange.end} />

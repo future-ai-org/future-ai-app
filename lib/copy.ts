@@ -26,10 +26,15 @@ export const copy = {
   influence: {
     title: 'influences',
     subtitle: 'planetary conjunctions this month — when two planets are within 10°.',
-    viewBands: 'bands',
-    viewLines: 'gaussian',
+    viewBands: 'conjunction bands',
+    viewLines: 'conjunction gaussians',
     viewBandsHint: 'Show influences as filled bands',
     viewLinesHint: 'Show influences as Gaussian bells peaking on conjunction day',
+  },
+
+  nextConjunctions: {
+    title: 'next conjunctions to watch for',
+    subtitle: '',
   },
 
   auth: {

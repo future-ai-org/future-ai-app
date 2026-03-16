@@ -13,7 +13,7 @@ export function Header() {
 
   const navLinkClass = (path: string) =>
     cn(
-      'rounded-lg px-3 py-2 text-sm font-bold transition-colors hover:bg-border/60 hover:text-foreground',
+      'rounded-lg px-3 py-2 text-base font-bold transition-colors hover:bg-border/60 hover:text-foreground',
       pathname === path
         ? 'bg-border/50 text-violet-800 dark:text-violet-300'
         : 'text-muted-foreground',
@@ -33,8 +33,8 @@ export function Header() {
             }
           }}
         >
-          <span className="inline-block text-xl text-violet-500 dark:text-violet-400 scale-x-[-1]" aria-hidden>☽</span>
-          <span className="font-semibold tracking-tight text-foreground">{copy.site.title}</span>
+          <span className="inline-block text-2xl text-violet-500 dark:text-violet-400 scale-x-[-1]" aria-hidden>☽</span>
+          <span className="text-lg font-semibold tracking-tight text-foreground">{copy.site.title}</span>
         </Link>
         <nav aria-label={copy.nav.ariaLabel} className="flex items-center gap-1">
           <Link href="/chart" className={navLinkClass('/chart')}>
