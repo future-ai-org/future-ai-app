@@ -19,8 +19,8 @@ function formatEventDate(d: Date): string {
 /** One color per planet so the same object is always the same color (e.g. Moon = blue, Sun = red). */
 const PLANET_COLORS: Record<PlanetName, string> = {
   Sun: '#f87171',
-  Moon: '#60a5fa',
-  Mercury: '#a16207',
+  Moon: '#93c5fd',
+  Mercury: '#f9a8d4',
   Venus: '#22c55e',
   Mars: '#dc2626',
   Jupiter: '#f59e0b',
@@ -57,19 +57,6 @@ export function NextConjunctions() {
       ) : null}
       <div className="mx-auto max-w-md overflow-x-auto">
         <table className="w-full text-sm border-collapse">
-          <thead>
-            <tr className="border-b border-border/60">
-              <th className="py-1.5 pr-4 text-center text-muted-foreground font-bold">
-                Date
-              </th>
-              <th className="py-1.5 pr-4 text-center text-muted-foreground font-bold">
-                Objects
-              </th>
-              <th className="py-1.5 text-center text-muted-foreground font-bold">
-                Angles
-              </th>
-            </tr>
-          </thead>
           <tbody>
             {list.map((event, i) => {
               const lon = conjunctionLongitude(event.lon1, event.lon2);
@@ -84,7 +71,7 @@ export function NextConjunctions() {
                   </td>
                   <td className="py-1.5 pr-4 font-medium whitespace-nowrap">
                     <span style={{ color: PLANET_COLORS[event.planet1] }}>{event.planet1}</span>
-                    {'–'}
+                    {' – '}
                     <span style={{ color: PLANET_COLORS[event.planet2] }}>{event.planet2}</span>
                   </td>
                   <td className="py-1.5 font-bold text-muted-foreground whitespace-nowrap">
