@@ -194,6 +194,7 @@ export const copy = {
     transitsTableTitle: 'natal and transits',
     transitsTableNatal: 'natal',
     transitsTableTransits: 'transits',
+    transitsGaussianTitle: 'transit–natal influences',
   },
 
   today: {

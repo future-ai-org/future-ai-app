@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { TransitsWheel } from '@/components/chart/TransitsWheel';
 import { TransitsTable } from '@/components/chart/TransitsTable';
+import { TransitNatalGaussianPlot } from '@/components/chart/TransitNatalGaussianPlot';
 import { Button } from '@/components/ui/Button';
 import { copy } from '@/lib/copy';
 import { calculateChart } from '@/lib/astro/calculate';
@@ -178,6 +179,12 @@ export default function ChartTransitsPage() {
           <TransitsTable natal={chart.chartResult} transit={transitResult} />
         </div>
       </div>
+      <TransitNatalGaussianPlot
+          natal={chart.chartResult}
+          transitDate={transitDate}
+          onAdjustDate={adjustDate}
+          onToday={() => setTransitDate(new Date())}
+        />
     </main>
   );
 }

@@ -667,7 +667,7 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
                   x={xScale(d)}
                   y={plotHeight - MARGIN.bottom + 22}
                   textAnchor="middle"
-                  className="fill-[#7c6b9e] text-xs"
+                  className="fill-[#7c6b9e] text-[9px]"
                 >
                   {formatAxisDate(d)}
                 </text>
