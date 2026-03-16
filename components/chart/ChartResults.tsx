@@ -51,6 +51,11 @@ export function ChartResults({ result, showAscendant = true, showAngles = showAs
           <AscendantCard result={result} />
         </div>
       )}
+      {!showAngles && (
+        <p className="text-center text-sm text-muted-foreground font-bold mb-6 max-w-md mx-auto">
+          {copy.noAnglesNote}
+        </p>
+      )}
       {wheelOnly ? (
         wheelBlock
       ) : (

@@ -16,7 +16,11 @@ export default function ChartPage() {
 
   const handleSubmit = (data: BirthData, options: ChartOptions, meta: ChartFormMeta) => {
     setChartMeta(meta);
-    calculate(data, options);
+    const opts: ChartOptions =
+      meta.timeNotKnown || meta.cityNotKnown
+        ? { ...options, lotOfFortune: false, lotOfSpirit: false, lotOfEros: false, lotOfVictory: false }
+        : options;
+    calculate(data, opts);
   };
 
   const handleSaved = () => {
