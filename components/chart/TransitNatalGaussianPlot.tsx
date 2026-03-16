@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { findTransitNatalConjunctionsInRange } from '@/lib/astro/conjunctions';
+import { formatLon } from '@/lib/astro/format';
 import { copy } from '@/lib/copy';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import { Button } from '@/components/ui/Button';
@@ -86,6 +87,7 @@ export function TransitNatalGaussianPlot({ natal, transitDate, onAdjustDate, onT
   const { theme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const [plotWidth, setPlotWidth] = useState(DEFAULT_PLOT_WIDTH);
+  const [tooltip, setTooltip] = useState<{ pair: string; x: number; y: number } | null>(null);
   const clipId = useId();
 
   const startDate = useMemo(() => {
@@ -106,22 +108,38 @@ export function TransitNatalGaussianPlot({ natal, transitDate, onAdjustDate, onT
     [natal, startDate, endDate]
   );
 
-  const { pairs, seriesByPair } = useMemo(() => {
+  const { pairs, seriesByPair, pairTooltipInfo } = useMemo(() => {
     const set = new Set<string>();
     for (const e of events) {
       set.add(`${e.transitPlanet}–${e.natalPlanet}`);
     }
     const pairs = Array.from(set).sort();
     const seriesByPair = new Map<string, { date: Date; separationDeg: number }[]>();
+    const pairTooltipInfo = new Map<
+      string,
+      { transitPlanet: string; natalPlanet: string; lon: number; date: Date; separationDeg: number }
+    >();
     for (const e of events) {
       const key = `${e.transitPlanet}–${e.natalPlanet}`;
       if (!seriesByPair.has(key)) seriesByPair.set(key, []);
       seriesByPair.get(key)!.push({ date: e.date, separationDeg: e.separationDeg });
+      const existing = pairTooltipInfo.get(key);
+      const midLon = (e.lonTransit + e.lonNatal) / 2;
+      const lonNorm = midLon < 0 ? midLon + 360 : midLon >= 360 ? midLon - 360 : midLon;
+      if (!existing || e.separationDeg < existing.separationDeg) {
+        pairTooltipInfo.set(key, {
+          transitPlanet: e.transitPlanet,
+          natalPlanet: e.natalPlanet,
+          lon: lonNorm,
+          date: e.date,
+          separationDeg: e.separationDeg,
+        });
+      }
     }
     for (const arr of seriesByPair.values()) {
       arr.sort((a, b) => a.date.getTime() - b.date.getTime());
     }
-    return { pairs, seriesByPair };
+    return { pairs, seriesByPair, pairTooltipInfo };
   }, [events]);
 
   const seriesWithExactPeak = useMemo(() => {
@@ -370,7 +388,25 @@ export function TransitNatalGaussianPlot({ natal, transitDate, onAdjustDate, onT
       <div
         ref={containerRef}
         className={`w-full max-w-full overflow-x-auto rounded-2xl border p-4 ${cardClass}`}
+        onMouseLeave={() => setTooltip(null)}
       >
+        {tooltip && (() => {
+          const info = pairTooltipInfo.get(tooltip.pair);
+          if (!info) return null;
+          const { sign, deg, glyph } = formatLon(info.lon);
+          const dateStr = formatTransitDate(info.date);
+          return (
+            <div
+              className="pointer-events-none fixed z-50 rounded-lg border border-border bg-background px-3 py-2 text-sm font-bold text-foreground shadow-lg"
+              style={{ left: tooltip.x + 12, top: tooltip.y + 8 }}
+            >
+              <div>Transit <strong>{info.transitPlanet}</strong> conjunct natal <strong>{info.natalPlanet}</strong></div>
+              <div className="text-muted-foreground font-normal mt-1">
+                {deg}° {glyph} {sign} · {dateStr}
+              </div>
+            </div>
+          );
+        })()}
         {pairsWithGaussian.length === 0 ? (
           <p className="text-muted-foreground text-sm text-center py-8">
             No transit–natal conjunctions (within {ORB_DEG}°) in this range.
@@ -433,6 +469,16 @@ export function TransitNatalGaussianPlot({ natal, transitDate, onAdjustDate, onT
                       stroke={color}
                       strokeWidth={2.5}
                       strokeOpacity={0.9}
+                      onMouseEnter={(e) =>
+                        setTooltip({ pair, x: e.clientX, y: e.clientY })
+                      }
+                      onMouseMove={(e) =>
+                        setTooltip((prev) =>
+                          prev && prev.pair === pair
+                            ? { ...prev, x: e.clientX, y: e.clientY }
+                            : prev
+                        )
+                      }
                     />
                     {labelPos != null && (
                       <text
