@@ -273,4 +273,7 @@ export const copy = {
     mcLabel: 'mc (midheaven):',
     houseLabel: (n: number) => `house ${n}:`,
   },
+
+  noAnglesNote:
+    '(this chart has no ascendant - and other angles - since the birth time and/or birth place are needed to calculate these angles)',
 } as const;
