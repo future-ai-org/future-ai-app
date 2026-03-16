@@ -145,9 +145,6 @@ export default function ChartTransitsPage() {
         <h1 className="text-5xl md:text-6xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
           {copy.chart.transitsTitle}
         </h1>
-        <p className="text-5xl md:text-6xl font-serif mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
-          {chart.label}
-        </p>
         <p className="text-muted-foreground text-sm mt-2 font-bold">
           {copy.chart.transitsSubtitle(transitLabel)}
         </p>

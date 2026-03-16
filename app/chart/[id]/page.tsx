@@ -74,7 +74,7 @@ export default function ViewSavedChartPage() {
         >
           ← {copy.dashboard.title}
         </Link>
-        <h1 className="text-4xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
+        <h1 className="text-5xl md:text-6xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
           {copy.chart.titlePrefix} {chart.label}
         </h1>
       </div>
