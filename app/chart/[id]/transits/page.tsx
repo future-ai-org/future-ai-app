@@ -1,29 +1,53 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { TransitsWheel } from '@/components/chart/TransitsWheel';
 import { TransitsTable } from '@/components/chart/TransitsTable';
+import { Button } from '@/components/ui/Button';
 import { copy } from '@/lib/copy';
 import { calculateChart } from '@/lib/astro/calculate';
 import { CHART_OF_MOMENT_OPTIONS } from '@/lib/astro/types';
 import type { BirthData, ChartResult } from '@/lib/astro/types';
 
-function nowBirthData(lat: number, lon: number, cityLabel: string): BirthData {
-  const now = new Date();
+function birthDataForDate(
+  date: Date,
+  lat: number,
+  lon: number,
+  cityLabel: string,
+): BirthData {
   const pad = (n: number) => String(n).padStart(2, '0');
-  const date = `${now.getUTCFullYear()}-${pad(now.getUTCMonth() + 1)}-${pad(now.getUTCDate())}`;
-  const time = `${pad(now.getUTCHours())}:${pad(now.getUTCMinutes())}`;
+  const y = date.getUTCFullYear();
+  const m = date.getUTCMonth() + 1;
+  const d = date.getUTCDate();
+  const dateStr = `${y}-${pad(m)}-${pad(d)}`;
+  const time = `${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`;
   return {
-    date,
+    date: dateStr,
     time,
     latitude: lat,
     longitude: lon,
     utcOffset: 0,
     cityLabel,
   };
+}
+
+function formatTransitDate(d: Date): string {
+  return d.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+function isSameCalendarDay(a: Date, b: Date): boolean {
+  return (
+    a.getUTCFullYear() === b.getUTCFullYear() &&
+    a.getUTCMonth() === b.getUTCMonth() &&
+    a.getUTCDate() === b.getUTCDate()
+  );
 }
 
 export default function ChartTransitsPage() {
@@ -34,6 +58,17 @@ export default function ChartTransitsPage() {
   const [chart, setChart] = useState<{ label: string; chartResult: ChartResult } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [transitDate, setTransitDate] = useState<Date>(() => new Date());
+
+  const adjustDate = useCallback((unit: 'day' | 'month' | 'year', delta: number) => {
+    setTransitDate((prev) => {
+      const next = new Date(prev);
+      if (unit === 'day') next.setUTCDate(next.getUTCDate() + delta);
+      else if (unit === 'month') next.setUTCMonth(next.getUTCMonth() + delta);
+      else next.setUTCFullYear(next.getUTCFullYear() + delta);
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -65,9 +100,9 @@ export default function ChartTransitsPage() {
   const transitResult = useMemo(() => {
     if (!chart?.chartResult?.birthData) return null;
     const b = chart.chartResult.birthData;
-    const nowData = nowBirthData(b.latitude, b.longitude, b.cityLabel);
-    return calculateChart(nowData, CHART_OF_MOMENT_OPTIONS);
-  }, [chart?.chartResult?.birthData]);
+    const data = birthDataForDate(transitDate, b.latitude, b.longitude, b.cityLabel);
+    return calculateChart(data, CHART_OF_MOMENT_OPTIONS);
+  }, [chart?.chartResult?.birthData, transitDate]);
 
   if (status === 'loading' || status === 'unauthenticated') {
     return (
@@ -90,8 +125,9 @@ export default function ChartTransitsPage() {
 
   if (!chart || !transitResult) return null;
 
-  const now = new Date();
-  const transitLabel = now.toLocaleString(undefined, {
+  const today = new Date();
+  const isToday = isSameCalendarDay(transitDate, today);
+  const transitLabel = transitDate.toLocaleString(undefined, {
     dateStyle: 'medium',
     timeStyle: 'short',
   });
@@ -111,6 +147,24 @@ export default function ChartTransitsPage() {
         <p className="text-muted-foreground text-sm mt-2">
           {copy.chart.transitsSubtitle(transitLabel)}
         </p>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-2 md:gap-3 font-bold">
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" className="!py-1.5 !px-2.5 text-lg leading-none font-bold" onClick={() => adjustDate('year', -1)} title={copy.today.prevYear} aria-label={copy.today.prevYear}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">year</span></Button>
+            <Button variant="ghost" className="!py-1.5 !px-2.5 text-lg leading-none font-bold" onClick={() => adjustDate('month', -1)} title={copy.today.prevMonth} aria-label={copy.today.prevMonth}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">month</span></Button>
+            <Button variant="ghost" className="!py-1.5 !px-2.5 text-lg leading-none font-bold" onClick={() => adjustDate('day', -1)} title={copy.today.prevDay} aria-label={copy.today.prevDay}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">day</span></Button>
+          </div>
+          <span className="min-w-[140px] text-foreground font-bold tabular-nums">
+            {formatTransitDate(transitDate)}
+          </span>
+          <Button variant="ghost" className={`!py-1.5 !px-2.5 text-sm font-bold ${isToday ? 'text-violet-500 dark:text-violet-400' : 'text-muted-foreground'}`} onClick={() => setTransitDate(new Date())} title={copy.today.goToToday} aria-label={copy.today.goToToday}>
+            today
+          </Button>
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" className="!py-1.5 !px-2.5 text-lg leading-none font-bold" onClick={() => adjustDate('day', 1)} title={copy.today.nextDay} aria-label={copy.today.nextDay}><span className="text-sm text-muted-foreground mr-0.5">day</span><span className="text-foreground">→</span></Button>
+            <Button variant="ghost" className="!py-1.5 !px-2.5 text-lg leading-none font-bold" onClick={() => adjustDate('month', 1)} title={copy.today.nextMonth} aria-label={copy.today.nextMonth}><span className="text-sm text-muted-foreground mr-0.5">month</span><span className="text-foreground">→</span></Button>
+            <Button variant="ghost" className="!py-1.5 !px-2.5 text-lg leading-none font-bold" onClick={() => adjustDate('year', 1)} title={copy.today.nextYear} aria-label={copy.today.nextYear}><span className="text-sm text-muted-foreground mr-0.5">year</span><span className="text-foreground">→</span></Button>
+          </div>
+        </div>
       </div>
       <div className="flex flex-col lg:flex-row items-start justify-center gap-8 mt-8">
         <div className="flex flex-col items-center gap-6 shrink-0">
