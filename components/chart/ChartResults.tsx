@@ -13,6 +13,8 @@ interface Props {
   showAscendant?: boolean;
   /** When false, ASC/DSC/MC/IC are not drawn on the wheel. Defaults to same as showAscendant. */
   showAngles?: boolean;
+  /** When true, render only the ASC marker/label on the wheel (hide DSC/MC/IC). */
+  showAscOnly?: boolean;
   /** When false, the house column is hidden in the planet table. Defaults to same as showAscendant. */
   showHouses?: boolean;
   /** Canvas size in px for the chart wheel. Larger = more prominent, centered. */
@@ -23,10 +25,18 @@ interface Props {
   wheelOnly?: boolean;
 }
 
-export function ChartResults({ result, showAscendant = true, showAngles = showAscendant, showHouses = showAscendant, chartSize = DEFAULT_CHART_SIZE, onAdjustHours, wheelOnly = false }: Props) {
+export function ChartResults({ result, showAscendant = true, showAngles = showAscendant, showAscOnly = false, showHouses = showAscendant, chartSize = DEFAULT_CHART_SIZE, onAdjustHours, wheelOnly = false }: Props) {
+  const ascAngleUnknown = result.calculation?.ascendantAngleUnknown === true;
+  const effectiveShowAscOnly = ascAngleUnknown || showAscOnly;
+
   const wheelBlock = (
     <div className="flex flex-col items-center justify-center gap-4 w-full">
-      <ChartWheel result={result} size={chartSize} showAngles={showAngles} />
+      <ChartWheel
+        result={result}
+        size={chartSize}
+        showAngles={showAngles}
+        showAscOnly={effectiveShowAscOnly}
+      />
       {onAdjustHours && (
         <div className="flex flex-wrap items-center justify-center gap-3 text-sm w-full">
           <span className="text-muted-foreground font-bold mr-1">{copy.chart.birthTime}:</span>
@@ -48,10 +58,15 @@ export function ChartResults({ result, showAscendant = true, showAngles = showAs
     <div className="mt-8">
       {showAscendant && (
         <div className="flex justify-center mb-8">
-          <AscendantCard result={result} />
+          <AscendantCard result={result} showMc={!ascAngleUnknown} />
         </div>
       )}
-      {!showAngles && (
+      {ascAngleUnknown && (
+        <p className="text-center text-sm text-muted-foreground font-bold mb-6 max-w-md mx-auto">
+          {copy.ascendantAngleUnknownNote}
+        </p>
+      )}
+      {!showAngles && !ascAngleUnknown && (
         <p className="text-center text-sm text-muted-foreground font-bold mb-6 max-w-md mx-auto">
           {copy.noAnglesNote}
         </p>

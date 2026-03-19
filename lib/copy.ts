@@ -231,6 +231,8 @@ export const copy = {
     dateLabel: 'date of birth',
     timeLabel: 'time of birth',
     timeNotKnown: 'time not known (use 12pm)',
+    ascendantKnown: 'i know my ascendant',
+    ascendantSignLabel: 'ascendant (rising sign)',
     cityLabel: 'birth city',
     cityNotKnown: 'city not known',
     utcLabel: 'utc offset — adjust if DST applies',
@@ -276,11 +278,13 @@ export const copy = {
 
   ascendant: {
     title: 'ascendant (rising sign)',
-    risingSuffix: '— your rising sign',
+    risingSuffix: '— rising sign',
     mcLabel: 'mc (midheaven):',
     houseLabel: (n: number) => `house ${n}:`,
   },
 
   noAnglesNote:
     '(this chart has no ascendant - and other angles - since the birth time and/or birth place are needed to calculate these angles)',
+  ascendantAngleUnknownNote:
+    '(ascendant set from your selection at 15°; exact angle is unknown because birth time and/or city are unknown)',
 } as const;

@@ -3,7 +3,7 @@ import { signOf, degInSign, formatLon } from "./format";
 
 describe("format", () => {
   describe("signOf", () => {
-    it("returns 0 for 0° (Aries)", () => {
+    it("returns 0 for 0° (aries)", () => {
       expect(signOf(0)).toBe(0);
       expect(signOf(29.99)).toBe(0);
     });
@@ -30,22 +30,22 @@ describe("format", () => {
   describe("formatLon", () => {
     it("formats longitude with sign name and glyph", () => {
       const r = formatLon(0);
-      expect(r.sign).toBe("Aries");
+      expect(r.sign).toBe("aries");
       expect(r.glyph).toBe("♈");
       expect(r.deg).toBe(0);
       expect(r.min).toBe(0);
       expect(r.full).toMatch(/0°0' ♈/);
     });
-    it("formats 45° as 15° in Taurus", () => {
+    it("formats 45° as 15° in taurus", () => {
       const r = formatLon(45);
-      expect(r.sign).toBe("Taurus");
+      expect(r.sign).toBe("taurus");
       expect(r.glyph).toBe("♉");
       expect(r.deg).toBe(15);
       expect(r.full).toMatch(/15°0' ♉/);
     });
     it("includes minutes when fractional", () => {
-      const r = formatLon(12.5); // 12°30' Aries
-      expect(r.sign).toBe("Aries");
+      const r = formatLon(12.5); // 12°30' aries
+      expect(r.sign).toBe("aries");
       expect(r.deg).toBe(12);
       expect(r.min).toBe(30);
     });

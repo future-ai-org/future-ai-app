@@ -114,15 +114,15 @@ function mod360(x) { return ((x % 360) + 360) % 360; }
 function toRad(d) { return d * RAD; }
 function toDeg(r) { return r * DEG; }
 
-const SIGNS = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo',
-               'Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+const SIGNS = ['aries','taurus','gemini','cancer','leo','virgo',
+               'libra','scorpio','sagittarius','capricorn','aquarius','pisces'];
 const SIGN_GLYPHS = ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
 const PLANET_GLYPHS = { Sun:'☉', Moon:'☽', Mercury:'☿', Venus:'♀', Mars:'♂',
                         Jupiter:'♃', Saturn:'♄', Uranus:'♅', Neptune:'♆', Pluto:'⚸' };
 const SIGN_COLORS = {
-  'Aries':'#ef4444','Taurus':'#22c55e','Gemini':'#facc15','Cancer':'#60a5fa',
-  'Leo':'#f97316','Virgo':'#a3e635','Libra':'#e879f9','Scorpio':'#7c3aed',
-  'Sagittarius':'#f59e0b','Capricorn':'#6b7280','Aquarius':'#38bdf8','Pisces':'#c084fc'
+  'aries':'#ef4444','taurus':'#22c55e','gemini':'#facc15','cancer':'#60a5fa',
+  'leo':'#f97316','virgo':'#a3e635','libra':'#e879f9','scorpio':'#7c3aed',
+  'sagittarius':'#f59e0b','capricorn':'#6b7280','aquarius':'#38bdf8','pisces':'#c084fc'
 };
 const ELEMENT_COLORS = ['#ef4444','#22c55e','#facc15','#60a5fa','#f97316','#a3e635',
                          '#e879f9','#7c3aed','#f59e0b','#6b7280','#38bdf8','#c084fc'];
@@ -538,7 +538,7 @@ function renderResults(d) {
 
   // Ascendant display
   document.getElementById('ascSign').textContent = `${ascInfo.glyph} ${ascInfo.sign}`;
-  document.getElementById('ascDeg').textContent  = `${ascInfo.deg}° ${ascInfo.min}' — your rising sign`;
+document.getElementById('ascDeg').textContent  = `${ascInfo.deg}° ${ascInfo.min}' — rising sign`;
 
   // House info
   const mcInfo = formatLon(MC);

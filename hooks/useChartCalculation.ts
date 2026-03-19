@@ -12,15 +12,22 @@ type ChartState =
 export function useChartCalculation() {
   const [state, setState] = useState<ChartState>({ status: 'idle' });
 
-  const calculate = useCallback((data: BirthData, options?: ChartOptions) => {
-    setState({ status: 'calculating' });
-    try {
-      const result = calculateChart(data, options ?? {});
-      setState({ status: 'success', result });
-    } catch (e) {
-      setState({ status: 'error', message: e instanceof Error ? e.message : 'Calculation failed' });
-    }
-  }, []);
+  const calculate = useCallback(
+    (
+      data: BirthData,
+      options?: ChartOptions,
+      overrides?: Parameters<typeof calculateChart>[2],
+    ) => {
+      setState({ status: 'calculating' });
+      try {
+        const result = calculateChart(data, options ?? {}, overrides);
+        setState({ status: 'success', result });
+      } catch (e) {
+        setState({ status: 'error', message: e instanceof Error ? e.message : 'Calculation failed' });
+      }
+    },
+    [],
+  );
 
   const reset = useCallback(() => setState({ status: 'idle' }), []);
 
