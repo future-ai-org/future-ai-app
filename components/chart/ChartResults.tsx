@@ -30,7 +30,7 @@ export function ChartResults({ result, showAscendant = true, showAngles = showAs
   const effectiveShowAscOnly = ascAngleUnknown || showAscOnly;
 
   const wheelBlock = (
-    <div className="flex flex-col items-center justify-center gap-4 w-full">
+    <div className="flex flex-col items-center justify-center gap-4 w-full min-w-0">
       <ChartWheel
         result={result}
         size={chartSize}
@@ -38,16 +38,16 @@ export function ChartResults({ result, showAscendant = true, showAngles = showAs
         showAscOnly={effectiveShowAscOnly}
       />
       {onAdjustHours && (
-        <div className="flex flex-wrap items-center justify-center gap-3 text-sm w-full">
-          <span className="text-muted-foreground font-bold mr-1">{copy.chart.birthTime}:</span>
-          <span className="font-bold tabular-nums mr-2">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-sm w-full">
+          <span className="text-muted-foreground font-bold">{copy.chart.birthTime}:</span>
+          <span className="font-bold tabular-nums">
             {result.birthData.date} {result.birthData.time}
           </span>
-          <div className="flex gap-2">
-            <Button type="button" variant="secondary" className="px-2.5 py-1.5 text-sm" onClick={() => onAdjustHours(-1 / 4)}>{copy.chart.back15m}</Button>
-            <Button type="button" variant="secondary" className="px-2.5 py-1.5 text-sm" onClick={() => onAdjustHours(1 / 4)}>{copy.chart.forward15m}</Button>
-            <Button type="button" variant="secondary" className="px-2.5 py-1.5 text-sm" onClick={() => onAdjustHours(-1)}>{copy.chart.back1h}</Button>
-            <Button type="button" variant="secondary" className="px-2.5 py-1.5 text-sm" onClick={() => onAdjustHours(1)}>{copy.chart.forward1h}</Button>
+          <div className="flex flex-wrap justify-center gap-2">
+            <Button type="button" variant="secondary" className="px-2.5 py-1.5 text-xs sm:text-sm" onClick={() => onAdjustHours(-1 / 4)}>{copy.chart.back15m}</Button>
+            <Button type="button" variant="secondary" className="px-2.5 py-1.5 text-xs sm:text-sm" onClick={() => onAdjustHours(1 / 4)}>{copy.chart.forward15m}</Button>
+            <Button type="button" variant="secondary" className="px-2.5 py-1.5 text-xs sm:text-sm" onClick={() => onAdjustHours(-1)}>{copy.chart.back1h}</Button>
+            <Button type="button" variant="secondary" className="px-2.5 py-1.5 text-xs sm:text-sm" onClick={() => onAdjustHours(1)}>{copy.chart.forward1h}</Button>
           </div>
         </div>
       )}
@@ -74,7 +74,7 @@ export function ChartResults({ result, showAscendant = true, showAngles = showAs
       {wheelOnly ? (
         wheelBlock
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start min-w-0">
           {wheelBlock}
           <div className="min-w-0">
             <PlanetTable result={result} showHouses={showHouses} />

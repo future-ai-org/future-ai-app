@@ -13,7 +13,7 @@ export function Header() {
 
   const navLinkClass = (path: string) =>
     cn(
-      'rounded-lg px-3 py-2 text-base font-bold transition-colors hover:bg-border/60 hover:text-foreground',
+      'rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base font-bold whitespace-nowrap transition-colors hover:bg-border/60 hover:text-foreground',
       pathname === path
         ? 'bg-border/50 text-violet-800 dark:text-violet-300'
         : 'text-muted-foreground',
@@ -21,7 +21,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/95 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
+      <div className="mx-auto flex min-h-14 max-w-6xl items-center justify-between gap-2 px-3 sm:px-6">
         <Link
           href="/#chart-of-the-moment"
           className="flex items-center gap-2 text-foreground no-underline transition-opacity hover:opacity-90"
@@ -33,10 +33,10 @@ export function Header() {
             }
           }}
         >
-          <span className="inline-block text-2xl text-violet-500 dark:text-violet-400 scale-x-[-1]" aria-hidden>☽</span>
-          <span className="text-lg font-semibold tracking-tight text-foreground">{copy.site.title}</span>
+          <span className="inline-block text-xl sm:text-2xl text-violet-500 dark:text-violet-400 scale-x-[-1]" aria-hidden>☽</span>
+          <span className="hidden sm:inline text-base sm:text-lg font-semibold tracking-tight text-foreground">{copy.site.title}</span>
         </Link>
-        <nav aria-label={copy.nav.ariaLabel} className="flex items-center gap-1">
+        <nav aria-label={copy.nav.ariaLabel} className="flex max-w-[70vw] items-center gap-1 overflow-x-auto">
           <Link href="/chart" className={navLinkClass('/chart')}>
             {copy.nav.chart}
           </Link>
