@@ -36,7 +36,7 @@ export function ChartWheel({ result, size = DEFAULT_SIZE, showAngles = true, sho
 
   return (
     <div
-      className="inline-block transition-transform duration-200 ease-out origin-center hover:scale-110"
+      className="inline-block max-w-full transition-transform duration-200 ease-out origin-center md:hover:scale-110"
       style={{ maxWidth: size }}
     >
       <canvas

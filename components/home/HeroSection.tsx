@@ -4,20 +4,20 @@ import { copy } from '@/lib/copy';
 
 export function HeroSection() {
   return (
-    <section className="flex flex-col items-center justify-center text-center px-4 pt-16 pb-12 md:pt-20 md:pb-16">
-      <div className="text-6xl mb-6 opacity-80">{copy.home.heroIcon}</div>
-      <h1 className="text-5xl md:text-7xl font-serif mb-4 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
+    <section className="flex flex-col items-center justify-center text-center px-4 pt-12 pb-10 md:pt-20 md:pb-16">
+      <div className="text-5xl md:text-6xl mb-5 md:mb-6 opacity-80">{copy.home.heroIcon}</div>
+      <h1 className="text-4xl sm:text-5xl md:text-7xl font-serif mb-4 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
         {copy.home.title}
       </h1>
-      <p className="text-muted-foreground text-lg md:text-xl max-w-xl mb-8 leading-relaxed">
+      <p className="text-muted-foreground text-base sm:text-lg md:text-xl max-w-xl mb-8 leading-relaxed">
         {copy.home.subtitle}
       </p>
       <Link href="/chart">
-        <Button variant="primary" className="text-xl px-10 py-5">
+        <Button variant="primary" className="text-lg sm:text-xl px-7 sm:px-10 py-4 sm:py-5">
           {copy.home.cta}
         </Button>
       </Link>
-      <div className="mt-10 grid grid-cols-2 gap-8 max-w-2xl text-muted-foreground text-base">
+      <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-8 max-w-2xl text-muted-foreground text-sm sm:text-base">
         {copy.home.features.map(({ icon, label }) => (
           <div key={label} className="flex flex-col items-center gap-3 min-h-[4.5rem]">
             <div className="flex h-8 items-center justify-center shrink-0">
