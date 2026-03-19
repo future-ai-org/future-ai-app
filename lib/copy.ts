@@ -286,5 +286,5 @@ export const copy = {
   noAnglesNote:
     '(this chart has no ascendant - and other angles - since the birth time and/or birth place are needed to calculate these angles)',
   ascendantAngleUnknownNote:
-    '(ascendant set from your selection at 15°; exact angle is unknown because birth time and/or city are unknown)',
+    '(ascendant set at 15° since birth time and/or city are unknown)',
 } as const;
