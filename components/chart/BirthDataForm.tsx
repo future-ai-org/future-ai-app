@@ -112,7 +112,7 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
               type="date"
               value={date}
               onChange={e => setDate(e.target.value)}
-              min="1900-01-01"
+              min="-2000-01-01"
               max="2100-12-31"
               className="bg-background border border-border rounded-lg px-3 py-2.5 text-foreground text-sm outline-none focus:border-violet-500 transition-colors"
             />

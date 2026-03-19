@@ -2,7 +2,7 @@
  * Year range for chart generation. Prevents extreme or invalid dates.
  * Ephemeris accuracy is reasonable within this range.
  */
-export const MIN_CHART_YEAR = 1900;
+export const MIN_CHART_YEAR = -2000;
 export const MAX_CHART_YEAR = 2100;
 
 /**
@@ -13,14 +13,21 @@ export function isValidChartYear(year: number): boolean {
 }
 
 /**
- * Validates a birth date string (YYYY-MM-DD). Returns the parsed year if valid.
+ * Validates a birth date string with an optional signed year (YYYY-MM-DD or -YYYY-MM-DD).
+ * Returns the parsed year if valid.
  * Use this before calculating a chart to avoid weird years.
  */
 export function validateBirthDate(dateStr: string): { valid: true; year: number } | { valid: false } {
   if (!dateStr || typeof dateStr !== 'string') return { valid: false };
-  const parts = dateStr.trim().split('-').map(Number);
-  if (parts.length !== 3) return { valid: false };
-  const [yr, mo, dy] = parts;
+
+  // Supports signed years (e.g. "-2000-01-31") without breaking on the leading "-".
+  const match = dateStr.trim().match(/^([+-]?\d+)-(\d{2})-(\d{2})$/);
+  if (!match) return { valid: false };
+
+  const yr = Number(match[1]);
+  const mo = Number(match[2]);
+  const dy = Number(match[3]);
+
   if (!Number.isInteger(yr) || !Number.isInteger(mo) || !Number.isInteger(dy)) return { valid: false };
   if (mo < 1 || mo > 12 || dy < 1 || dy > 31) return { valid: false };
   if (!isValidChartYear(yr)) return { valid: false };
