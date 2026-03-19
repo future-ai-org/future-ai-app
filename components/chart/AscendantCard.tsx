@@ -5,11 +5,12 @@ import type { ChartResult } from '@/lib/astro/types';
 
 interface Props {
   result: ChartResult;
+  showMc?: boolean;
 }
 
-export function AscendantCard({ result }: Props) {
+export function AscendantCard({ result, showMc = true }: Props) {
   const ascInfo = formatLon(result.asc);
-  const mcInfo  = formatLon(result.mc);
+  const mcInfo = formatLon(result.mc);
 
   return (
     <Card className="mb-4 min-w-[20rem] w-full max-w-lg">
@@ -26,12 +27,14 @@ export function AscendantCard({ result }: Props) {
         </div>
       </div>
 
-      <div className="text-xs text-muted-foreground leading-relaxed text-center">
-        <p>
-          <span className="text-fuchsia-400 font-medium">{copy.ascendant.mcLabel}</span>{' '}
-          {mcInfo.glyph} {mcInfo.deg}°{mcInfo.min}&apos; {mcInfo.sign}
-        </p>
-      </div>
+      {showMc && (
+        <div className="text-xs text-muted-foreground leading-relaxed text-center">
+          <p>
+            <span className="text-fuchsia-400 font-medium">{copy.ascendant.mcLabel}</span>{' '}
+            {mcInfo.glyph} {mcInfo.deg}°{mcInfo.min}&apos; {mcInfo.sign}
+          </p>
+        </div>
+      )}
     </Card>
   );
 }

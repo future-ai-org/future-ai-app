@@ -6,21 +6,40 @@ import { SaveChart } from '@/components/chart/SaveChart';
 import { useChartCalculation } from '@/hooks/useChartCalculation';
 import { copy } from '@/lib/copy';
 import type { BirthData, ChartOptions } from '@/lib/astro/types';
+import { SIGNS } from '@/lib/astro/constants';
 
-const DEFAULT_CHART_META: ChartFormMeta = { timeNotKnown: false, cityNotKnown: false };
+const DEFAULT_CHART_META: ChartFormMeta = {
+  timeNotKnown: false,
+  cityNotKnown: false,
+  ascendantKnown: false,
+  ascendantSign: 'aries',
+};
 
 export default function ChartPage() {
   const { state, calculate, reset } = useChartCalculation();
   const [formKey, setFormKey] = useState(0);
   const [chartMeta, setChartMeta] = useState<ChartFormMeta>(DEFAULT_CHART_META);
+  const hasUnknownTimeOrCity = chartMeta.timeNotKnown || chartMeta.cityNotKnown;
 
   const handleSubmit = (data: BirthData, options: ChartOptions, meta: ChartFormMeta) => {
     setChartMeta(meta);
+    const hasUnknownTimeOrCity = meta.timeNotKnown || meta.cityNotKnown;
+
+    const ascendantIndex = SIGNS.indexOf(meta.ascendantSign);
+    const ascendantOverride =
+      meta.ascendantKnown && hasUnknownTimeOrCity && ascendantIndex >= 0
+        ? ascendantIndex * 30 + 15
+        : undefined;
+
     const opts: ChartOptions =
-      meta.timeNotKnown || meta.cityNotKnown
+      hasUnknownTimeOrCity
         ? { ...options, lotOfFortune: false, lotOfSpirit: false, lotOfEros: false, lotOfVictory: false }
         : options;
-    calculate(data, opts);
+
+    calculate(data, opts, {
+      ascendant: ascendantOverride,
+      ascendantAngleUnknown: typeof ascendantOverride === 'number',
+    });
   };
 
   const handleSaved = () => {
@@ -50,7 +69,9 @@ export default function ChartPage() {
         <>
           <ChartResults
             result={state.result}
-            showAscendant={!chartMeta.timeNotKnown && !chartMeta.cityNotKnown}
+            showAscendant={!hasUnknownTimeOrCity || chartMeta.ascendantKnown}
+            showAngles={!hasUnknownTimeOrCity || chartMeta.ascendantKnown}
+            showAscOnly={hasUnknownTimeOrCity ? chartMeta.ascendantKnown : false}
           />
           <SaveChart result={state.result} onSaved={handleSaved} />
         </>

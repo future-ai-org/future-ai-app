@@ -9,7 +9,22 @@ import { calcAscendant, calcMC, wholeSignHouses, planetHouse } from './houses';
 import { computePoints } from './points';
 import { validateBirthDate } from './validate';
 
-export function calculateChart(data: BirthData, options: ChartOptions = {}): ChartResult {
+export function calculateChart(
+  data: BirthData,
+  options: ChartOptions = {},
+  overrides?: {
+    /**
+     * When provided, forces ASC to this ecliptic longitude (degrees).
+     * Useful when user selected an ascendant but birth time/city are unknown.
+     */
+    ascendant?: number;
+    /**
+     * When true, the UI should show a disclaimer that ASC is an assumed value
+     * (e.g. "selected sign at 15°").
+     */
+    ascendantAngleUnknown?: boolean;
+  },
+): ChartResult {
   const validated = validateBirthDate(data.date);
   if (!validated.valid) {
     throw new Error('Birth date year must be between 1900 and 2100');
@@ -21,7 +36,7 @@ export function calculateChart(data: BirthData, options: ChartOptions = {}): Cha
   const T = (JD - 2451545.0) / 36525;
   const eps = obliquity(JD);
   const LST = localSiderealTime(JD, data.longitude);
-  const ASC = calcAscendant(LST, data.latitude, eps);
+  const ASC = Number.isFinite(overrides?.ascendant) ? (overrides!.ascendant as number) : calcAscendant(LST, data.latitude, eps);
   const MC = calcMC(LST, eps);
   const cusps = wholeSignHouses(ASC);
 
@@ -56,5 +71,14 @@ export function calculateChart(data: BirthData, options: ChartOptions = {}): Cha
     options,
   );
 
-  return { asc: ASC, mc: MC, obliquity: eps, cusps, planets, points, birthData: data };
+  return {
+    asc: ASC,
+    mc: MC,
+    obliquity: eps,
+    cusps,
+    planets,
+    points,
+    birthData: data,
+    calculation: overrides?.ascendantAngleUnknown ? { ascendantAngleUnknown: overrides.ascendantAngleUnknown } : undefined,
+  };
 }

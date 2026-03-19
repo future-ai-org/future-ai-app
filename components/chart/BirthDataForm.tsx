@@ -4,6 +4,7 @@ import { CitySearch } from './CitySearch';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { copy } from '@/lib/copy';
+import { SIGNS } from '@/lib/astro/constants';
 import { validateBirthDate } from '@/lib/astro/validate';
 import type { BirthData, GeoResult, ChartOptions } from '@/lib/astro/types';
 
@@ -26,6 +27,8 @@ const DEFAULT_OPTIONS: ChartOptions = {
 export interface ChartFormMeta {
   timeNotKnown: boolean;
   cityNotKnown: boolean;
+  ascendantKnown: boolean;
+  ascendantSign: string;
 }
 
 interface Props {
@@ -38,6 +41,8 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
   const [time, setTime] = useState('12:00');
   const [timeNotKnown, setTimeNotKnown] = useState(false);
   const [cityNotKnown, setCityNotKnown] = useState(false);
+  const [ascendantKnown, setAscendantKnown] = useState(false);
+  const [ascendantSign, setAscendantSign] = useState<string>(SIGNS[0] ?? 'aries');
   const [geoResult, setGeoResult] = useState<GeoResult | null>(null);
   const [utcOffset, setUtcOffset] = useState('');
   const [error, setError] = useState('');
@@ -72,6 +77,7 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
 
     if (isNaN(parsedOffset)) { setError(copy.form.errors.invalidUtc); return; }
 
+    const ascendantAngleUnknown = ascendantKnown && (timeNotKnown || cityNotKnown);
     onSubmit(
       {
         date,
@@ -82,7 +88,12 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
         cityLabel,
       },
       options,
-      { timeNotKnown, cityNotKnown },
+      {
+        timeNotKnown,
+        cityNotKnown,
+        ascendantKnown: ascendantAngleUnknown,
+        ascendantSign,
+      },
     );
   }
 
@@ -121,8 +132,10 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
                 type="checkbox"
                 checked={timeNotKnown}
                 onChange={e => {
-                  setTimeNotKnown(e.target.checked);
-                  if (e.target.checked) setTime('12:00');
+                  const checked = e.target.checked;
+                  setTimeNotKnown(checked);
+                  if (checked) setTime('12:00');
+                  if (!checked && !cityNotKnown) setAscendantKnown(false);
                 }}
                 className="rounded border-border bg-background text-violet-500 focus:ring-violet-500"
               />
@@ -146,12 +159,45 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
                   } else {
                     setUtcOffset('');
                   }
+                  if (!checked && !timeNotKnown) setAscendantKnown(false);
                 }}
                 className="rounded border-border bg-background text-violet-500 focus:ring-violet-500"
               />
               <span className="text-xs text-muted-foreground">{copy.form.cityNotKnown}</span>
             </label>
           </div>
+
+          {(timeNotKnown || cityNotKnown) && (
+            <div className="flex flex-col gap-1.5 sm:col-span-2">
+              <label className="flex items-center gap-2 cursor-pointer w-fit">
+                <input
+                  type="checkbox"
+                  checked={ascendantKnown}
+                  onChange={e => setAscendantKnown(e.target.checked)}
+                  className="rounded border-border bg-background text-violet-500 focus:ring-violet-500"
+                />
+                <span className="text-xs text-muted-foreground">{copy.form.ascendantKnown}</span>
+              </label>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs text-muted-foreground tracking-wider">
+                  {copy.form.ascendantSignLabel}
+                </label>
+                <select
+                  value={ascendantSign}
+                  onChange={e => setAscendantSign(e.target.value)}
+                  disabled={!ascendantKnown}
+                  className="bg-background border border-border rounded-lg px-3 py-2.5 text-foreground text-sm outline-none focus:border-violet-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {SIGNS.map(s => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
 
           {(geoResult || cityNotKnown) && (
             <div className="flex flex-col gap-1.5">

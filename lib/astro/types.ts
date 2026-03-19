@@ -70,6 +70,17 @@ export interface ChartResult {
   /** Optional points (asteroids, nodes, lots) when enabled by ChartOptions. Omit when loading old saved charts. */
   points?: PointPosition[];
   birthData: BirthData;
+  /**
+   * Optional calculation metadata / notes to help the UI explain assumptions.
+   * Stored alongside the chart result for saved charts.
+   */
+  calculation?: {
+    /**
+     * True when user provided an ascendant sign but birth time/city are unknown,
+     * so ASC is treated as "selected sign at 15°" (not an exact astronomical ASC).
+     */
+    ascendantAngleUnknown?: boolean;
+  };
 }
 
 export interface FormattedPosition {

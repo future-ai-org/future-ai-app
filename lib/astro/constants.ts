@@ -1,6 +1,6 @@
 export const SIGNS = [
-  'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
-  'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
+  'aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo',
+  'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces',
 ];
 
 // Standard zodiac symbols (Unicode)
@@ -31,18 +31,18 @@ export const PLANET_GLYPHS: Record<string, string> = {
 };
 
 export const SIGN_COLORS: Record<string, string> = {
-  'Aries':       '#ef4444',
-  'Taurus':      '#22c55e',
-  'Gemini':      '#facc15',
-  'Cancer':      '#60a5fa',
-  'Leo':         '#f97316',
-  'Virgo':       '#a3e635',
-  'Libra':       '#e879f9',
-  'Scorpio':     '#7c3aed',
-  'Sagittarius': '#f59e0b',
-  'Capricorn':   '#6b7280',
-  'Aquarius':    '#38bdf8',
-  'Pisces':      '#c084fc',
+  'aries':       '#ef4444',
+  'taurus':      '#22c55e',
+  'gemini':      '#facc15',
+  'cancer':      '#60a5fa',
+  'leo':         '#f97316',
+  'virgo':       '#a3e635',
+  'libra':       '#e879f9',
+  'scorpio':     '#7c3aed',
+  'sagittarius': '#f59e0b',
+  'capricorn':   '#6b7280',
+  'aquarius':    '#38bdf8',
+  'pisces':      '#c084fc',
 };
 
 export const ELEMENT_COLORS = [
