@@ -244,7 +244,7 @@ export const copy = {
       noTime: 'please enter your birth time.',
       noCity: 'please search for and select a birth city.',
       invalidUtc: 'please enter a valid utc offset.',
-      invalidYear: 'please use a birth date between 1900 and 2100.',
+      invalidYear: 'please use a birth date between -2000 and 2100.',
     },
   },
 

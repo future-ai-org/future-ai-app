@@ -12,11 +12,12 @@ describe("validate", () => {
       expect(isValidChartYear(MIN_CHART_YEAR)).toBe(true);
       expect(isValidChartYear(MAX_CHART_YEAR)).toBe(true);
       expect(isValidChartYear(2000)).toBe(true);
+      expect(isValidChartYear(-1999)).toBe(true);
     });
 
     it("returns false for years below min", () => {
       expect(isValidChartYear(MIN_CHART_YEAR - 1)).toBe(false);
-      expect(isValidChartYear(1899)).toBe(false);
+      expect(isValidChartYear(-2001)).toBe(false);
     });
 
     it("returns false for years above max", () => {
@@ -36,6 +37,11 @@ describe("validate", () => {
       expect(validateBirthDate("2000-01-01")).toEqual({ valid: true, year: 2000 });
     });
 
+    it("returns valid with signed year", () => {
+      expect(validateBirthDate("-2000-01-01")).toEqual({ valid: true, year: -2000 });
+      expect(validateBirthDate("-1999-12-31")).toEqual({ valid: true, year: -1999 });
+    });
+
     it("returns invalid for empty or non-string", () => {
       expect(validateBirthDate("")).toEqual({ valid: false });
       expect(validateBirthDate(null as unknown as string)).toEqual({ valid: false });
@@ -48,7 +54,7 @@ describe("validate", () => {
     });
 
     it("returns invalid for out-of-range year", () => {
-      expect(validateBirthDate("1899-06-01")).toEqual({ valid: false });
+      expect(validateBirthDate("-2001-06-01")).toEqual({ valid: false });
       expect(validateBirthDate("2101-06-01")).toEqual({ valid: false });
     });
 

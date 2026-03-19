@@ -27,9 +27,15 @@ export function calculateChart(
 ): ChartResult {
   const validated = validateBirthDate(data.date);
   if (!validated.valid) {
-    throw new Error('Birth date year must be between 1900 and 2100');
+    throw new Error('Birth date year must be between -2000 and 2100');
   }
-  const [yr, mo, dy] = data.date.split('-').map(Number);
+  const match = data.date.trim().match(/^([+-]?\d+)-(\d{2})-(\d{2})$/);
+  // `validateBirthDate()` already checked the format and ranges.
+  if (!match) throw new Error('Birth date format is invalid');
+
+  const yr = Number(match[1]);
+  const mo = Number(match[2]);
+  const dy = Number(match[3]);
   const [hr, mn] = data.time.split(':').map(Number);
   const utHour = hr + mn / 60 - data.utcOffset;
   const JD = julianDay(yr, mo, dy, utHour);
