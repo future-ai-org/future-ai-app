@@ -164,9 +164,7 @@ export default function Home() {
 
   const influenceRange = useMemo(() => {
     const now = new Date();
-    const dayOfWeek = now.getDay();
     const start = new Date(now);
-    start.setDate(now.getDate() - dayOfWeek);
     start.setHours(0, 0, 0, 0);
     const end = new Date(start);
     end.setDate(start.getDate() + 6);

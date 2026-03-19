@@ -92,13 +92,14 @@ export function TransitNatalGaussianPlot({ natal, transitDate, onAdjustDate, onT
 
   const startDate = useMemo(() => {
     const d = new Date(transitDate);
-    d.setMonth(d.getMonth() - 2);
     d.setHours(0, 0, 0, 0);
     return d;
   }, [transitDate]);
   const endDate = useMemo(() => {
     const d = new Date(transitDate);
-    d.setMonth(d.getMonth() + 2);
+    // Keep the same overall window length as the old implementation (-2..+2 months),
+    // but start it on the current/transit day so the x-axis begins "today".
+    d.setMonth(d.getMonth() + 4);
     d.setHours(0, 0, 0, 0);
     return d;
   }, [transitDate]);
