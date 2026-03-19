@@ -544,11 +544,9 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
         variant={viewMode === 'lines' ? 'secondary' : 'ghost'}
         className="!py-2 !px-3 text-sm font-bold"
         onClick={() => {
+          // Keep the same date range so the x-axis starts at the same place
+          // across both view modes.
           setViewMode('lines');
-          const oneYearAgo = new Date(today);
-          oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-          setStartStr(toDateString(oneYearAgo));
-          setEndStr(toDateString(today));
         }}
         title={copy.influence.viewLinesHint}
         aria-pressed={viewMode === 'lines'}
