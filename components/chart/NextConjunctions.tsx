@@ -1,11 +1,12 @@
 'use client';
 
-import { useMemo } from 'react';
-import { findNextNConjunctions } from '@/lib/astro/conjunctions';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { aspectDisplayLongitude } from '@/lib/astro/aspects';
+import { findNextNAspects, type PlanetPairAspectEvent } from '@/lib/astro/conjunctions';
 import { formatLon } from '@/lib/astro/format';
-import { mod360 } from '@/lib/astro/math';
 import type { PlanetName } from '@/lib/astro/types';
 import { copy } from '@/lib/copy';
+import { cn } from '@/lib/utils';
 
 function formatEventDate(d: Date): string {
   return d.toLocaleDateString('en-US', {
@@ -16,7 +17,6 @@ function formatEventDate(d: Date): string {
   });
 }
 
-/** One color per planet so the same object is always the same color (e.g. Moon = blue, Sun = red). */
 const PLANET_COLORS: Record<PlanetName, string> = {
   Sun: '#f87171',
   Moon: '#93c5fd',
@@ -30,58 +30,234 @@ const PLANET_COLORS: Record<PlanetName, string> = {
   Pluto: '#a855f7',
 };
 
-/** Longitude at exact conjunction (average of the two planets, handles wrap). */
-function conjunctionLongitude(lon1: number, lon2: number): number {
-  let diff = lon2 - lon1;
-  if (diff > 180) diff -= 360;
-  if (diff < -180) diff += 360;
-  return mod360(lon1 + diff / 2);
+const UPCOMING_PER_ASPECT = 10;
+const UPCOMING_ORB_DEG = 3;
+const CAROUSEL_INTERVAL_MS = 8000;
+
+function ChevronLeftIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden
+    >
+      <path
+        d="M14 6l-6 6 6 6"
+        stroke="currentColor"
+        strokeWidth="2.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ChevronRightIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden
+    >
+      <path
+        d="M10 6l6 6-6 6"
+        stroke="currentColor"
+        strokeWidth="2.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function UpcomingTable({ events }: { events: PlanetPairAspectEvent[] }) {
+  return (
+    <table className="w-full text-sm border-collapse">
+      <thead>
+        <tr className="border-b border-border/60 text-left text-muted-foreground text-xs uppercase tracking-wide">
+          <th className="py-2 pr-3 font-bold">Date</th>
+          <th className="py-2 pr-3 font-bold">Objects</th>
+          <th className="py-2 font-bold">Angles</th>
+        </tr>
+      </thead>
+      <tbody>
+        {events.length === 0 ? (
+          <tr>
+            <td colSpan={3} className="py-6 text-center text-muted-foreground">
+              None in range
+            </td>
+          </tr>
+        ) : (
+          events.map((event, i) => {
+            const lon = aspectDisplayLongitude(event.lon1, event.lon2);
+            const { sign, deg } = formatLon(lon);
+            return (
+              <tr
+                key={`${event.planet1}-${event.planet2}-${event.date.getTime()}-${i}`}
+                className="border-b border-border/60 last:border-0"
+              >
+                <td className="py-1.5 pr-3 font-bold text-muted-foreground tabular-nums whitespace-nowrap">
+                  {formatEventDate(event.date)}
+                </td>
+                <td className="py-1.5 pr-3 font-medium whitespace-nowrap">
+                  <span style={{ color: PLANET_COLORS[event.planet1] }}>{event.planet1}</span>
+                  {' – '}
+                  <span style={{ color: PLANET_COLORS[event.planet2] }}>{event.planet2}</span>
+                </td>
+                <td className="py-1.5 font-bold text-muted-foreground whitespace-nowrap">
+                  {deg}° {sign}
+                </td>
+              </tr>
+            );
+          })
+        )}
+      </tbody>
+    </table>
+  );
 }
 
 export function NextConjunctions() {
-  const list = useMemo(() => {
+  const { conjunctions, oppositions } = useMemo(() => {
     const from = new Date();
     from.setUTCHours(0, 0, 0, 0);
-    return findNextNConjunctions(from, 10, 3);
+    return {
+      conjunctions: findNextNAspects('conjunction', from, UPCOMING_PER_ASPECT, UPCOMING_ORB_DEG),
+      oppositions: findNextNAspects('opposition', from, UPCOMING_PER_ASPECT, UPCOMING_ORB_DEG),
+    };
   }, []);
 
+  const [slide, setSlide] = useState(0);
+  const slides = useMemo(
+    () => [
+      {
+        id: 'conjunction' as const,
+        title: copy.nextConjunctions.conjunctionSlideTitle,
+        events: conjunctions,
+      },
+      {
+        id: 'opposition' as const,
+        title: copy.nextConjunctions.oppositionSlideTitle,
+        events: oppositions,
+      },
+    ],
+    [conjunctions, oppositions]
+  );
+
+  const goTo = useCallback((index: number) => {
+    setSlide(((index % slides.length) + slides.length) % slides.length);
+  }, [slides.length]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) return;
+    const id = window.setInterval(() => {
+      setSlide((s) => (s + 1) % slides.length);
+    }, CAROUSEL_INTERVAL_MS);
+    return () => window.clearInterval(id);
+  }, [slides.length]);
+
   return (
-    <section id="next-conjunctions" className="w-full mt-12 scroll-mt-24">
+    <section
+      id="next-conjunctions"
+      className="w-full mt-12 scroll-mt-24"
+      aria-roledescription="carousel"
+      aria-label={copy.nextConjunctions.title}
+    >
       <h2 className="text-2xl font-serif font-bold text-center text-violet-400 mb-6">
         {copy.nextConjunctions.title}
       </h2>
-      {copy.nextConjunctions.subtitle ? (
-        <p className="text-muted-foreground text-sm text-center mb-6">
-          {copy.nextConjunctions.subtitle}
-        </p>
-      ) : null}
-      <div className="mx-auto max-w-md overflow-x-auto">
-        <table className="w-full text-sm border-collapse">
-          <tbody>
-            {list.map((event, i) => {
-              const lon = conjunctionLongitude(event.lon1, event.lon2);
-              const { sign, deg } = formatLon(lon);
-              return (
-                <tr
-                  key={`${event.planet1}-${event.planet2}-${event.date.getTime()}-${i}`}
-                  className="border-b border-border/60 last:border-0"
+
+      <div className="mx-auto max-w-lg">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            type="button"
+            onClick={() => goTo(slide - 1)}
+            aria-label={copy.nextConjunctions.carouselPrevious}
+            className={cn(
+              'group flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-11 sm:w-11',
+              'border border-violet-400/35 bg-card/90 text-violet-400 shadow-[0_0_20px_-4px_rgba(139,92,246,0.35)]',
+              'transition-all motion-reduce:transition-none',
+              'hover:border-violet-400/60 hover:bg-violet-500/10 hover:text-violet-300',
+              'active:scale-95',
+              'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400'
+            )}
+          >
+            <ChevronLeftIcon className="transition-transform group-hover:-translate-x-0.5" />
+          </button>
+
+          <div className="min-w-0 flex-1 overflow-hidden rounded-xl border border-border/60 bg-card/30 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]">
+            <div
+              className={cn(
+                'flex w-[200%] transition-transform duration-500 ease-out motion-reduce:transition-none',
+                slide === 0 ? 'translate-x-0' : '-translate-x-1/2'
+              )}
+              aria-live="polite"
+            >
+              {slides.map((s, i) => (
+                <div
+                  key={s.id}
+                  className="w-1/2 shrink-0 px-4 pb-4 pt-5 sm:px-5"
+                  aria-hidden={slide !== i}
                 >
-                  <td className="py-1.5 pr-4 font-bold text-muted-foreground tabular-nums whitespace-nowrap">
-                    {formatEventDate(event.date)}
-                  </td>
-                  <td className="py-1.5 pr-4 font-medium whitespace-nowrap">
-                    <span style={{ color: PLANET_COLORS[event.planet1] }}>{event.planet1}</span>
-                    {' – '}
-                    <span style={{ color: PLANET_COLORS[event.planet2] }}>{event.planet2}</span>
-                  </td>
-                  <td className="py-1.5 font-bold text-muted-foreground whitespace-nowrap">
-                    {deg}° {sign}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                  <h3 className="text-center text-lg font-serif font-bold text-violet-400/95 mb-4">
+                    {s.title}
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <UpcomingTable events={s.events} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => goTo(slide + 1)}
+            aria-label={copy.nextConjunctions.carouselNext}
+            className={cn(
+              'group flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-11 sm:w-11',
+              'border border-violet-400/35 bg-card/90 text-violet-400 shadow-[0_0_20px_-4px_rgba(139,92,246,0.35)]',
+              'transition-all motion-reduce:transition-none',
+              'hover:border-violet-400/60 hover:bg-violet-500/10 hover:text-violet-300',
+              'active:scale-95',
+              'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400'
+            )}
+          >
+            <ChevronRightIcon className="transition-transform group-hover:translate-x-0.5" />
+          </button>
+        </div>
+
+        <div
+          className="mt-5 flex items-center justify-center gap-2.5"
+          role="group"
+          aria-label="Aspect table"
+        >
+          {slides.map((s, i) => (
+            <button
+              key={s.id}
+              type="button"
+              aria-current={slide === i ? 'true' : undefined}
+              aria-label={i === 0 ? copy.nextConjunctions.carouselGoToConjunction : copy.nextConjunctions.carouselGoToOpposition}
+              className={cn(
+                'h-2 rounded-full transition-all motion-reduce:transition-none',
+                'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400',
+                slide === i
+                  ? 'w-9 bg-gradient-to-r from-violet-400 to-fuchsia-400 shadow-[0_0_12px_rgba(167,139,250,0.45)]'
+                  : 'w-2 bg-muted-foreground/35 hover:bg-muted-foreground/55'
+              )}
+              onClick={() => goTo(i)}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );

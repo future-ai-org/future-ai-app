@@ -25,16 +25,23 @@ export const copy = {
 
   influence: {
     title: 'influences',
-    subtitle: 'planetary conjunctions this month — when two planets are within 10°.',
-    viewBands: 'conjunction bands',
-    viewLines: 'conjunction gaussians',
+    subtitle:
+      'major sky aspects in this range — conjunction (0°) and opposition (180°), each within default orbs.',
+    viewBands: 'aspect bands',
+    viewLines: 'aspect gaussians',
     viewBandsHint: 'Show influences as filled bands',
-    viewLinesHint: 'Show influences as Gaussian bells peaking on conjunction day',
+    viewLinesHint: 'Show influences as Gaussian bells peaking on exact aspect days',
+    emptyRange: 'No conjunctions or oppositions in this date range (within each aspect’s default orb).',
   },
 
   nextConjunctions: {
-    title: 'next conjunctions to watch for',
-    subtitle: '',
+    title: 'upcoming aspects',
+    conjunctionSlideTitle: 'next conjunctions',
+    oppositionSlideTitle: 'next oppositions',
+    carouselGoToConjunction: 'show conjunction table',
+    carouselGoToOpposition: 'show opposition table',
+    carouselPrevious: 'previous slide',
+    carouselNext: 'next slide',
   },
 
   auth: {

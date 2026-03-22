@@ -89,6 +89,10 @@ export function TransitNatalGaussianPlot({ natal, transitDate, onAdjustDate, onT
   const [plotWidth, setPlotWidth] = useState(DEFAULT_PLOT_WIDTH);
   const [tooltip, setTooltip] = useState<{ pair: string; x: number; y: number } | null>(null);
   const clipId = useId();
+  const yAxisArrowMarkerId = useMemo(
+    () => `yaxis-arrow-${clipId.replace(/[^a-zA-Z0-9_-]/g, '')}`,
+    [clipId]
+  );
 
   const startDate = useMemo(() => {
     const d = new Date(transitDate);
@@ -115,25 +119,25 @@ export function TransitNatalGaussianPlot({ natal, transitDate, onAdjustDate, onT
       set.add(`${e.transitPlanet}–${e.natalPlanet}`);
     }
     const pairs = Array.from(set).sort();
-    const seriesByPair = new Map<string, { date: Date; separationDeg: number }[]>();
+    const seriesByPair = new Map<string, { date: Date; orbFromExactDeg: number }[]>();
     const pairTooltipInfo = new Map<
       string,
-      { transitPlanet: string; natalPlanet: string; lon: number; date: Date; separationDeg: number }
+      { transitPlanet: string; natalPlanet: string; lon: number; date: Date; orbFromExactDeg: number }
     >();
     for (const e of events) {
       const key = `${e.transitPlanet}–${e.natalPlanet}`;
       if (!seriesByPair.has(key)) seriesByPair.set(key, []);
-      seriesByPair.get(key)!.push({ date: e.date, separationDeg: e.separationDeg });
+      seriesByPair.get(key)!.push({ date: e.date, orbFromExactDeg: e.orbFromExactDeg });
       const existing = pairTooltipInfo.get(key);
       const midLon = (e.lonTransit + e.lonNatal) / 2;
       const lonNorm = midLon < 0 ? midLon + 360 : midLon >= 360 ? midLon - 360 : midLon;
-      if (!existing || e.separationDeg < existing.separationDeg) {
+      if (!existing || e.orbFromExactDeg < existing.orbFromExactDeg) {
         pairTooltipInfo.set(key, {
           transitPlanet: e.transitPlanet,
           natalPlanet: e.natalPlanet,
           lon: lonNorm,
           date: e.date,
-          separationDeg: e.separationDeg,
+          orbFromExactDeg: e.orbFromExactDeg,
         });
       }
     }
@@ -144,16 +148,19 @@ export function TransitNatalGaussianPlot({ natal, transitDate, onAdjustDate, onT
   }, [events]);
 
   const seriesWithExactPeak = useMemo(() => {
-    const out = new Map<string, { date: Date; separationDeg: number }[]>();
+    const out = new Map<string, { date: Date; orbFromExactDeg: number }[]>();
     for (const [pair, points] of seriesByPair) {
       if (points.length === 0) {
         out.set(pair, []);
         continue;
       }
       const sorted = [...points].sort((a, b) => a.date.getTime() - b.date.getTime());
-      const minIdx = sorted.reduce((best, p, i) => (p.separationDeg < sorted[best].separationDeg ? i : best), 0);
-      const sMin = sorted[minIdx].separationDeg;
-      if (sMin <= 0) {
+      const minIdx = sorted.reduce(
+        (best, p, i) => (p.orbFromExactDeg < sorted[best].orbFromExactDeg ? i : best),
+        0
+      );
+      const orbMin = sorted[minIdx].orbFromExactDeg;
+      if (orbMin <= 0) {
         out.set(pair, sorted);
         continue;
       }
@@ -161,20 +168,20 @@ export function TransitNatalGaussianPlot({ natal, transitDate, onAdjustDate, onT
       let tExact: number | null = null;
       if (minIdx > 0) {
         const t0 = sorted[minIdx - 1].date.getTime();
-        const s0 = sorted[minIdx - 1].separationDeg;
-        if (s0 > sMin) {
-          tExact = t0 + ((0 - s0) / (sMin - s0)) * (tMin - t0);
+        const o0 = sorted[minIdx - 1].orbFromExactDeg;
+        if (o0 > orbMin) {
+          tExact = t0 + ((0 - o0) / (orbMin - o0)) * (tMin - t0);
         }
       }
       if (tExact == null && minIdx < sorted.length - 1) {
         const t1 = sorted[minIdx + 1].date.getTime();
-        const s1 = sorted[minIdx + 1].separationDeg;
-        if (s1 > sMin) {
-          tExact = tMin + ((0 - sMin) / (s1 - sMin)) * (t1 - tMin);
+        const o1 = sorted[minIdx + 1].orbFromExactDeg;
+        if (o1 > orbMin) {
+          tExact = tMin + ((0 - orbMin) / (o1 - orbMin)) * (t1 - tMin);
         }
       }
       if (tExact != null && Number.isFinite(tExact)) {
-        const withExact = [...sorted, { date: new Date(tExact), separationDeg: 0 }];
+        const withExact = [...sorted, { date: new Date(tExact), orbFromExactDeg: 0 }];
         withExact.sort((a, b) => a.date.getTime() - b.date.getTime());
         out.set(pair, withExact);
       } else {
@@ -191,10 +198,10 @@ export function TransitNatalGaussianPlot({ natal, transitDate, onAdjustDate, onT
     return pairs.filter((pair) => {
       const points = seriesWithExactPeak.get(pair);
       if (!points || points.length === 0) return false;
-      let peakDates = points.filter((p) => p.separationDeg === 0).map((p) => p.date.getTime());
+      let peakDates = points.filter((p) => p.orbFromExactDeg === 0).map((p) => p.date.getTime());
       if (peakDates.length === 0) {
-        const minSep = Math.min(...points.map((p) => p.separationDeg));
-        const minPoint = points.find((p) => p.separationDeg === minSep);
+        const minOrb = Math.min(...points.map((p) => p.orbFromExactDeg));
+        const minPoint = points.find((p) => p.orbFromExactDeg === minOrb);
         if (!minPoint) return false;
         peakDates = [minPoint.date.getTime()];
       }
@@ -244,10 +251,10 @@ export function TransitNatalGaussianPlot({ natal, transitDate, onAdjustDate, onT
     for (const pair of pairsWithGaussian) {
       const points = seriesWithExactPeak.get(pair);
       if (!points?.length) continue;
-      let peakDates = points.filter((p) => p.separationDeg === 0).map((p) => p.date.getTime());
+      let peakDates = points.filter((p) => p.orbFromExactDeg === 0).map((p) => p.date.getTime());
       if (peakDates.length === 0) {
-        const minSep = Math.min(...points.map((p) => p.separationDeg));
-        const minPoint = points.find((p) => p.separationDeg === minSep);
+        const minOrb = Math.min(...points.map((p) => p.orbFromExactDeg));
+        const minPoint = points.find((p) => p.orbFromExactDeg === minOrb);
         if (minPoint) peakDates = [minPoint.date.getTime()];
       }
       const peakT = peakDates[0];
@@ -307,10 +314,10 @@ export function TransitNatalGaussianPlot({ natal, transitDate, onAdjustDate, onT
   function getPeakDatesForPair(pair: string): number[] {
     const points = seriesWithExactPeak.get(pair);
     if (!points || points.length === 0) return [];
-    let peakDates = points.filter((p) => p.separationDeg === 0).map((p) => p.date.getTime());
+    let peakDates = points.filter((p) => p.orbFromExactDeg === 0).map((p) => p.date.getTime());
     if (peakDates.length === 0) {
-      const minSep = Math.min(...points.map((p) => p.separationDeg));
-      const minPoint = points.find((p) => p.separationDeg === minSep);
+      const minOrb = Math.min(...points.map((p) => p.orbFromExactDeg));
+      const minPoint = points.find((p) => p.orbFromExactDeg === minOrb);
       if (!minPoint) return [];
       peakDates = [minPoint.date.getTime()];
     }
@@ -418,6 +425,17 @@ export function TransitNatalGaussianPlot({ natal, transitDate, onAdjustDate, onT
               <clipPath id={clipId}>
                 <rect x={MARGIN_LEFT} y={MARGIN.top} width={innerWidth} height={innerHeight} />
               </clipPath>
+              <marker
+                id={yAxisArrowMarkerId}
+                markerWidth="6"
+                markerHeight="6"
+                refX="5"
+                refY="3"
+                orient="auto"
+                markerUnits="userSpaceOnUse"
+              >
+                <path d="M 0 0 L 6 3 L 0 6 Z" fill="#3d3560" />
+              </marker>
             </defs>
             <line
               x1={MARGIN_LEFT}
@@ -440,21 +458,22 @@ export function TransitNatalGaussianPlot({ natal, transitDate, onAdjustDate, onT
             ))}
             <line
               x1={MARGIN_LEFT}
-              y1={MARGIN.top}
+              y1={plotHeight - MARGIN.bottom}
               x2={MARGIN_LEFT}
-              y2={plotHeight - MARGIN.bottom}
+              y2={MARGIN.top}
               stroke="#3d3560"
               strokeWidth={1}
+              markerEnd={`url(#${yAxisArrowMarkerId})`}
             />
             <text
               x={MARGIN_LEFT - 8}
               y={MARGIN.top + innerHeight / 2}
               textAnchor="middle"
               dominantBaseline="middle"
-              className="fill-[#7c6b9e] text-[10px] uppercase tracking-wide"
+              className="fill-[#7c6b9e] text-[10px] tracking-wide"
               transform={`rotate(-90, ${MARGIN_LEFT - 8}, ${MARGIN.top + innerHeight / 2})`}
             >
-              Intensity
+              estimated intensity
             </text>
             <g clipPath={`url(#${clipId})`}>
               {pairsWithGaussian.map((pair, idx) => {

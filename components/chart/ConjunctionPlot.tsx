@@ -1,7 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import { findConjunctionsInRange } from '@/lib/astro/conjunctions';
+import {
+  INFLUENCE_PLOT_ASPECTS,
+  aspectDisplayLongitude,
+  aspectPairTrackKey,
+  getAspect,
+  parseAspectPairTrackKey,
+} from '@/lib/astro/aspects';
+import { findAspectsInRange, type PlanetPairAspectEvent } from '@/lib/astro/conjunctions';
 import { formatLon } from '@/lib/astro/format';
 import { Button } from '@/components/ui/Button';
 import { copy } from '@/lib/copy';
@@ -29,9 +36,12 @@ const PAIR_COLORS = [
   '#fb923c', // orange-2
 ];
 
-function pairKey(p1: string, p2: string): string {
-  return [p1, p2].sort().join('–');
-}
+type SeriesPoint = {
+  date: Date;
+  orbFromExactDeg: number;
+  /** Max orb used when this aspect was detected (for band height normalization). */
+  orbMax: number;
+};
 
 /** Intensity by distance from sun (outer planets = stronger influence). 0–1 scale. */
 const PLANET_INTENSITY: Record<string, number> = {
@@ -47,8 +57,8 @@ const PLANET_INTENSITY: Record<string, number> = {
   Pluto: 1,
 };
 
-function pairIntensity(pair: string): number {
-  const [a, b] = pair.split('–');
+function pairIntensity(planetPair: string): number {
+  const [a, b] = planetPair.split('–');
   const ia = PLANET_INTENSITY[a] ?? 0.5;
   const ib = PLANET_INTENSITY[b] ?? 0.5;
   // When Moon or Sun is involved, use least intensity (min); otherwise outer planet = stronger (max).
@@ -56,11 +66,29 @@ function pairIntensity(pair: string): number {
   return Math.max(ia, ib);
 }
 
+function pairIntensityFromTrack(track: string): number {
+  const parsed = parseAspectPairTrackKey(track);
+  return pairIntensity(parsed?.pair ?? track);
+}
+
+function trackDisplayLabel(track: string): string {
+  const parsed = parseAspectPairTrackKey(track);
+  if (!parsed) return track;
+  return `${getAspect(parsed.aspectId).label} · ${parsed.pair}`;
+}
+
+/** Bands view y-axis row labels only (short aspect names). */
+function bandYAxisTrackLabel(track: string): string {
+  const parsed = parseAspectPairTrackKey(track);
+  if (!parsed) return track;
+  const aspectShort =
+    parsed.aspectId === 'conjunction' ? 'conj.' : parsed.aspectId === 'opposition' ? 'opp.' : getAspect(parsed.aspectId).label;
+  return `${aspectShort} · ${parsed.pair}`;
+}
+
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 /** Gaussian sigma for influence bells (~4 days half-width). */
 const GAUSS_SIGMA_MS = 4 * MS_PER_DAY;
-/** Min peak value in range to consider the Gaussian "visible" (hide flat lines). */
-const GAUSS_VISIBLE_THRESHOLD = 0.2;
 
 function formatAxisDate(d: Date): string {
   return d.toLocaleDateString('en-US', {
@@ -135,13 +163,10 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
   const [startStr, setStartStr] = useState(() => toDateString(initialStart));
   const [endStr, setEndStr] = useState(() => toDateString(initialEnd));
   const [tooltip, setTooltip] = useState<{
-    pair: string;
+    track: string;
     exactDate: Date | undefined;
-    minSep: number;
-    lon1?: number;
-    lon2?: number;
-    planet1?: string;
-    planet2?: string;
+    minOrb: number;
+    peakLon?: number;
     x: number;
     y: number;
   } | null>(null);
@@ -200,22 +225,29 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
 
   const events = useMemo(() => {
     if (startDate >= endDate) return [];
-    return findConjunctionsInRange(startDate, endDate, 10);
+    const all: PlanetPairAspectEvent[] = [];
+    for (const aspectId of INFLUENCE_PLOT_ASPECTS) {
+      all.push(...findAspectsInRange(aspectId, startDate, endDate));
+    }
+    return all;
   }, [startDate, endDate]);
-
-  const ORB_DEG = 10;
 
   const { pairs, seriesByPair } = useMemo(() => {
     const set = new Set<string>();
     for (const e of events) {
-      set.add(pairKey(e.planet1, e.planet2));
+      set.add(aspectPairTrackKey(e.aspectId, e.planet1, e.planet2));
     }
     const pairs = Array.from(set).sort();
-    const seriesByPair = new Map<string, { date: Date; separationDeg: number }[]>();
+    const seriesByPair = new Map<string, SeriesPoint[]>();
     for (const e of events) {
-      const key = pairKey(e.planet1, e.planet2);
+      const key = aspectPairTrackKey(e.aspectId, e.planet1, e.planet2);
+      const orbMax = getAspect(e.aspectId).defaultOrbDeg;
       if (!seriesByPair.has(key)) seriesByPair.set(key, []);
-      seriesByPair.get(key)!.push({ date: e.date, separationDeg: e.separationDeg });
+      seriesByPair.get(key)!.push({
+        date: e.date,
+        orbFromExactDeg: e.orbFromExactDeg,
+        orbMax,
+      });
     }
     for (const arr of seriesByPair.values()) {
       arr.sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -223,87 +255,57 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
     return { pairs, seriesByPair };
   }, [events]);
 
-  // Add an interpolated point at exact conjunction (sep=0) so the curve peaks at the right time
+  /** Interpolate a synthetic point at orbFromExact = 0 so curves peak at exact aspect time. */
   const seriesWithExactPeak = useMemo(() => {
-    const out = new Map<string, { date: Date; separationDeg: number }[]>();
-    for (const [pair, points] of seriesByPair) {
+    const out = new Map<string, SeriesPoint[]>();
+    for (const [track, points] of seriesByPair) {
       if (points.length === 0) {
-        out.set(pair, []);
+        out.set(track, []);
         continue;
       }
       const sorted = [...points].sort((a, b) => a.date.getTime() - b.date.getTime());
-      const minIdx = sorted.reduce((best, p, i) => (p.separationDeg < sorted[best].separationDeg ? i : best), 0);
-      const sMin = sorted[minIdx].separationDeg;
-      if (sMin <= 0) {
-        out.set(pair, sorted);
+      const minIdx = sorted.reduce(
+        (best, p, i) => (p.orbFromExactDeg < sorted[best].orbFromExactDeg ? i : best),
+        0
+      );
+      const orbMin = sorted[minIdx].orbFromExactDeg;
+      if (orbMin <= 0) {
+        out.set(track, sorted);
         continue;
       }
       const tMin = sorted[minIdx].date.getTime();
+      const orbMax = sorted[minIdx].orbMax;
       let tExact: number | null = null;
       if (minIdx > 0) {
         const t0 = sorted[minIdx - 1].date.getTime();
-        const s0 = sorted[minIdx - 1].separationDeg;
-        if (s0 > sMin) {
-          tExact = t0 + ((0 - s0) / (sMin - s0)) * (tMin - t0);
+        const o0 = sorted[minIdx - 1].orbFromExactDeg;
+        if (o0 > orbMin) {
+          tExact = t0 + ((0 - o0) / (orbMin - o0)) * (tMin - t0);
         }
       }
       if (tExact == null && minIdx < sorted.length - 1) {
         const t1 = sorted[minIdx + 1].date.getTime();
-        const s1 = sorted[minIdx + 1].separationDeg;
-        if (s1 > sMin) {
-          tExact = tMin + ((0 - sMin) / (s1 - sMin)) * (t1 - tMin);
+        const o1 = sorted[minIdx + 1].orbFromExactDeg;
+        if (o1 > orbMin) {
+          tExact = tMin + ((0 - orbMin) / (o1 - orbMin)) * (t1 - tMin);
         }
       }
       if (tExact != null && Number.isFinite(tExact)) {
-        const withExact = [...sorted, { date: new Date(tExact), separationDeg: 0 }];
+        const withExact = [...sorted, { date: new Date(tExact), orbFromExactDeg: 0, orbMax }];
         withExact.sort((a, b) => a.date.getTime() - b.date.getTime());
-        out.set(pair, withExact);
+        out.set(track, withExact);
       } else {
-        out.set(pair, sorted);
+        out.set(track, sorted);
       }
     }
     return out;
   }, [seriesByPair]);
 
-  /** In Gaussian view, only show pairs that have a visible Gaussian (peak in range, not a flat line). */
-  const pairsWithGaussian = useMemo(() => {
-    const sigmaSq = GAUSS_SIGMA_MS * GAUSS_SIGMA_MS;
-    const t0 = startDate.getTime();
-    const t1 = endDate.getTime();
-    return pairs.filter((pair) => {
-      const points = seriesWithExactPeak.get(pair);
-      if (!points || points.length === 0) return false;
-      let peakDates = points.filter((p) => p.separationDeg === 0).map((p) => p.date.getTime());
-      if (peakDates.length === 0) {
-        const minSep = Math.min(...points.map((p) => p.separationDeg));
-        const minPoint = points.find((p) => p.separationDeg === minSep);
-        if (!minPoint) return false;
-        peakDates = [minPoint.date.getTime()];
-      }
-      let maxVal = 0;
-      for (let i = 0; i <= 80; i++) {
-        const t = t0 + (i / 80) * (t1 - t0);
-        let value = 0;
-        for (const tPeak of peakDates) {
-          const diff = t - tPeak;
-          value += Math.exp(-(diff * diff) / (2 * sigmaSq));
-        }
-        if (value > maxVal) maxVal = value;
-      }
-      return maxVal >= GAUSS_VISIBLE_THRESHOLD;
-    });
-  }, [pairs, seriesWithExactPeak, startDate, endDate]);
-
-  const displayPairs = useMemo(
-    () => (viewMode === 'lines' ? pairsWithGaussian : pairs),
-    [viewMode, pairs, pairsWithGaussian]
-  );
-
   const displayPairIndex = useMemo(() => {
     const m = new Map<string, number>();
-    displayPairs.forEach((p, i) => m.set(p, i));
+    pairs.forEach((p, i) => m.set(p, i));
     return m;
-  }, [displayPairs]);
+  }, [pairs]);
 
   const marginLeft = viewMode === 'bands' ? MARGIN_LEFT_BANDS : MARGIN_LEFT_LINES;
 
@@ -328,7 +330,7 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
   /** Bands view: row center y for a pair. */
   const yCenter = (pair: string) => {
     const i = displayPairIndex.get(pair) ?? 0;
-    const n = Math.max(1, displayPairs.length);
+    const n = Math.max(1, pairs.length);
     const step = innerHeight / n;
     return MARGIN.top + step * (i + 0.5);
   };
@@ -363,23 +365,24 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
       b.y - b.h / 2 - PAD < a.y + a.h / 2 + PAD;
 
     const initial: Box[] = [];
-    for (const pair of pairsWithGaussian) {
-      const points = seriesWithExactPeak.get(pair);
+    for (const track of pairs) {
+      const points = seriesWithExactPeak.get(track);
       if (!points?.length) continue;
-      let peakDates = points.filter((p) => p.separationDeg === 0).map((p) => p.date.getTime());
+      let peakDates = points.filter((p) => p.orbFromExactDeg === 0).map((p) => p.date.getTime());
       if (peakDates.length === 0) {
-        const minSep = Math.min(...points.map((p) => p.separationDeg));
-        const minPoint = points.find((p) => p.separationDeg === minSep);
+        const minOrb = Math.min(...points.map((p) => p.orbFromExactDeg));
+        const minPoint = points.find((p) => p.orbFromExactDeg === minOrb);
         if (minPoint) peakDates = [minPoint.date.getTime()];
       }
       const peakT = peakDates[0];
       if (peakT == null) continue;
-      const baseInt = pairIntensity(pair);
+      const baseInt = pairIntensityFromTrack(track);
       const x = xScaleL(peakT);
       const y = yScaleL(baseInt) - 8;
-      const w = Math.max(60, pair.length * 6.5);
+      const label = trackDisplayLabel(track);
+      const w = Math.max(60, label.length * 6.5);
       const h = LABEL_H;
-      initial.push({ pair, x, y, w, h });
+      initial.push({ pair: track, x, y, w, h });
     }
     initial.sort((a, b) => a.x - b.x);
 
@@ -407,7 +410,15 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
     const map = new Map<string, { x: number; y: number }>();
     for (const b of placed) map.set(b.pair, { x: b.x, y: b.y });
     return map;
-  }, [pairsWithGaussian, startDate, endDate, plotWidth, seriesWithExactPeak]);
+  }, [pairs, startDate, endDate, plotWidth, seriesWithExactPeak]);
+
+  function eventForTrackAndDate(track: string, day: Date): PlanetPairAspectEvent | undefined {
+    return events.find(
+      (ev) =>
+        aspectPairTrackKey(ev.aspectId, ev.planet1, ev.planet2) === track &&
+        ev.date.getTime() === day.getTime()
+    );
+  }
 
   const { xTicks } = useMemo(() => {
     const out: Date[] = [];
@@ -439,6 +450,10 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
   }, [startDate, endDate, innerWidth, marginLeft]);
 
   const clipId = useId();
+  const yAxisArrowMarkerId = useMemo(
+    () => `yaxis-arrow-${clipId.replace(/[^a-zA-Z0-9_-]/g, '')}`,
+    [clipId]
+  );
 
   function smoothPathThrough(points: { x: number; y: number }[]): string {
     if (points.length === 0) return '';
@@ -459,19 +474,20 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
     return path;
   }
 
-  /** Bands view: one row per pair, smooth round bulge (tapered to baseline at both ends). */
-  function buildCurvePath(pair: string): string {
-    const points = seriesWithExactPeak.get(pair);
+  /** Bands view: one row per aspect track, smooth round bulge (tapered to baseline at both ends). */
+  function buildCurvePath(track: string): string {
+    const points = seriesWithExactPeak.get(track);
     if (!points || points.length === 0) return '';
-    const n = Math.max(1, displayPairs.length);
+    const n = Math.max(1, pairs.length);
     const rowHeight = innerHeight / n;
     const maxHalfHeight = rowHeight * 0.4;
-    const yC = yCenter(pair);
+    const yC = yCenter(track);
     const top: { x: number; y: number }[] = [];
     const bottom: { x: number; y: number }[] = [];
     for (const p of points) {
       const x = xScale(p.date);
-      const intensity = 1 - p.separationDeg / ORB_DEG;
+      const orbMax = p.orbMax > 0 ? p.orbMax : 1;
+      const intensity = Math.max(0, Math.min(1, 1 - p.orbFromExactDeg / orbMax));
       const halfH = maxHalfHeight * intensity;
       top.push({ x, y: yC - halfH });
       bottom.push({ x, y: yC + halfH });
@@ -489,28 +505,28 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
     return `${topPath} L ${lastBottom.x},${lastBottom.y} ${bottomPath} Z`;
   }
 
-  /** Gaussian view: one bell curve per conjunction; y=0 at row baseline, peak at conjunction day; path closed for fill. */
+  /** Gaussian view: one bell per aspect peak; y=0 at baseline, peak at exact aspect day; path closed for fill. */
   const GAUSS_SAMPLES = 120; // samples across the range for smooth curves
 
-  function getPeakDatesForPair(pair: string): number[] {
-    const points = seriesWithExactPeak.get(pair);
+  function getPeakDatesForTrack(track: string): number[] {
+    const points = seriesWithExactPeak.get(track);
     if (!points || points.length === 0) return [];
-    const peakDates = points.filter((p) => p.separationDeg === 0).map((p) => p.date.getTime());
+    let peakDates = points.filter((p) => p.orbFromExactDeg === 0).map((p) => p.date.getTime());
     if (peakDates.length === 0) {
-      const minSep = Math.min(...points.map((p) => p.separationDeg));
-      const minPoint = points.find((p) => p.separationDeg === minSep);
+      const minOrb = Math.min(...points.map((p) => p.orbFromExactDeg));
+      const minPoint = points.find((p) => p.orbFromExactDeg === minOrb);
       if (!minPoint) return [];
-      peakDates.push(minPoint.date.getTime());
+      peakDates = [minPoint.date.getTime()];
     }
     return peakDates;
   }
 
-  function buildGaussianPath(pair: string): string {
-    const peakDates = getPeakDatesForPair(pair);
+  function buildGaussianPath(track: string): string {
+    const peakDates = getPeakDatesForTrack(track);
     if (peakDates.length === 0) return '';
     const t0 = startDate.getTime();
     const t1 = endDate.getTime();
-    const baseIntensity = pairIntensity(pair);
+    const baseIntensity = pairIntensityFromTrack(track);
     const yBottom = yScale(0);
     const linePoints: { x: number; y: number }[] = [];
     for (let i = 0; i <= GAUSS_SAMPLES; i++) {
@@ -621,9 +637,9 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
                 className="pointer-events-none fixed z-50 rounded-lg border border-border bg-background px-3 py-2 text-sm font-bold text-foreground shadow-lg"
                 style={{ left: tooltip.x + 12, top: tooltip.y + 8 }}
               >
-                {tooltip.pair}
-                {tooltip.lon1 != null ? (
-                  <> — peak at {formatLon(tooltip.lon1).deg}° {formatLon(tooltip.lon1).sign}</>
+                {trackDisplayLabel(tooltip.track)}
+                {tooltip.peakLon != null ? (
+                  <> — peak at {formatLon(tooltip.peakLon).deg}° {formatLon(tooltip.peakLon).sign}</>
                 ) : (
                   <> — peak at sign and angle</>
                 )}
@@ -637,6 +653,17 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
                 <clipPath id={clipId}>
                   <rect x={marginLeft} y={MARGIN.top} width={innerWidth} height={plotHeight - MARGIN.top - MARGIN.bottom} />
                 </clipPath>
+                <marker
+                  id={yAxisArrowMarkerId}
+                  markerWidth="6"
+                  markerHeight="6"
+                  refX="5"
+                  refY="3"
+                  orient="auto"
+                  markerUnits="userSpaceOnUse"
+                >
+                  <path d="M 0 0 L 6 3 L 0 6 Z" fill="#3d3560" />
+                </marker>
               </defs>
               {/* Grid and axis only in inner area; dashed verticals only in bands view */}
               {viewMode === 'bands' &&
@@ -672,62 +699,61 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
               ))}
               {/* Bands: pair labels on left. Gaussian: intensity y-axis. */}
               {viewMode === 'bands' &&
-                displayPairs.map((pair) => (
+                pairs.map((track) => (
                   <text
-                    key={pair}
+                    key={track}
                     x={marginLeft - 12}
-                    y={yCenter(pair)}
+                    y={yCenter(track)}
                     textAnchor="end"
                     dominantBaseline="middle"
                     className="fill-[#c4b5e0] text-xs font-bold"
                   >
-                    {pair}
+                    {bandYAxisTrackLabel(track)}
                   </text>
                 ))}
               {viewMode === 'lines' && (
                 <>
                   <line
                     x1={marginLeft}
-                    y1={MARGIN.top}
+                    y1={plotHeight - MARGIN.bottom}
                     x2={marginLeft}
-                    y2={plotHeight - MARGIN.bottom}
+                    y2={MARGIN.top}
                     stroke="#3d3560"
                     strokeWidth={1}
+                    markerEnd={`url(#${yAxisArrowMarkerId})`}
                   />
                   <text
                     x={marginLeft - 8}
                     y={MARGIN.top + (plotHeight - MARGIN.top - MARGIN.bottom) / 2}
                     textAnchor="middle"
                     dominantBaseline="middle"
-                    className="fill-[#7c6b9e] text-[10px] uppercase tracking-wide"
+                    className="fill-[#7c6b9e] text-[10px] tracking-wide"
                     transform={`rotate(-90, ${marginLeft - 8}, ${MARGIN.top + (plotHeight - MARGIN.top - MARGIN.bottom) / 2})`}
                   >
-                    Intensity
+                    estimated intensity
                   </text>
                 </>
               )}
               <g clipPath={`url(#${clipId})`}>
-              {displayPairs.map((pair, idx) => {
-                const pathD = viewMode === 'bands' ? buildCurvePath(pair) : buildGaussianPath(pair);
+              {pairs.map((track, idx) => {
+                const pathD = viewMode === 'bands' ? buildCurvePath(track) : buildGaussianPath(track);
                 const color = PAIR_COLORS[idx % PAIR_COLORS.length];
-                const points = seriesByPair.get(pair) ?? [];
-                const pointsWithPeak = seriesWithExactPeak.get(pair) ?? [];
-                const minSep = points.length ? Math.min(...points.map((p) => p.separationDeg)) : 0;
+                const points = seriesByPair.get(track) ?? [];
+                const pointsWithPeak = seriesWithExactPeak.get(track) ?? [];
+                const minOrb = points.length ? Math.min(...points.map((p) => p.orbFromExactDeg)) : 0;
                 const exactDate =
-                  pointsWithPeak.find((p) => p.separationDeg === 0)?.date ??
-                  points.find((p) => p.separationDeg === minSep)?.date;
-                const dayOfMin = points.find((p) => p.separationDeg === minSep)?.date;
-                const eventAtExact = dayOfMin
-                  ? events.find(
-                      (ev) =>
-                        pairKey(ev.planet1, ev.planet2) === pair &&
-                        ev.date.getTime() === dayOfMin.getTime()
-                    )
-                  : undefined;
+                  pointsWithPeak.find((p) => p.orbFromExactDeg === 0)?.date ??
+                  points.find((p) => p.orbFromExactDeg === minOrb)?.date;
+                const dayOfMin = points.find((p) => p.orbFromExactDeg === minOrb)?.date;
+                const eventAtExact = dayOfMin ? eventForTrackAndDate(track, dayOfMin) : undefined;
+                const peakLon =
+                  eventAtExact != null
+                    ? aspectDisplayLongitude(eventAtExact.lon1, eventAtExact.lon2)
+                    : undefined;
                 const isLines = viewMode === 'lines';
-                const labelPos = isLines ? gaussianLabelPositions.get(pair) : null;
+                const labelPos = isLines ? gaussianLabelPositions.get(track) : null;
                 return (
-                  <g key={pair}>
+                  <g key={track}>
                     <path
                       d={pathD}
                       fill={color}
@@ -737,20 +763,17 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
                       strokeOpacity={0.9}
                       onMouseEnter={(e) => {
                         setTooltip({
-                          pair,
+                          track,
                           exactDate,
-                          minSep,
-                          lon1: eventAtExact?.lon1,
-                          lon2: eventAtExact?.lon2,
-                          planet1: eventAtExact?.planet1,
-                          planet2: eventAtExact?.planet2,
+                          minOrb,
+                          peakLon,
                           x: e.clientX,
                           y: e.clientY,
                         });
                       }}
                       onMouseMove={(e) => {
                         setTooltip((prev) =>
-                          prev && prev.pair === pair
+                          prev && prev.track === track
                             ? { ...prev, x: e.clientX, y: e.clientY }
                             : prev
                         );
@@ -765,7 +788,7 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
                         className="fill-[#c4b5e0] text-[11px] font-bold pointer-events-none"
                         style={{ paintOrder: 'stroke', stroke: '#1a1625', strokeWidth: 2 }}
                       >
-                        {pair}
+                        {trackDisplayLabel(track)}
                       </text>
                     )}
                   </g>
@@ -776,7 +799,7 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
           </div>
           {events.length === 0 && (
             <p className="mt-4 text-muted-foreground text-sm text-center w-full">
-              No conjunctions (within 10°) in this date range.
+              {copy.influence.emptyRange}
             </p>
           )}
         </>
