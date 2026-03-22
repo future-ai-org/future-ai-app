@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { aspectDisplayLongitude } from '@/lib/astro/aspects';
+import { aspectDisplayLongitude, INFLUENCE_PLOT_SELECTABLE_ASPECTS, type InfluencePlotAspectKind } from '@/lib/astro/aspects';
 import { findNextNAspects, type PlanetPairAspectEvent } from '@/lib/astro/conjunctions';
 import { formatLon } from '@/lib/astro/format';
 import type { PlanetName } from '@/lib/astro/types';
@@ -125,30 +125,25 @@ function UpcomingTable({ events }: { events: PlanetPairAspectEvent[] }) {
 }
 
 export function NextConjunctions() {
-  const { conjunctions, oppositions } = useMemo(() => {
+  const eventsByAspect = useMemo(() => {
     const from = new Date();
     from.setUTCHours(0, 0, 0, 0);
-    return {
-      conjunctions: findNextNAspects('conjunction', from, UPCOMING_PER_ASPECT, UPCOMING_ORB_DEG),
-      oppositions: findNextNAspects('opposition', from, UPCOMING_PER_ASPECT, UPCOMING_ORB_DEG),
-    };
+    const out = {} as Record<InfluencePlotAspectKind, PlanetPairAspectEvent[]>;
+    for (const aspectId of INFLUENCE_PLOT_SELECTABLE_ASPECTS) {
+      out[aspectId] = findNextNAspects(aspectId, from, UPCOMING_PER_ASPECT, UPCOMING_ORB_DEG);
+    }
+    return out;
   }, []);
 
   const [slide, setSlide] = useState(0);
   const slides = useMemo(
-    () => [
-      {
-        id: 'conjunction' as const,
-        title: copy.nextConjunctions.conjunctionSlideTitle,
-        events: conjunctions,
-      },
-      {
-        id: 'opposition' as const,
-        title: copy.nextConjunctions.oppositionSlideTitle,
-        events: oppositions,
-      },
-    ],
-    [conjunctions, oppositions]
+    () =>
+      INFLUENCE_PLOT_SELECTABLE_ASPECTS.map((id) => ({
+        id,
+        title: copy.nextConjunctions.slideByAspect[id].title,
+        events: eventsByAspect[id],
+      })),
+    [eventsByAspect]
   );
 
   const goTo = useCallback((index: number) => {
@@ -196,16 +191,18 @@ export function NextConjunctions() {
 
           <div className="min-w-0 flex-1 overflow-hidden rounded-xl border border-border/60 bg-card/30 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]">
             <div
-              className={cn(
-                'flex w-[200%] transition-transform duration-500 ease-out motion-reduce:transition-none',
-                slide === 0 ? 'translate-x-0' : '-translate-x-1/2'
-              )}
+              className="flex transition-transform duration-500 ease-out motion-reduce:transition-none"
+              style={{
+                width: `${slides.length * 100}%`,
+                transform: `translateX(-${(slide * 100) / slides.length}%)`,
+              }}
               aria-live="polite"
             >
               {slides.map((s, i) => (
                 <div
                   key={s.id}
-                  className="w-1/2 shrink-0 px-4 pb-4 pt-5 sm:px-5"
+                  className="shrink-0 px-4 pb-4 pt-5 sm:px-5"
+                  style={{ width: `${100 / slides.length}%` }}
                   aria-hidden={slide !== i}
                 >
                   <h3 className="text-center text-lg font-serif font-bold text-violet-400/95 mb-4">
@@ -246,7 +243,7 @@ export function NextConjunctions() {
               key={s.id}
               type="button"
               aria-current={slide === i ? 'true' : undefined}
-              aria-label={i === 0 ? copy.nextConjunctions.carouselGoToConjunction : copy.nextConjunctions.carouselGoToOpposition}
+              aria-label={copy.nextConjunctions.slideByAspect[s.id].goToAria}
               className={cn(
                 'h-2 rounded-full transition-all motion-reduce:transition-none',
                 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400',

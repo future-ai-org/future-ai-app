@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import {
-  INFLUENCE_PLOT_ASPECTS,
+  INFLUENCE_PLOT_SELECTABLE_ASPECTS,
   aspectDisplayLongitude,
   aspectPairTrackKey,
   getAspect,
   parseAspectPairTrackKey,
+  type InfluencePlotAspectKind,
 } from '@/lib/astro/aspects';
 import { findAspectsInRange, type PlanetPairAspectEvent } from '@/lib/astro/conjunctions';
 import { formatLon } from '@/lib/astro/format';
@@ -77,12 +78,19 @@ function trackDisplayLabel(track: string): string {
   return `${getAspect(parsed.aspectId).label} · ${parsed.pair}`;
 }
 
+const BAND_ASPECT_SHORT: Partial<Record<InfluencePlotAspectKind, string>> = {
+  conjunction: 'conj.',
+  opposition: 'opp.',
+  trine: 'tri.',
+  square: 'sq.',
+  sextile: 'sext.',
+};
+
 /** Bands view y-axis row labels only (short aspect names). */
 function bandYAxisTrackLabel(track: string): string {
   const parsed = parseAspectPairTrackKey(track);
   if (!parsed) return track;
-  const aspectShort =
-    parsed.aspectId === 'conjunction' ? 'conj.' : parsed.aspectId === 'opposition' ? 'opp.' : getAspect(parsed.aspectId).label;
+  const aspectShort = BAND_ASPECT_SHORT[parsed.aspectId as InfluencePlotAspectKind] ?? getAspect(parsed.aspectId).label;
   return `${aspectShort} · ${parsed.pair}`;
 }
 
@@ -171,6 +179,13 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
     y: number;
   } | null>(null);
   const [viewMode, setViewMode] = useState<'bands' | 'lines'>('bands');
+  const [plotAspectsEnabled, setPlotAspectsEnabled] = useState<Record<InfluencePlotAspectKind, boolean>>(() => {
+    const init = {} as Record<InfluencePlotAspectKind, boolean>;
+    for (const id of INFLUENCE_PLOT_SELECTABLE_ASPECTS) {
+      init[id] = id === 'conjunction' || id === 'opposition';
+    }
+    return init;
+  });
 
   const startDate = useMemo(() => {
     if (hideDateControls && defaultStart) return new Date(defaultStart.getFullYear(), defaultStart.getMonth(), defaultStart.getDate());
@@ -223,14 +238,20 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
     };
   }, [startDate, endDate]);
 
+  const enabledPlotAspects = useMemo(
+    () => INFLUENCE_PLOT_SELECTABLE_ASPECTS.filter((id) => plotAspectsEnabled[id]),
+    [plotAspectsEnabled],
+  );
+
   const events = useMemo(() => {
     if (startDate >= endDate) return [];
+    if (enabledPlotAspects.length === 0) return [];
     const all: PlanetPairAspectEvent[] = [];
-    for (const aspectId of INFLUENCE_PLOT_ASPECTS) {
+    for (const aspectId of enabledPlotAspects) {
       all.push(...findAspectsInRange(aspectId, startDate, endDate));
     }
     return all;
-  }, [startDate, endDate]);
+  }, [startDate, endDate, enabledPlotAspects]);
 
   const { pairs, seriesByPair } = useMemo(() => {
     const set = new Set<string>();
@@ -545,6 +566,38 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
     return `M ${first.x},${yBottom} L ${first.x},${first.y} ${curvePath.replace(/^M [\d.,]+ /, '')} L ${last.x},${yBottom} Z`;
   }
 
+  const aspectCheckboxes = (
+    <div
+      className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-4 px-1"
+      role="group"
+      aria-label={copy.influence.aspectsGroupAria}
+    >
+      <span className="text-sm font-bold text-violet-400 uppercase tracking-wide w-full text-center sm:w-auto sm:text-left">
+        {copy.influence.aspectsLabel}
+      </span>
+      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+        {INFLUENCE_PLOT_SELECTABLE_ASPECTS.map((kind) => (
+          <label
+            key={kind}
+            className="flex cursor-pointer items-center gap-2 text-sm font-bold text-foreground"
+          >
+            <input
+              type="checkbox"
+              className="size-4 rounded border-border accent-violet-500"
+              checked={plotAspectsEnabled[kind]}
+              onChange={(e) =>
+                setPlotAspectsEnabled((prev) => ({ ...prev, [kind]: e.target.checked }))
+              }
+            />
+            <span>
+              {getAspect(kind).label} ({getAspect(kind).angleDeg}°)
+            </span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+
   const viewToggle = (
     <div className="flex items-center gap-2 justify-center flex-wrap mb-4">
       <Button
@@ -580,6 +633,7 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
         </h3>
       )}
       {viewToggle}
+      {aspectCheckboxes}
       {!hideDateControls && (
       <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 mb-4">
         <div className="flex flex-wrap items-center justify-center gap-1.5 md:gap-2 font-bold">
@@ -625,6 +679,8 @@ export function ConjunctionPlot({ defaultStart, defaultEnd, hideDateControls = f
 
       {startDate >= endDate ? (
         <p className="text-muted-foreground text-sm text-center w-full">Choose an end date after the start date.</p>
+      ) : enabledPlotAspects.length === 0 ? (
+        <p className="text-muted-foreground text-sm text-center w-full">{copy.influence.noAspectsSelected}</p>
       ) : (
         <>
           <div

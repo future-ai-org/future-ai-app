@@ -26,20 +26,27 @@ export const copy = {
   influence: {
     title: 'influences',
     subtitle:
-      'major sky aspects in this range — conjunction (0°) and opposition (180°), each within default orbs.',
+      'major sky aspects in this range — conjunction, opposition, trine, square, and sextile, each within default orbs. Toggle which aspects appear on the plot.',
+    aspectsLabel: 'Plot aspects',
+    aspectsGroupAria: 'Aspect types to include on the influence plot',
+    noAspectsSelected: 'Select at least one aspect type to show on the plot.',
     viewBands: 'aspect bands',
     viewLines: 'aspect gaussians',
     viewBandsHint: 'Show influences as filled bands',
     viewLinesHint: 'Show influences as Gaussian bells peaking on exact aspect days',
-    emptyRange: 'No conjunctions or oppositions in this date range (within each aspect’s default orb).',
+    emptyRange: 'No matching aspects in this date range (within each selected aspect’s default orb).',
   },
 
   nextConjunctions: {
     title: 'upcoming aspects',
-    conjunctionSlideTitle: 'next conjunctions',
-    oppositionSlideTitle: 'next oppositions',
-    carouselGoToConjunction: 'show conjunction table',
-    carouselGoToOpposition: 'show opposition table',
+    /** Per-aspect carousel slide title and dot button aria label */
+    slideByAspect: {
+      conjunction: { title: 'next conjunctions', goToAria: 'show conjunction table' },
+      opposition: { title: 'next oppositions', goToAria: 'show opposition table' },
+      trine: { title: 'next trines', goToAria: 'show trine table' },
+      square: { title: 'next squares', goToAria: 'show square table' },
+      sextile: { title: 'next sextiles', goToAria: 'show sextile table' },
+    },
     carouselPrevious: 'previous slide',
     carouselNext: 'next slide',
   },
