@@ -3,7 +3,7 @@ import { mod360 } from './math';
 /**
  * Major and minor aspects used for transit / sky-event detection and influence plots.
  * Add new kinds here, set angle + default orb, then include the id in feature-specific lists
- * (e.g. `INFLUENCE_PLOT_ASPECTS` for the home-page chart).
+ * (e.g. `INFLUENCE_PLOT_SELECTABLE_ASPECTS` for the influence plot checkboxes).
  */
 export const ASPECT_KINDS = [
   'conjunction',
@@ -34,8 +34,19 @@ export const ASPECTS: Record<AspectKind, AspectDefinition> = {
   quintile: { id: 'quintile', angleDeg: 72, defaultOrbDeg: 3, label: 'quintile' },
 };
 
-/** Aspects drawn on the home-page influence plot (bands / Gaussians). */
-export const INFLUENCE_PLOT_ASPECTS: AspectKind[] = ['conjunction', 'opposition'];
+/**
+ * Ptolemaic aspects the user can toggle on the influence plot (bands / Gaussians).
+ * Quintile and other kinds stay off this list until the plot UX supports them.
+ */
+export const INFLUENCE_PLOT_SELECTABLE_ASPECTS = [
+  'conjunction',
+  'opposition',
+  'trine',
+  'square',
+  'sextile',
+] as const satisfies readonly AspectKind[];
+
+export type InfluencePlotAspectKind = (typeof INFLUENCE_PLOT_SELECTABLE_ASPECTS)[number];
 
 export function getAspect(kind: AspectKind): AspectDefinition {
   return ASPECTS[kind];
