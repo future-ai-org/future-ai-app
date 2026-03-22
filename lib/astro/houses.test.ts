@@ -1,0 +1,54 @@
+import { describe, it, expect } from "vitest";
+import {
+  calcAscendant,
+  calcMC,
+  wholeSignHouses,
+  planetHouse,
+} from "./houses";
+import { mod360 } from "./math";
+
+describe("houses", () => {
+  describe("wholeSignHouses", () => {
+    it("places 12 cusps 30° apart starting at ASC", () => {
+      expect(wholeSignHouses(0)).toEqual([
+        0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330,
+      ]);
+    });
+    it("wraps ASC past 360", () => {
+      const c = wholeSignHouses(350);
+      expect(c[0]).toBe(350);
+      expect(c[1]).toBe(20);
+      expect(c[11]).toBe(mod360(350 + 11 * 30));
+    });
+  });
+
+  describe("planetHouse", () => {
+    it("returns house 1 for longitude in first 30° segment", () => {
+      const cusps = wholeSignHouses(0);
+      expect(planetHouse(10, cusps)).toBe(1);
+      expect(planetHouse(29.9, cusps)).toBe(1);
+    });
+    it("returns correct house for later segments", () => {
+      const cusps = wholeSignHouses(0);
+      expect(planetHouse(30, cusps)).toBe(2);
+      expect(planetHouse(89, cusps)).toBe(3);
+    });
+    it("handles ASC not at 0 (whole sign from rotated cusps)", () => {
+      const cusps = wholeSignHouses(15);
+      expect(planetHouse(20, cusps)).toBe(1);
+      expect(planetHouse(14, cusps)).toBe(12);
+    });
+  });
+
+  describe("calcAscendant / calcMC", () => {
+    it("returns degrees in 0..360", () => {
+      const eps = 23.44;
+      const asc = calcAscendant(45, 40, eps);
+      const mc = calcMC(45, eps);
+      expect(asc).toBeGreaterThanOrEqual(0);
+      expect(asc).toBeLessThan(360);
+      expect(mc).toBeGreaterThanOrEqual(0);
+      expect(mc).toBeLessThan(360);
+    });
+  });
+});
