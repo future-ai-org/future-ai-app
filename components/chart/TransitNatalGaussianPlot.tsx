@@ -11,7 +11,6 @@ import type { ChartResult } from '@/lib/astro/types';
 const DEFAULT_PLOT_WIDTH = 800;
 const MARGIN = { top: 24, right: 24, bottom: 56 };
 const MARGIN_LEFT = 52;
-const MIN_PLOT_HEIGHT = 280;
 const INNER_HEIGHT_GAUSS = 320;
 const MIN_PX_PER_X_LABEL = 72;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -286,7 +285,7 @@ export function TransitNatalGaussianPlot({ natal, transitDate, onAdjustDate, onT
     const map = new Map<string, { x: number; y: number }>();
     for (const b of placed) map.set(b.pair, { x: b.x, y: b.y });
     return map;
-  }, [pairsWithGaussian, startDate, endDate, plotWidth, seriesWithExactPeak, innerWidth]);
+  }, [pairsWithGaussian, startDate, endDate, seriesWithExactPeak, innerWidth, innerHeight, plotHeight]);
 
   const xTicks = useMemo(() => {
     const out: Date[] = [];
