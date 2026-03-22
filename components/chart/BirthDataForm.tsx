@@ -8,9 +8,9 @@ import { SIGNS } from '@/lib/astro/constants';
 import { validateBirthDate } from '@/lib/astro/validate';
 import type { BirthData, GeoResult, ChartOptions } from '@/lib/astro/types';
 
-const AUSTIN_LAT = 30.2672;
-const AUSTIN_LON = -97.7431;
-const AUSTIN_UTC_OFFSET = -6; // Central Time (standard)
+const SAN_FRANCISCO_LAT = 37.7749;
+const SAN_FRANCISCO_LON = -122.4194;
+const SAN_FRANCISCO_UTC_OFFSET = -8; // Pacific Time (standard)
 
 const DEFAULT_OPTIONS: ChartOptions = {
   lilith: true,
@@ -68,12 +68,12 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
     if (!timeNotKnown && !time) { setError(copy.form.errors.noTime); return; }
     if (!cityNotKnown && !geoResult) { setError(copy.form.errors.noCity); return; }
 
-    const latitude = cityNotKnown ? AUSTIN_LAT : geoResult!.latitude;
-    const longitude = cityNotKnown ? AUSTIN_LON : geoResult!.longitude;
+    const latitude = cityNotKnown ? SAN_FRANCISCO_LAT : geoResult!.latitude;
+    const longitude = cityNotKnown ? SAN_FRANCISCO_LON : geoResult!.longitude;
     const parsedOffset = cityNotKnown
-      ? (Number(utcOffset) || AUSTIN_UTC_OFFSET)
+      ? (Number(utcOffset) || SAN_FRANCISCO_UTC_OFFSET)
       : parseFloat(utcOffset);
-    const cityLabel = cityNotKnown ? 'Austin' : geoResult!.displayName;
+    const cityLabel = cityNotKnown ? 'San Francisco' : geoResult!.displayName;
 
     if (isNaN(parsedOffset)) { setError(copy.form.errors.invalidUtc); return; }
 
@@ -155,7 +155,7 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
                   setCityNotKnown(checked);
                   if (checked) {
                     setGeoResult(null);
-                    setUtcOffset(String(AUSTIN_UTC_OFFSET));
+                    setUtcOffset(String(SAN_FRANCISCO_UTC_OFFSET));
                   } else {
                     setUtcOffset('');
                   }

@@ -218,7 +218,7 @@ export const copy = {
 
   today: {
     title: "chart of the moment",
-    subtitle: 'current transits in Austin',
+    subtitle: 'current transits in San Francisco',
     goToToday: 'go back to today',
     prevDay: '1 day before',
     nextDay: '1 day after',
@@ -276,7 +276,7 @@ export const copy = {
   },
 
   citySearch: {
-    placeholder: 'e.g. austin',
+    placeholder: 'e.g. san francisco',
     search: 'search',
     searching: 'searching…',
     foundPrefix: '✓',

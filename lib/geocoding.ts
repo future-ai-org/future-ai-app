@@ -19,7 +19,7 @@ async function fetchTimeZone(lat: number, lon: number): Promise<{ timeZone?: str
 export async function geocodeCity(city: string): Promise<GeoResult> {
   const query = city.trim();
   if (!query) throw new Error('City not found');
-  // Normalize case so "AUSTIN" or "Austin" still find the city
+  // Normalize case so "SAN FRANCISCO" or "San Francisco" still find the city
   const normalized = query.toLowerCase();
   const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(normalized)}&format=json&limit=1`;
   const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });

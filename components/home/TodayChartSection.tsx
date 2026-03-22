@@ -8,12 +8,12 @@ import { calculateChart } from '@/lib/astro/calculate';
 import { type BirthData, type ChartResult, CHART_OF_MOMENT_OPTIONS } from '@/lib/astro/types';
 import { copy } from '@/lib/copy';
 
-const AUSTIN_TZ = 'America/Chicago';
-const AUSTIN_LAT = 30.2672;
-const AUSTIN_LON = -97.7431;
+const SAN_FRANCISCO_TZ = 'America/Los_Angeles';
+const SAN_FRANCISCO_LAT = 37.7749;
+const SAN_FRANCISCO_LON = -122.4194;
 
 function buildBirthDataForMoment(moment: Date): BirthData {
-  const parts = moment.toLocaleString('sv-SE', { timeZone: AUSTIN_TZ }).split(' ');
+  const parts = moment.toLocaleString('sv-SE', { timeZone: SAN_FRANCISCO_TZ }).split(' ');
   const [datePart, timePart] = parts;
   const [y, m, d] = datePart.split('-');
   const [hh, mm] = timePart.split(':');
@@ -23,15 +23,15 @@ function buildBirthDataForMoment(moment: Date): BirthData {
   return {
     date: `${y}-${m}-${d}`,
     time: `${hh.padStart(2, '0')}:${mm.padStart(2, '0')}`,
-    latitude: AUSTIN_LAT,
-    longitude: AUSTIN_LON,
+    latitude: SAN_FRANCISCO_LAT,
+    longitude: SAN_FRANCISCO_LON,
     utcOffset,
-    cityLabel: 'Austin',
+    cityLabel: 'San Francisco',
   };
 }
 
 function formatChartDate(d: Date): string {
-  return d.toLocaleDateString('en-US', { timeZone: AUSTIN_TZ, month: 'short', day: 'numeric', year: 'numeric' });
+  return d.toLocaleDateString('en-US', { timeZone: SAN_FRANCISCO_TZ, month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 export function TodayChartSection() {

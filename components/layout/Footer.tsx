@@ -28,7 +28,7 @@ export function Footer() {
     <footer className="mt-auto w-full border-t border-border/80 bg-footer">
       <div className="mx-auto max-w-6xl px-4 pt-6 pb-10 sm:px-6 sm:pb-12">
         <AstroFooterStrip transits={transits} />
-        <p className="mt-6 pt-2 text-center text-base font-bold text-muted-foreground" title={moon.phaseName}>
+        <p className="mt-6 pt-2 pb-6 text-center text-base font-bold text-muted-foreground sm:pb-8" title={moon.phaseName}>
           {moon.emoji} {moonLine}
         </p>
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left font-bold">

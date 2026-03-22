@@ -11,10 +11,10 @@ import { calculateChart } from '@/lib/astro/calculate';
 import { type BirthData, type ChartResult, type GeoResult, CHART_OF_MOMENT_OPTIONS } from '@/lib/astro/types';
 import { copy } from '@/lib/copy';
 
-const AUSTIN_TZ = 'America/Chicago';
-const AUSTIN_LAT = 30.2672;
-const AUSTIN_LON = -97.7431;
-const AUSTIN_UTC_OFFSET = -6; // Central Time (standard)
+const SAN_FRANCISCO_TZ = 'America/Los_Angeles';
+const SAN_FRANCISCO_LAT = 37.7749;
+const SAN_FRANCISCO_LON = -122.4194;
+const SAN_FRANCISCO_UTC_OFFSET = -8; // Pacific Time (standard)
 const DENVER_TZ = 'America/Denver';
 
 type TodayLocation = {
@@ -26,16 +26,16 @@ type TodayLocation = {
 };
 
 const DEFAULT_LOCATION: TodayLocation = {
-  latitude: AUSTIN_LAT,
-  longitude: AUSTIN_LON,
-  utcOffset: AUSTIN_UTC_OFFSET,
-  cityLabel: 'Austin',
-  timeZone: AUSTIN_TZ,
+  latitude: SAN_FRANCISCO_LAT,
+  longitude: SAN_FRANCISCO_LON,
+  utcOffset: SAN_FRANCISCO_UTC_OFFSET,
+  cityLabel: 'San Francisco',
+  timeZone: SAN_FRANCISCO_TZ,
 };
 
 function inferTimeZone(cityLabel: string): string | undefined {
   const name = cityLabel.toLowerCase();
-  if (name.includes('austin')) return AUSTIN_TZ;
+  if (name.includes('san francisco')) return SAN_FRANCISCO_TZ;
   if (name.includes('denver')) return DENVER_TZ;
   // Fallback: simple US guess by longitude if needed later
   return undefined;
@@ -135,7 +135,7 @@ export default function Home() {
     }
   }, [status, session?.user?.id]);
 
-  // When not authenticated, always fall back to the Austin default.
+  // When not authenticated, always fall back to the San Francisco default.
   useEffect(() => {
     if (status !== 'authenticated') {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -173,7 +173,7 @@ export default function Home() {
   }, []);
 
   const todaySubtitle =
-    location.cityLabel === 'Austin'
+    location.cityLabel === 'San Francisco'
       ? copy.today.subtitle
       : `current transits in ${location.cityLabel}`;
 
