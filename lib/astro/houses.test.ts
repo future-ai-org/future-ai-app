@@ -9,16 +9,22 @@ import { mod360 } from "./math";
 
 describe("houses", () => {
   describe("wholeSignHouses", () => {
-    it("places 12 cusps 30° apart starting at ASC", () => {
+    it("places 12 cusps at sign boundaries starting with ASC’s sign", () => {
       expect(wholeSignHouses(0)).toEqual([
         0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330,
       ]);
     });
-    it("wraps ASC past 360", () => {
+    it("uses 0° of the sign containing ASC, not the exact ASC longitude", () => {
+      expect(wholeSignHouses(15)).toEqual(wholeSignHouses(0));
+      expect(wholeSignHouses(125)).toEqual([
+        120, 150, 180, 210, 240, 270, 300, 330, 0, 30, 60, 90,
+      ]);
+    });
+    it("wraps for ASC in late Pisces", () => {
       const c = wholeSignHouses(350);
-      expect(c[0]).toBe(350);
-      expect(c[1]).toBe(20);
-      expect(c[11]).toBe(mod360(350 + 11 * 30));
+      expect(c[0]).toBe(330);
+      expect(c[1]).toBe(0);
+      expect(c[11]).toBe(mod360(330 + 11 * 30));
     });
   });
 
@@ -33,10 +39,12 @@ describe("houses", () => {
       expect(planetHouse(30, cusps)).toBe(2);
       expect(planetHouse(89, cusps)).toBe(3);
     });
-    it("handles ASC not at 0 (whole sign from rotated cusps)", () => {
+    it("assigns by zodiac sign of ASC (15° Aries → all Aries in house 1)", () => {
       const cusps = wholeSignHouses(15);
       expect(planetHouse(20, cusps)).toBe(1);
-      expect(planetHouse(14, cusps)).toBe(12);
+      expect(planetHouse(14, cusps)).toBe(1);
+      expect(planetHouse(29.9, cusps)).toBe(1);
+      expect(planetHouse(30, cusps)).toBe(2);
     });
   });
 

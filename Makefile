@@ -1,7 +1,7 @@
 .PHONY: dev server generate build start lint typecheck test coverage check install clean
 
 # Development server (alias: dev)
-dev server:
+dev:
 	npm run dev
 
 # Prisma
@@ -13,7 +13,7 @@ build:
 	npx prisma generate
 	npm run build
 
-start:
+server:
 	npm run start
 
 # Lint and typecheck
