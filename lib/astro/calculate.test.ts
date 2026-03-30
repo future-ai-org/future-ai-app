@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { calculateChart } from "./calculate";
+import { calculateChart, reapplyWholeSignHouses } from "./calculate";
 import type { BirthData } from "./types";
 
 const denver: BirthData = {
@@ -57,5 +57,23 @@ describe("calculateChart", () => {
     const names = r.points?.map((p) => p.name) ?? [];
     expect(names).toContain("North Node");
     expect(names).toContain("Lot of Fortune");
+  });
+});
+
+describe("reapplyWholeSignHouses", () => {
+  it("realigns cusps and houses when JSON still has old equal-from-ASC cusps", () => {
+    const fresh = calculateChart(denver);
+    const asc = fresh.asc;
+    const staleCusps = Array.from({ length: 12 }, (_, i) => (asc + i * 30) % 360);
+    const corrupted = {
+      ...fresh,
+      cusps: staleCusps,
+      planets: fresh.planets.map((p) => ({ ...p, house: 1 })),
+    };
+    const fixed = reapplyWholeSignHouses(corrupted);
+    expect(fixed.cusps).toEqual(fresh.cusps);
+    expect(fixed.planets.map((p) => p.house)).toEqual(
+      fresh.planets.map((p) => p.house),
+    );
   });
 });

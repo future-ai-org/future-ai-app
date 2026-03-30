@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { MiniChartWheel } from '@/components/chart/MiniChartWheel';
 import { copy } from '@/lib/copy';
+import { reapplyWholeSignHouses } from '@/lib/astro/calculate';
 import type { ChartResult } from '@/lib/astro/types';
 
 interface SavedChartItem {
@@ -97,7 +98,7 @@ export default function DashboardPage() {
             return (
               <div className="mb-8 flex flex-col items-center">
                 <MiniChartWheel
-                  result={result}
+                  result={reapplyWholeSignHouses(result)}
                   href={`/chart/${primary.id}`}
                   label={primary.label}
                 />

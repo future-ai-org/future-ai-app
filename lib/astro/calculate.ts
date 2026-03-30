@@ -88,3 +88,18 @@ export function calculateChart(
     calculation: overrides?.ascendantAngleUnknown ? { ascendantAngleUnknown: overrides.ascendantAngleUnknown } : undefined,
   };
 }
+
+/**
+ * Recompute whole-sign cusps and every body’s house from stored asc + longitudes.
+ * Saved charts may still carry pre-fix cusps/houses (old “equal from ASC” cusps); this aligns them with current whole-sign rules.
+ */
+export function reapplyWholeSignHouses(result: ChartResult): ChartResult {
+  const cusps = wholeSignHouses(result.asc);
+  const houseFor = (lon: number) => planetHouse(lon, cusps);
+  return {
+    ...result,
+    cusps,
+    planets: result.planets.map(p => ({ ...p, house: houseFor(p.longitude) })),
+    points: result.points?.map(p => ({ ...p, house: houseFor(p.longitude) })),
+  };
+}

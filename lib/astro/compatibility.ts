@@ -1,4 +1,5 @@
 import type { ChartResult, PlanetPosition } from './types';
+import { reapplyWholeSignHouses } from './calculate';
 import { planetHouse } from './houses';
 import { formatLon } from './format';
 import { PLANET_GLYPHS } from './constants';
@@ -43,11 +44,13 @@ export function computeCompatibility(
   labelA: string,
   labelB: string,
 ): CompatibilityResult {
+  const a = reapplyWholeSignHouses(chartA);
+  const b = reapplyWholeSignHouses(chartB);
   return {
     chartALabel: labelA,
     chartBLabel: labelB,
-    aInB: planetInHouseList(chartA.planets, chartB.cusps),
-    bInA: planetInHouseList(chartB.planets, chartA.cusps),
+    aInB: planetInHouseList(a.planets, b.cusps),
+    bInA: planetInHouseList(b.planets, a.cusps),
   };
 }
 

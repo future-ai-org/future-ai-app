@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/Card';
 import { copy } from '@/lib/copy';
 import { PLANET_GLYPHS } from '@/lib/astro/constants';
+import { reapplyWholeSignHouses } from '@/lib/astro/calculate';
 import { formatLon } from '@/lib/astro/format';
 import type { ChartResult } from '@/lib/astro/types';
 
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function PlanetTable({ result, showHouses = true }: Props) {
+  const data = reapplyWholeSignHouses(result);
   return (
     <Card>
       <h2 className="text-xs text-violet-400 tracking-widest uppercase mb-3 border-b border-border pb-2">
@@ -29,7 +31,7 @@ export function PlanetTable({ result, showHouses = true }: Props) {
             </tr>
           </thead>
           <tbody>
-            {result.planets.map(p => {
+            {data.planets.map(p => {
               const f = formatLon(p.longitude);
               return (
                 <tr key={p.name} className="border-b border-[#1e1b38] last:border-0">
@@ -57,7 +59,7 @@ export function PlanetTable({ result, showHouses = true }: Props) {
                 </tr>
               );
             })}
-            {(result.points ?? []).map(p => {
+            {(data.points ?? []).map(p => {
               const f = formatLon(p.longitude);
               const glyph = PLANET_GLYPHS[p.name] ?? p.name.charAt(0);
               return (
