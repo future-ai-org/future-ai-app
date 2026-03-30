@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
+import { reapplyWholeSignHouses } from '@/lib/astro/calculate';
 import { drawTransitWheel } from '@/lib/astro/draw';
 import type { ChartResult } from '@/lib/astro/types';
 import { useTheme } from '@/components/providers/ThemeProvider';
@@ -29,7 +30,7 @@ export function TransitsWheel({ natal, transit, size = DEFAULT_SIZE }: Props) {
     canvas.width = size * dpr;
     canvas.height = size * dpr;
     ctx.scale(dpr, dpr);
-    drawTransitWheel(ctx, size, size, natal, transit, chartTheme);
+    drawTransitWheel(ctx, size, size, reapplyWholeSignHouses(natal), transit, chartTheme);
   }, [natal, transit, size, chartTheme]);
 
   return (

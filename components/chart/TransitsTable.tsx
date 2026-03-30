@@ -3,6 +3,7 @@
 import { Card } from '@/components/ui/Card';
 import { copy } from '@/lib/copy';
 import { PLANET_GLYPHS } from '@/lib/astro/constants';
+import { reapplyWholeSignHouses } from '@/lib/astro/calculate';
 import { formatLon } from '@/lib/astro/format';
 import type { ChartResult } from '@/lib/astro/types';
 
@@ -67,9 +68,10 @@ function PositionCell({ pos }: { pos: RowPosition | undefined }) {
 }
 
 export function TransitsTable({ natal, transit }: Props) {
-  const natalByName = byName(natal);
+  const natalDisplay = reapplyWholeSignHouses(natal);
+  const natalByName = byName(natalDisplay);
   const transitByName = byName(transit);
-  const names = allNames(natal, transit);
+  const names = allNames(natalDisplay, transit);
 
   return (
     <Card>

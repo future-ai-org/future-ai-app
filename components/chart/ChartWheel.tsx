@@ -1,5 +1,6 @@
 'use client';
 import { useRef, useEffect } from 'react';
+import { reapplyWholeSignHouses } from '@/lib/astro/calculate';
 import { drawChartWheel } from '@/lib/astro/draw';
 import type { ChartResult } from '@/lib/astro/types';
 import { useTheme } from '@/components/providers/ThemeProvider';
@@ -31,7 +32,10 @@ export function ChartWheel({ result, size = DEFAULT_SIZE, showAngles = true, sho
     canvas.width = size * dpr;
     canvas.height = size * dpr;
     ctx.scale(dpr, dpr);
-    drawChartWheel(ctx, size, size, result, chartTheme, { showAngles, showAscOnly });
+    drawChartWheel(ctx, size, size, reapplyWholeSignHouses(result), chartTheme, {
+      showAngles,
+      showAscOnly,
+    });
   }, [result, size, chartTheme, showAngles, showAscOnly]);
 
   return (
