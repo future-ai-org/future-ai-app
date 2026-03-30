@@ -1,10 +1,13 @@
 import Link from 'next/link';
+import { unstable_noStore as noStore } from 'next/cache';
 import { copy } from '@/lib/copy';
 import { getCurrentTransits } from '@/lib/astro/currentTransits';
 import { getMoonPhaseInfo } from '@/lib/astro/moonPhase';
 import { AstroFooterStrip } from './AstroFooterStrip';
 
 export function Footer() {
+  // Without this, production can prerender/cache the layout with `new Date()` from build time.
+  noStore();
   const now = new Date();
   const year = now.getFullYear();
   const copyrightText = copy.footer.copyright.replace('{year}', String(year));

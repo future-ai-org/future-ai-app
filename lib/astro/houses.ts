@@ -20,11 +20,13 @@ export function calcMC(LST: number, eps: number): number {
   return mod360(mc);
 }
 
-/** Whole sign: each house is 30°; 1st house starts at ASC. */
+/** Whole sign: each house is one 30° sign; house 1 is the zodiac sign containing ASC (cusp at 0° of that sign). */
 export function wholeSignHouses(ASC: number): number[] {
+  const ascNorm = mod360(ASC);
+  const ascSignStart = Math.floor(ascNorm / 30) * 30;
   const cusps = new Array(12);
   for (let i = 0; i < 12; i++) {
-    cusps[i] = mod360(ASC + i * 30);
+    cusps[i] = mod360(ascSignStart + i * 30);
   }
   return cusps;
 }
