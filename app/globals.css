@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Light mode (default) */
+/* Light mode (when `.light` is on <html>, or optional default before script runs) */
 :root {
   --background: #f8f6fc;
   --foreground: #1a1625;

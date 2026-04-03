@@ -18,6 +18,7 @@ export const copy = {
     dashboard: 'dashboard',
     signIn: 'sign in',
     signOut: 'sign out',
+    solarSystem: 'solar system',
     ariaLabel: 'main navigation',
     themeLight: 'switch to light mode',
     themeDark: 'switch to dark mode',
