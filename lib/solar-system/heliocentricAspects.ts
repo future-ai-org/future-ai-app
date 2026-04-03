@@ -213,6 +213,9 @@ export function separationSunOrbiterGeo(T: number, other: OrbiterId): number {
  * Point on the ecliptic plane as seen from Earth: body direction (geocentric λ) from Earth’s
  * scene position, scaled by rimRadius. Chords between two such points subtend the same angle
  * as geocentric ecliptic separation (major aspects in the panel).
+ *
+ * `azimuthOffsetRad`: add this to every catalog longitude so the rim rotates with the scene
+ * (e.g. align catalog λ with world XZ using the Sun at origin); pairwise separations unchanged.
  */
 export function geoEclipticRimPointXZ(
   T: number,
@@ -220,9 +223,11 @@ export function geoEclipticRimPointXZ(
   earthX: number,
   earthZ: number,
   rimRadius: number,
+  azimuthOffsetRad = 0,
 ): { x: number; z: number } {
-  const λ =
+  const λBase =
     body === 'sun' ? sunGeoLongitudeRad(T) : orbiterGeoLongitudeRad(T, body);
+  const λ = λBase + azimuthOffsetRad;
   return {
     x: earthX + rimRadius * Math.cos(λ),
     z: earthZ + rimRadius * Math.sin(λ),

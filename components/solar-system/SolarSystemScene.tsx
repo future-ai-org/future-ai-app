@@ -31,19 +31,23 @@ import {
   aspectsFromOrbiterGeo,
   aspectsFromSunGeo,
   formatPeakCalendarDays,
-  geoEclipticRimPointXZ,
   nextAspectPeakTimeGeo,
   nextSunOrbiterAspectPeakTimeGeo,
   separationBetweenOrbitersGeo,
   separationSunOrbiterGeo,
   type MajorAspectKind,
 } from '@/lib/solar-system/heliocentricAspects';
-import { julianCenturiesUTC, sceneMoonOffsetXZ, sceneOrbitXZ } from '@/lib/solar-system/solarEphemeris';
+import {
+  julianCenturiesUTC,
+  moonWorldXZ,
+  sceneMoonOffsetXZ,
+  sceneOrbitXZ,
+} from '@/lib/solar-system/solarEphemeris';
 
-/** Geocentric ecliptic rim around Earth’s scene position (aspect chords, not heliocentric mesh). */
-const GEO_ECLIPTIC_RIM = 9;
+const CHORD_Y = 0.055;
 
-const CHORD_Y = 0.045;
+/** Line2 width in world units (reliable on Apple; pixel linewidth is often clamped to 1). */
+const CHORD_LINE_WIDTH_WORLD = 0.11;
 
 function aspectsNotInvolvingEarth(rows: { other: OrbiterId; kind: MajorAspectKind }[]): typeof rows {
   return rows.filter((r) => r.other !== 'earth');
@@ -696,27 +700,49 @@ function MoonMesh() {
   );
 }
 
+const chordLineProps = {
+  lineWidth: CHORD_LINE_WIDTH_WORLD,
+  worldUnits: true,
+  transparent: true,
+  opacity: 0.98,
+  depthWrite: false,
+  depthTest: false,
+  toneMapped: false,
+} as const;
+
+/** Scene XZ for chord endpoints (matches planet groups / sun / moon world position). */
+function chordBodyAnchorXZ(
+  body: HoverBodyId,
+  planetXZ: Record<PlanetKey, { x: number; z: number }>,
+  moonXZ: { x: number; z: number },
+): { x: number; z: number } {
+  if (body === 'sun') return { x: 0, z: 0 };
+  if (body === 'moon') return moonXZ;
+  return planetXZ[body as PlanetKey];
+}
+
 function HoverChordLines({
   hovered,
   T,
-  earthXZ,
+  planetXZ,
+  moonXZ,
 }: {
   hovered: HoverBodyId | null;
   T: number;
-  earthXZ: { x: number; z: number };
+  planetXZ: Record<PlanetKey, { x: number; z: number }>;
+  moonXZ: { x: number; z: number };
 }) {
   if (!hovered || hovered === 'earth') return null;
 
-  const rim = (body: HoverBodyId) =>
-    geoEclipticRimPointXZ(T, body, earthXZ.x, earthXZ.z, GEO_ECLIPTIC_RIM);
+  const anchor = (body: HoverBodyId) => chordBodyAnchorXZ(body, planetXZ, moonXZ);
 
   if (hovered === 'sun') {
     const rows = aspectsFromSunGeo(T);
     return (
       <>
         {rows.map(({ other, kind }) => {
-          const a = rim('sun');
-          const b = rim(other);
+          const a = anchor('sun');
+          const b = anchor(other);
           return (
             <Line
               key={`sun-${other}-${kind}`}
@@ -725,10 +751,7 @@ function HoverChordLines({
                 [b.x, CHORD_Y, b.z],
               ]}
               color={aspectLineColor(kind)}
-              lineWidth={2}
-              transparent
-              opacity={0.92}
-              depthWrite={false}
+              {...chordLineProps}
             />
           );
         })}
@@ -737,11 +760,11 @@ function HoverChordLines({
   }
 
   const rows = aspectsNotInvolvingEarth(aspectsFromOrbiterGeo(T, hovered as OrbiterId));
-  const from = rim(hovered);
+  const from = anchor(hovered);
   return (
     <>
       {rows.map(({ other, kind }) => {
-        const to = rim(other);
+        const to = anchor(other);
         return (
           <Line
             key={`${hovered}-${other}-${kind}`}
@@ -750,10 +773,7 @@ function HoverChordLines({
               [to.x, CHORD_Y, to.z],
             ]}
             color={aspectLineColor(kind)}
-            lineWidth={2}
-            transparent
-            opacity={0.92}
-            depthWrite={false}
+            {...chordLineProps}
           />
         );
       })}
@@ -774,6 +794,7 @@ function HoverAspectPanel({ hovered, T }: { hovered: HoverBodyId | null; T: numb
   }, [hovered, T]);
 
   if (!hovered) return null;
+  if (hovered === 'earth') return null;
 
   const t = snap.body === hovered ? snap.T : T;
 
@@ -797,10 +818,7 @@ function HoverAspectPanel({ hovered, T }: { hovered: HoverBodyId | null; T: numb
     );
   }
 
-  const rows =
-    hovered === 'earth'
-      ? []
-      : aspectsNotInvolvingEarth(aspectsFromOrbiterGeo(t, hovered as OrbiterId));
+  const rows = aspectsNotInvolvingEarth(aspectsFromOrbiterGeo(t, hovered as OrbiterId));
   return (
     <Html transform={false} fullscreen style={{ pointerEvents: 'none' }}>
       <div className="pointer-events-none absolute right-3 top-1/2 z-10 max-h-[min(72vh,30rem)] w-[min(96vw,23rem)] -translate-y-1/2 overflow-y-auto rounded-xl border border-violet-500/30 bg-black/70 px-3 py-2.5 text-xs text-violet-100 shadow-lg backdrop-blur-md sm:right-5">
@@ -856,6 +874,7 @@ export function SolarSystemScene() {
   }, [T]);
 
   const moonOff = useMemo(() => sceneMoonOffsetXZ(T), [T]);
+  const moonChordXZ = moonWorldXZ(T, pos.earth, spin(1));
 
   return (
     <>
@@ -879,7 +898,7 @@ export function SolarSystemScene() {
         />
       ))}
 
-      <HoverChordLines hovered={hovered} T={T} earthXZ={pos.earth} />
+      <HoverChordLines hovered={hovered} T={T} planetXZ={pos} moonXZ={moonChordXZ} />
       <HoverAspectPanel hovered={hovered} T={T} />
 
       <HoverHit body="sun" hitRadius={SUN_RADIUS * 2.35} setHovered={setHovered}>

@@ -36,7 +36,6 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",
-    "siwe": "^3.0.0",
     "tailwind-merge": "^3.5.0",
     "three": "^0.183.2"
   },
