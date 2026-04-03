@@ -18,6 +18,7 @@ export const copy = {
     dashboard: 'dashboard',
     signIn: 'sign in',
     signOut: 'sign out',
+    solarSystem: 'solar system',
     ariaLabel: 'main navigation',
     themeLight: 'switch to light mode',
     themeDark: 'switch to dark mode',
@@ -71,6 +72,9 @@ export const copy = {
     signUpWithGoogle: 'sign up with Google',
     signUpWithGitHub: 'sign up with GitHub',
     orContinueWithEmail: 'or continue with email',
+    metaMaskUnavailable: 'MetaMask is not available in this browser.',
+    siweStatement: 'Sign in to Future AI with your Ethereum address.',
+    metaMaskSignInError: 'Wallet sign-in failed. Try again or use another method.',
     errors: {
       invalidCredentials: 'invalid email or password.',
       generic: 'something went wrong. try again.',

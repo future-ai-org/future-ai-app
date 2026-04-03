@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useLayoutEffect, useState } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -11,13 +11,6 @@ const ThemeContext = createContext<{
 
 const STORAGE_KEY = 'future-theme';
 
-function getInitialTheme(): Theme {
-  if (typeof window === 'undefined') return 'light';
-  const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-  if (stored === 'light' || stored === 'dark') return stored;
-  return 'light';
-}
-
 function applyTheme(theme: Theme) {
   document.documentElement.classList.remove('light', 'dark');
   document.documentElement.classList.add(theme);
@@ -25,26 +18,22 @@ function applyTheme(theme: Theme) {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(() => getInitialTheme());
+  /** Matches default in layout theme script; explicit `light`/`dark` in localStorage overrides. */
+  const [theme, setThemeState] = useState<Theme>('dark');
 
-  useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
-
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-color-scheme: light)');
-    const handler = () => {
-      if (localStorage.getItem(STORAGE_KEY)) return;
-      const next: Theme = mq.matches ? 'light' : 'dark';
-      setThemeState(next);
-    };
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
+  useLayoutEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
+    const resolved: Theme =
+      stored === 'light' || stored === 'dark' ? stored : 'dark';
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot sync from localStorage (default dark for SSR/first paint)
+    setThemeState(resolved);
+    applyTheme(resolved);
   }, []);
 
-  const setTheme = (next: Theme) => {
+  const setTheme = useCallback((next: Theme) => {
     setThemeState(next);
-  };
+    applyTheme(next);
+  }, []);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>

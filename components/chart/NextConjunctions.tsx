@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { aspectDisplayLongitude, INFLUENCE_PLOT_SELECTABLE_ASPECTS, type InfluencePlotAspectKind } from '@/lib/astro/aspects';
 import { findNextNAspects, type PlanetPairAspectEvent } from '@/lib/astro/conjunctions';
 import { formatLon } from '@/lib/astro/format';
@@ -32,7 +32,6 @@ const PLANET_COLORS: Record<PlanetName, string> = {
 
 const UPCOMING_PER_ASPECT = 10;
 const UPCOMING_ORB_DEG = 3;
-const CAROUSEL_INTERVAL_MS = 8000;
 
 function ChevronLeftIcon({ className }: { className?: string }) {
   return (
@@ -148,16 +147,6 @@ export function NextConjunctions() {
 
   const goTo = useCallback((index: number) => {
     setSlide(((index % slides.length) + slides.length) % slides.length);
-  }, [slides.length]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduceMotion) return;
-    const id = window.setInterval(() => {
-      setSlide((s) => (s + 1) % slides.length);
-    }, CAROUSEL_INTERVAL_MS);
-    return () => window.clearInterval(id);
   }, [slides.length]);
 
   return (

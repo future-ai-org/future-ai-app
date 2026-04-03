@@ -40,6 +40,9 @@ export function Header() {
           <Link href="/chart" className={navLinkClass('/chart')}>
             {copy.nav.chart}
           </Link>
+          <Link href="/solar-system" className={navLinkClass('/solar-system')}>
+            {copy.nav.solarSystem}
+          </Link>
           {status === 'authenticated' && (
             <Link href="/dashboard" className={navLinkClass('/dashboard')}>
               {copy.nav.dashboard}

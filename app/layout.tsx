@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   description: copy.site.description,
 };
 
-const themeScript = `(function(){var t=localStorage.getItem('future-theme');if(t==='light'||t==='dark'){document.documentElement.classList.add(t);}else{document.documentElement.classList.add('light');}})();`;
+const themeScript = `(function(){var t=localStorage.getItem('future-theme');if(t==='light'||t==='dark'){document.documentElement.classList.add(t);}else{document.documentElement.classList.add('dark');}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
