@@ -1,7 +1,7 @@
 'use client';
 
 import { useFrame, useThree } from '@react-three/fiber';
-import { Billboard, Html, Line, OrbitControls, Stars, useTexture } from '@react-three/drei';
+import { Html, Line, OrbitControls, Stars, useTexture } from '@react-three/drei';
 import {
   type Dispatch,
   type SetStateAction,
@@ -450,8 +450,18 @@ function HoverHit({
   );
 }
 
-/** Slightly outside the sun sphere so the face isn’t depth-occluded by the surface (0.94× was inside). */
-const SUN_FACE_ANCHOR = new THREE.Vector3(0, 30, 48).normalize().multiplyScalar(SUN_RADIUS * 1.05);
+/** Local surface point (rotates with the sun); slightly outside the sphere to avoid z-fighting. */
+const SUN_FACE_ANCHOR_LOCAL = new THREE.Vector3(0, 0.22, 1)
+  .normalize()
+  .multiplyScalar(SUN_RADIUS * 1.05);
+
+const SUN_FACE_NORMAL = SUN_FACE_ANCHOR_LOCAL.clone().normalize();
+
+/** Tangent plane: local +Z → outward normal so eyes/smile sit on the limb. */
+const SUN_FACE_QUAT = new THREE.Quaternion().setFromUnitVectors(
+  new THREE.Vector3(0, 0, 1),
+  SUN_FACE_NORMAL,
+);
 
 const SUN_WORLD = new THREE.Vector3(0, 0, 0);
 
@@ -490,16 +500,17 @@ function SunCuteFace() {
   if (!visible) return null;
 
   return (
-    <Billboard position={SUN_FACE_ANCHOR} follow>
+    <group position={SUN_FACE_ANCHOR_LOCAL} quaternion={SUN_FACE_QUAT}>
       <group scale={0.72}>
         <mesh position={[-0.4, 0.22, 0]} renderOrder={1}>
           <circleGeometry args={[0.13, 24]} />
           <meshBasicMaterial
             color="#3d2918"
             depthWrite={false}
-            depthTest={false}
+            depthTest
             polygonOffset
             polygonOffsetFactor={-1}
+            polygonOffsetUnits={-1}
           />
         </mesh>
         <mesh position={[0.4, 0.22, 0]} renderOrder={1}>
@@ -507,18 +518,19 @@ function SunCuteFace() {
           <meshBasicMaterial
             color="#3d2918"
             depthWrite={false}
-            depthTest={false}
+            depthTest
             polygonOffset
             polygonOffsetFactor={-1}
+            polygonOffsetUnits={-1}
           />
         </mesh>
         <mesh position={[-0.34, 0.28, 0.002]} scale={[1, 1.15, 1]} renderOrder={1}>
           <circleGeometry args={[0.04, 12]} />
-          <meshBasicMaterial color="#fff5e0" depthWrite={false} depthTest={false} />
+          <meshBasicMaterial color="#fff5e0" depthWrite={false} depthTest />
         </mesh>
         <mesh position={[0.46, 0.28, 0.002]} scale={[1, 1.15, 1]} renderOrder={1}>
           <circleGeometry args={[0.04, 12]} />
-          <meshBasicMaterial color="#fff5e0" depthWrite={false} depthTest={false} />
+          <meshBasicMaterial color="#fff5e0" depthWrite={false} depthTest />
         </mesh>
         <Line
           points={smilePoints}
@@ -527,18 +539,18 @@ function SunCuteFace() {
           transparent
           opacity={0.95}
           depthWrite={false}
-          depthTest={false}
+          depthTest
           renderOrder={1}
         />
       </group>
-    </Billboard>
+    </group>
   );
 }
 
-function SunBody() {
+function SunBody({ spinY }: { spinY: number }) {
   const map = useSrgbTexture(TEXTURES.sun);
   return (
-    <group>
+    <group rotation={[0, spinY, 0]}>
       <mesh>
         <sphereGeometry args={[SUN_RADIUS, 64, 64]} />
         <meshStandardMaterial
@@ -902,7 +914,7 @@ export function SolarSystemScene() {
       <HoverAspectPanel hovered={hovered} T={T} />
 
       <HoverHit body="sun" hitRadius={SUN_RADIUS * 2.35} setHovered={setHovered}>
-        <SunBody />
+        <SunBody spinY={spin(1.15)} />
       </HoverHit>
 
       <group position={[pos.mercury.x, 0, pos.mercury.z]}>
