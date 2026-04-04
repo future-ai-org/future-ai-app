@@ -202,9 +202,9 @@ export function PredictBetMoreModal({ open, bet, onClose, onSuccess }: Props) {
         </p>
 
         {status === 'unauthenticated' || status === 'loading' ? (
-          <div className="mt-6 space-y-4">
-            <p className="text-sm text-muted-foreground">{p.investSignInPrompt ?? 'Sign in.'}</p>
-            <div className="flex flex-wrap gap-2">
+          <div className="mt-6 space-y-4 text-center">
+            <p className="text-sm font-bold text-muted-foreground text-balance px-1">{p.investSignInPrompt ?? 'Sign in.'}</p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
               <Link href="/login?callbackUrl=/dashboard">
                 <Button type="button" variant="primary" className="!px-8 !py-3.5 !text-base">
                   {p.investGoSignIn ?? 'Sign in'}
@@ -216,13 +216,15 @@ export function PredictBetMoreModal({ open, bet, onClose, onSuccess }: Props) {
             </div>
           </div>
         ) : authRequired ? (
-          <div className="mt-6 space-y-4">
-            <p className="text-sm text-muted-foreground">{p.investSignInPrompt ?? 'Sign in.'}</p>
-            <Link href="/login?callbackUrl=/dashboard">
-              <Button type="button" variant="primary" className="!px-8 !py-3.5 !text-base">
-                {p.investGoSignIn ?? 'Sign in'}
-              </Button>
-            </Link>
+          <div className="mt-6 space-y-4 text-center">
+            <p className="text-sm font-bold text-muted-foreground text-balance px-1">{p.investSignInPrompt ?? 'Sign in.'}</p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Link href="/login?callbackUrl=/dashboard">
+                <Button type="button" variant="primary" className="!px-8 !py-3.5 !text-base">
+                  {p.investGoSignIn ?? 'Sign in'}
+                </Button>
+              </Link>
+            </div>
           </div>
         ) : loadingBalance ? (
           <div className="mt-6 text-center">

@@ -246,11 +246,11 @@ export function PredictInvestModal({
         </p>
 
         {status === 'unauthenticated' || status === 'loading' ? (
-          <div className="mt-6 space-y-4">
-            <p className="text-sm text-muted-foreground">
+          <div className="mt-6 space-y-4 text-center">
+            <p className="text-sm font-bold text-muted-foreground text-balance px-1">
               {p.investSignInPrompt ?? 'Sign in to invest.'}
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-2">
               <Link href="/login?callbackUrl=/">
                 <Button type="button" variant="primary" className="!px-8 !py-3.5 !text-base">
                   {p.investGoSignIn ?? 'Sign in'}
@@ -262,11 +262,11 @@ export function PredictInvestModal({
             </div>
           </div>
         ) : authRequired ? (
-          <div className="mt-6 space-y-4">
-            <p className="text-sm text-muted-foreground">
+          <div className="mt-6 space-y-4 text-center">
+            <p className="text-sm font-bold text-muted-foreground text-balance px-1">
               {p.investSignInPrompt ?? 'Sign in to continue.'}
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-2">
               <Link href="/login?callbackUrl=/">
                 <Button type="button" variant="primary" className="!px-8 !py-3.5 !text-base">
                   {p.investGoSignIn ?? 'Sign in'}

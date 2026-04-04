@@ -282,7 +282,7 @@
   ],
   "investModalHowMany": "how many astro coins do you want on this pick?",
   "investBalanceLabel": "your balance",
-  "investSignInPrompt": "sign in to invest astrocoins on predictions.",
+  "investSignInPrompt": "sign in to make a prediction",
   "investLoadingBalance": "loading balance",
   "investNotEnoughCoins": "you don't have enough coins.",
   "investAddCoins": "add coins",
