@@ -389,11 +389,15 @@ function CompatibilityContent() {
                       <th className="pb-2 pr-2 pt-1 whitespace-nowrap border-l border-border/60 pl-3">
                         {copy.compatibility.sign}
                       </th>
-                      <th className="pb-2 pr-2 pt-1 whitespace-nowrap">{copy.compatibility.house}</th>
+                      <th className="pb-2 pr-2 pt-1 whitespace-nowrap text-center w-[3rem]">
+                        {copy.compatibility.house}
+                      </th>
                       <th className="pb-2 pr-2 pt-1 whitespace-nowrap border-l border-border/60 pl-3">
                         {copy.compatibility.sign}
                       </th>
-                      <th className="pb-2 pt-1 whitespace-nowrap">{copy.compatibility.house}</th>
+                      <th className="pb-2 pt-1 whitespace-nowrap text-center w-[3rem]">
+                        {copy.compatibility.house}
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -424,7 +428,7 @@ function CompatibilityContent() {
                             </span>
                           </td>
                           <td className="py-2.5 pr-4 text-muted-foreground text-xs leading-snug align-top max-w-[22rem]">
-                            <span className="font-medium text-violet-200/90">{placement.note}</span>
+                            <span className="font-medium text-black dark:text-violet-200/90">{placement.note}</span>
                             {' '}
                             {getMergedCrossChartExplanation(
                               name,
@@ -440,14 +444,18 @@ function CompatibilityContent() {
                               {rowA.inSign}
                             </span>
                           </td>
-                          <td className="py-2.5 pr-2 whitespace-nowrap">house {rowA.house}</td>
+                          <td className="py-2.5 pr-2 whitespace-nowrap text-center tabular-nums">
+                            {rowA.house}
+                          </td>
                           <td className="py-2.5 pr-2 border-l border-border/40 pl-3 whitespace-nowrap">
                             <span className="inline-flex items-center gap-1">
                               <span aria-hidden>{rowB.glyph}</span>
                               {rowB.inSign}
                             </span>
                           </td>
-                          <td className="py-2.5 pr-2 whitespace-nowrap">house {rowB.house}</td>
+                          <td className="py-2.5 pr-2 whitespace-nowrap text-center tabular-nums">
+                            {rowB.house}
+                          </td>
                         </tr>
                       );
                     })}
