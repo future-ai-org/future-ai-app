@@ -8,7 +8,7 @@ export const copy = {
   site: {
     title: 'future',
     tabTitle: 'Ancient Wisdom → AI Age',
-    description: 'future — start your journey and more.',
+    description: 'future — create a chart and more.',
     tagline: '',
   },
 
@@ -16,7 +16,7 @@ export const copy = {
     home: 'home',
     predict: 'predict',
     chartOfMoment: 'current sky',
-    chart: 'start your journey',
+    chart: 'create a chart',
     todayChart: "today's chart",
     influence: 'influences',
     compatibility: 'compatibility',
@@ -95,7 +95,7 @@ export const copy = {
     tabInfluences: 'influences',
     tabAsk: 'ask',
     todayChart: "today's chart",
-    newChart: 'new chart',
+    addNewChart: 'add a new chart',
     myChart: 'my chart',
     addChart: 'add chart',
     otherCharts: 'other charts',
@@ -145,7 +145,7 @@ export const copy = {
     links: [
       { label: 'predict', href: '/' },
       { label: 'current sky', href: '/today' },
-      { label: 'start your journey', href: '/chart' },
+      { label: 'create a chart', href: '/chart' },
       { label: 'influences', href: '/influence' },
       { label: 'compatibility', href: '/compatibility' },
       { label: 'dashboard', href: '/dashboard' },
@@ -226,7 +226,7 @@ export const copy = {
 
   chart: {
     back: '← back',
-    title: 'start your journey',
+    title: 'create a chart',
     titlePrefix: '✦',
     titleSuffix: '✦',
     tagline: '',

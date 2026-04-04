@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import Stripe from 'stripe';
 import { coinsFromAmountTotalCents } from '@/lib/astro-coins';
+import { applyAstroCoinDelta } from '@/lib/astro-coins-ledger';
 import { prisma } from '@/lib/db';
 import { getStripeClient, getStripeSecretKey } from '@/lib/stripe-server';
 
@@ -45,10 +46,7 @@ async function fulfillCheckoutSession(session: Stripe.Checkout.Session) {
           amountUsdCents: amountTotal,
         },
       });
-      await tx.user.update({
-        where: { id: userId },
-        data: { astroCoins: { increment: coins } },
-      });
+      await applyAstroCoinDelta(tx, userId, coins, 'stripe_checkout', session.id);
     });
   } catch (error) {
     if (isUniqueViolation(error)) {

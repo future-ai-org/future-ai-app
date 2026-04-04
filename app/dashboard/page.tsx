@@ -153,68 +153,77 @@ export default function DashboardPage() {
               <Card className="py-6 text-center">
                 <p className="text-muted-foreground text-sm mb-3">{copy.dashboard.noCharts}</p>
                 <Link href="/chart">
-                  <Button variant="secondary">{copy.dashboard.newChart}</Button>
+                  <Button variant="secondary">{copy.dashboard.addNewChart}</Button>
                 </Link>
               </Card>
             ) : (
-              <ul className="space-y-3">
-                {charts
-                  .filter(c => c.isPrimary !== true)
-                  .map(chart => {
-                    let birthLabel = '';
-                    try {
-                      const b = JSON.parse(chart.birthData) as {
-                        date?: string;
-                      };
-                      birthLabel = b.date || chart.label;
-                    } catch {
-                      birthLabel = chart.label;
-                    }
-                    return (
-                      <li key={chart.id}>
-                        <Card className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                          <div className="min-w-0">
+              <>
+                <ul className="space-y-3">
+                  {charts
+                    .filter(c => c.isPrimary !== true)
+                    .map(chart => {
+                      let birthLabel = '';
+                      try {
+                        const b = JSON.parse(chart.birthData) as {
+                          date?: string;
+                        };
+                        birthLabel = b.date || chart.label;
+                      } catch {
+                        birthLabel = chart.label;
+                      }
+                      return (
+                        <li key={chart.id}>
+                          <Card className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="min-w-0">
                               <h3 className="text-xl sm:text-2xl font-semibold text-foreground truncate leading-tight">
                                 {chart.label}
                               </h3>
-                            <p className="text-sm text-muted-foreground truncate">{birthLabel}</p>
+                              <p className="text-sm text-muted-foreground truncate">{birthLabel}</p>
                               <p className="text-xs text-muted-foreground mt-0.5">
                                 {copy.dashboard.createdAt}{' '}
                                 {new Date(chart.createdAt).toLocaleDateString(undefined, {
                                   dateStyle: 'medium',
                                 })}
                               </p>
-                          </div>
-                          <div className="flex flex-wrap gap-2 shrink-0">
-                            <Link href={`/chart/${chart.id}`}>
-                              <Button variant="secondary" type="button">
-                                {copy.dashboard.view}
+                            </div>
+                            <div className="flex flex-wrap gap-2 shrink-0">
+                              <Link href={`/chart/${chart.id}`}>
+                                <Button variant="secondary" type="button">
+                                  {copy.dashboard.view}
+                                </Button>
+                              </Link>
+                              <Link href={`/chart/${chart.id}/transits`}>
+                                <Button variant="secondary" type="button">
+                                  {copy.chart.checkTransits}
+                                </Button>
+                              </Link>
+                              <Link href={`/compatibility?chart=${chart.id}`}>
+                                <Button variant="secondary" type="button">
+                                  {copy.compatibility.compatibility}
+                                </Button>
+                              </Link>
+                              <Button
+                                variant="secondary"
+                                type="button"
+                                disabled={deletingId === chart.id}
+                                onClick={() => handleDelete(chart.id)}
+                              >
+                                {deletingId === chart.id ? '…' : copy.dashboard.delete}
                               </Button>
-                            </Link>
-                            <Link href={`/chart/${chart.id}/transits`}>
-                              <Button variant="secondary" type="button">
-                                {copy.chart.checkTransits}
-                              </Button>
-                            </Link>
-                            <Link href={`/compatibility?chart=${chart.id}`}>
-                              <Button variant="secondary" type="button">
-                                {copy.compatibility.compatibility}
-                              </Button>
-                            </Link>
-                            <Button
-                              variant="secondary"
-                              type="button"
-                              disabled={deletingId === chart.id}
-                              onClick={() => handleDelete(chart.id)}
-                            >
-                              {deletingId === chart.id ? '…' : copy.dashboard.delete}
-                            </Button>
-                          </div>
-                        </Card>
-                      </li>
-                    );
-                  })}
-              </ul>
+                            </div>
+                          </Card>
+                        </li>
+                      );
+                    })}
+                </ul>
+                <div className="mt-8 flex justify-center">
+                  <Link href="/chart">
+                    <Button variant="primary" className="px-6 py-3 text-base">
+                      {copy.dashboard.addNewChart}
+                    </Button>
+                  </Link>
+                </div>
+              </>
             )}
           </section>
         </>

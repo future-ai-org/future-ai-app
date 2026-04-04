@@ -279,5 +279,19 @@
       "outcome_type": "Binary",
       "expiresAt": "2026-08-01"
     }
-  ]
+  ],
+  "investModalHowMany": "how many astro coins do you want on this pick?",
+  "investBalanceLabel": "your balance",
+  "investSignInPrompt": "sign in to invest astrocoins on predictions.",
+  "investNotEnoughCoins": "you don't have enough coins.",
+  "investAddCoins": "add coins",
+  "investGoDashboard": "go to dashboard",
+  "investGoSignIn": "sign in",
+  "investAmountLabel": "coins to invest",
+  "investConfirm": "confirm",
+  "investCancel": "cancel",
+  "investSubmitting": "saving…",
+  "investSuccessToast": "invested {coins} coins on {side}.",
+  "investErrorGeneric": "could not complete investment.",
+  "investInvalidAmount": "enter a valid number of coins."
 }

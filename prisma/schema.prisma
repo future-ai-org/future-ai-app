@@ -14,9 +14,11 @@ model User {
   image           String?
   astroCoins      Int              @default(0)
   createdAt       DateTime         @default(now())
-  savedCharts     SavedChart[]
-  favoriteNews    FavoriteNews[]
-  stripePurchases StripePurchase[]
+  savedCharts      SavedChart[]
+  favoriteNews     FavoriteNews[]
+  stripePurchases  StripePurchase[]
+  astroCoinLedgers AstroCoinLedger[]
+  predictBets      PredictBet[]
 }
 
 model FavoriteNews {
@@ -49,4 +51,31 @@ model StripePurchase {
   coins          Int
   amountUsdCents Int
   createdAt      DateTime @default(now())
+}
+
+/** Append-only ledger: every balance change is recorded (credits, debits). */
+model AstroCoinLedger {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  delta        Int
+  balanceAfter Int
+  reason       String
+  refId        String?
+  createdAt    DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model PredictBet {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId Int
+  side       String
+  coins      Int
+  createdAt  DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([questionId])
 }

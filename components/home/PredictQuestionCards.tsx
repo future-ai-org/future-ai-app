@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { PredictInvestModal } from '@/components/home/PredictInvestModal';
 import { copy } from '@/lib/copy';
 import { cn } from '@/lib/utils';
 
@@ -75,10 +76,18 @@ function selectionAt(map: Record<number, string>, i: number): string | null {
   return typeof v === 'string' && v.length > 0 ? v : null;
 }
 
+type InvestState = {
+  item: PredictQuestionItem;
+  index: number;
+  side: 'yes' | 'no';
+};
+
 export function PredictQuestionCards() {
   const pool = useMemo(() => normalizePool(copy.predict.questions), []);
   const [extraShown, setExtraShown] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [invest, setInvest] = useState<InvestState | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   const visibleCount = Math.min(INITIAL_QUESTION_COUNT + extraShown, pool.length);
 
@@ -93,21 +102,40 @@ export function PredictQuestionCards() {
   const canLoadMore = visibleCount < pool.length;
 
   function setSelection(index: number, value: string) {
-    setAnswers((prev) => {
-      const cur = prev[index];
-      const nextVal = cur === value ? undefined : value;
-      const out = { ...prev };
-      if (nextVal === undefined) {
-        delete out[index];
-      } else {
-        out[index] = nextVal;
-      }
-      return out;
-    });
+    setAnswers(prev => ({ ...prev, [index]: value }));
+  }
+
+  function openInvestModal(item: PredictQuestionItem, index: number, side: 'yes' | 'no') {
+    setInvest({ item, index, side });
   }
 
   return (
     <>
+      <PredictInvestModal
+        open={invest !== null}
+        onClose={() => setInvest(null)}
+        question={invest?.item ?? null}
+        cardIndex={invest?.index ?? 0}
+        side={invest?.side ?? 'yes'}
+        onInvested={(cardIndex, side, coins) => {
+          setSelection(cardIndex, side);
+          const predictCopy = copy.predict as { investSuccessToast?: string };
+          const tpl = predictCopy.investSuccessToast ?? '';
+          const msg = tpl
+            .replace('{coins}', String(coins))
+            .replace('{side}', side === 'yes' ? copy.predict.yes : copy.predict.no);
+          setToast(msg.trim() !== '' ? msg : `Invested ${coins} on ${side}.`);
+          window.setTimeout(() => setToast(null), 5000);
+        }}
+      />
+      {toast ? (
+        <div
+          className="fixed bottom-6 left-1/2 z-[102] max-w-[min(90vw,24rem)] -translate-x-1/2 rounded-xl border border-violet-500/30 bg-card/95 px-4 py-3 text-center text-sm text-foreground shadow-lg backdrop-blur-sm"
+          role="status"
+        >
+          {toast}
+        </div>
+      ) : null}
       <ul
         aria-label={copy.predict.questionsAria}
         className="mt-14 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-3 gap-y-8 sm:gap-x-4 sm:gap-y-10 w-full max-w-6xl mx-auto px-4 list-none"
@@ -139,7 +167,7 @@ export function PredictQuestionCards() {
                 </p>
 
                 <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center px-0.5 py-6 sm:py-7 gap-1.5">
-                  <p className="text-[0.55rem] sm:text-[0.6rem] font-bold text-muted-foreground leading-tight">
+                  <p className="text-xs sm:text-sm font-bold text-muted-foreground leading-tight tracking-wide">
                     {copy.predict.estimationPrefix}
                   </p>
                   <p
@@ -165,7 +193,7 @@ export function PredictQuestionCards() {
                           'ring-1 ring-violet-400/60 ring-offset-1 ring-offset-background',
                       )}
                       aria-pressed={selected === 'yes'}
-                      onClick={() => setSelection(i, 'yes')}
+                      onClick={() => openInvestModal(item, i, 'yes')}
                     >
                       <span className="inline-flex items-baseline gap-1 font-bold tabular-nums">
                         <span>{copy.predict.yes}</span>
@@ -181,7 +209,7 @@ export function PredictQuestionCards() {
                           'ring-1 ring-violet-400/60 ring-offset-1 ring-offset-background',
                       )}
                       aria-pressed={selected === 'no'}
-                      onClick={() => setSelection(i, 'no')}
+                      onClick={() => openInvestModal(item, i, 'no')}
                     >
                       <span className="inline-flex items-baseline gap-1 font-bold tabular-nums">
                         <span>{copy.predict.no}</span>

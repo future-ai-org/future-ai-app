@@ -97,13 +97,17 @@ For **dashboard** wallet purchases with Stripe (API keys, webhooks, local CLI), 
 
 ## 3. Run database migrations
 
-Apply the Prisma migrations so the database has the right tables (`User`, `SavedChart`):
+Apply the Prisma migrations so the database has the right tables (including `User`, `SavedChart`, `FavoriteNews`, astro coin fields on `User`, `StripePurchase`, `AstroCoinLedger`, `PredictBet` for home-page prediction picks, etc.):
 
 ```bash
 npx prisma migrate deploy
+# or
+make migrate
 ```
 
 (Requires `DIRECT_URL` or `DATABASE_URL` in `.env`; the CLI uses `prisma.config.ts`.)
+
+For **local development** when you change `schema.prisma`, use `npx prisma migrate dev` or `make migrate-dev`.
 
 ---
 
@@ -139,7 +143,7 @@ make start
 - [ ] `AUTH_SECRET` set (`npx auth secret`)
 - [ ] (Optional) `AUTH_GOOGLE_*` and/or `AUTH_GITHUB_*` set for OAuth
 - [ ] (Optional) Stripe keys and webhook — [STRIPE.md](STRIPE.md)
-- [ ] Migrations applied (`npx prisma migrate deploy`)
+- [ ] Migrations applied (`npx prisma migrate deploy` or `make migrate`)
 - [ ] App running (`npm run dev` or `make dev`)
 
 ---

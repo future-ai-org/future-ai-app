@@ -1,11 +1,11 @@
 # Stripe setup (astro coin purchases)
 
-This app can sell **astro coins** on the **dashboard** (`/dashboard`) using **Stripe Checkout** (hosted payment page). After a successful payment, Stripe calls a **webhook**; the app verifies the event and credits the signed-in user’s balance in Postgres (`User.astroCoins`).
+This app can sell **astro coins** on the **dashboard** (`/dashboard`) using **Stripe Checkout** (hosted payment page). After a successful payment, Stripe calls a **webhook**; the app verifies the event and credits the signed-in user’s balance in Postgres (`User.astroCoins`) and appends a row to **`AstroCoinLedger`** (audit trail).
 
 You need:
 
 - A **Stripe** account ([dashboard.stripe.com](https://dashboard.stripe.com))
-- **Database migrations applied** so tables include `User.astroCoins` and `StripePurchase` (see [SETUP.md](SETUP.md) → migrations)
+- **Database migrations applied** so tables include `User.astroCoins`, `StripePurchase`, and `AstroCoinLedger` (see [SETUP.md](SETUP.md) → migrations: `npx prisma migrate deploy` or **`make migrate`**)
 - **`AUTH_URL`** set to your real app origin (same as for OAuth): local `http://localhost:8066`, production `https://your-domain.com`. Checkout **success** and **cancel** URLs are built from this.
 
 ---
@@ -106,7 +106,9 @@ If **`AUTH_URL`** is wrong in production, customers may return to the wrong host
 | Checkout session creation | `app/api/stripe/checkout/route.ts` |
 | Webhook handler | `app/api/stripe/webhook/route.ts` |
 | Balance API | `app/api/astro-coins/route.ts` |
+| Ledger history API | `GET /api/astro-coins/ledger` → `app/api/astro-coins/ledger/route.ts` |
+| Balance + ledger writes | `lib/astro-coins-ledger.ts` (`applyAstroCoinDelta`, `debitAstroCoins`) |
 | Coins per dollar | `lib/astro-coins.ts` (`COINS_PER_USD`) |
 | Stripe client | `lib/stripe-server.ts` |
 | Dashboard UI | `components/dashboard/AstroCoinsPanel.tsx` |
-| Schema | `prisma/schema.prisma` (`User.astroCoins`, `StripePurchase`) |
+| Schema | `prisma/schema.prisma` (`User.astroCoins`, `StripePurchase`, `AstroCoinLedger`) |

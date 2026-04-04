@@ -56,6 +56,7 @@ future-ai-app/
 
 - **Lint**: ESLint (Next.js config); `npm run lint` / `npm run lint:fix`.
 - **Typecheck**: `npm run typecheck` (`tsc --noEmit`).
+- **Database**: `make migrate` (`prisma migrate deploy`), `make migrate-dev`, `make generate`; see **docs/SETUP.md** / **docs/DEPLOYMENT.md**. Astro coins + Stripe: **docs/STRIPE.md**.
 - **Pre-commit**: Husky + lint-staged; ESLint --fix on staged TS/JS files.
 
 ## Docs
