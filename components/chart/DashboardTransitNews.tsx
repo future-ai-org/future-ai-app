@@ -79,7 +79,6 @@ export function DashboardTransitNews({ natal, className }: Props) {
             return (
               <li
                 key={`${ev.aspectId}-${ev.transitPlanet}-${ev.natalPlanet}-${ev.date.getTime()}-${i}`}
-                className="border-b border-border/60 pb-4 last:border-0 last:pb-0"
               >
                 <p className="text-foreground break-words [overflow-wrap:anywhere]">
                   <span style={{ color: PLANET_COLORS[ev.transitPlanet] }} className="font-semibold">

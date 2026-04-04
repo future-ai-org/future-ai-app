@@ -18,7 +18,6 @@ export const copy = {
     dashboard: 'dashboard',
     signIn: 'sign in',
     signOut: 'sign out',
-    solarSystem: 'solar system',
     ariaLabel: 'main navigation',
     themeLight: 'switch to light mode',
     themeDark: 'switch to dark mode',
@@ -212,11 +211,11 @@ export const copy = {
     title: 'start your journey',
     titlePrefix: '✦',
     tagline: '',
-    birthTime: 'time',
     back15m: '−15m',
     forward15m: '+15m',
     back1h: '−1 hr',
     forward1h: '+1 hr',
+    see3D: 'see it in 3D',
     checkTransits: 'check transits',
     deleteChart: 'delete chart',
     transitsTitle: 'transits',
@@ -237,6 +236,10 @@ export const copy = {
     nextMonth: '1 month after',
     prevYear: '1 year before',
     nextYear: '1 year after',
+  },
+
+  solarSystem: {
+    title: 'our solar system',
   },
 
   saveChart: {
@@ -294,7 +297,6 @@ export const copy = {
   },
 
   planetTable: {
-    title: 'objects and angles',
     planet: 'planet',
     sign: 'sign',
     degree: 'degree',

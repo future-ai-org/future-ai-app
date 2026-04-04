@@ -1,8 +1,10 @@
+import Link from 'next/link';
 import { ChartWheel } from './ChartWheel';
 import { AscendantCard } from './AscendantCard';
 import { PlanetTable } from './PlanetTable';
 import { Button } from '@/components/ui/Button';
 import { copy } from '@/lib/copy';
+import { cn } from '@/lib/utils';
 import type { ChartResult } from '@/lib/astro/types';
 
 const DEFAULT_CHART_SIZE = 520;
@@ -39,7 +41,6 @@ export function ChartResults({ result, showAscendant = true, showAngles = showAs
       />
       {onAdjustHours && (
         <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-sm w-full">
-          <span className="text-muted-foreground font-bold">{copy.chart.birthTime}:</span>
           <span className="font-bold tabular-nums">
             {result.birthData.date} {result.birthData.time}
           </span>
@@ -48,6 +49,15 @@ export function ChartResults({ result, showAscendant = true, showAngles = showAs
             <Button type="button" variant="secondary" className="px-2.5 py-1.5 text-xs sm:text-sm" onClick={() => onAdjustHours(1 / 4)}>{copy.chart.forward15m}</Button>
             <Button type="button" variant="secondary" className="px-2.5 py-1.5 text-xs sm:text-sm" onClick={() => onAdjustHours(-1)}>{copy.chart.back1h}</Button>
             <Button type="button" variant="secondary" className="px-2.5 py-1.5 text-xs sm:text-sm" onClick={() => onAdjustHours(1)}>{copy.chart.forward1h}</Button>
+            <Link
+              href="/solar-system"
+              className={cn(
+                'inline-flex items-center justify-center rounded-xl font-serif tracking-wide transition-opacity normal-case',
+                'border border-violet-500 dark:border-violet-400 text-violet-600 dark:text-violet-300 px-2.5 py-1.5 text-xs sm:text-sm hover:bg-violet-100 dark:hover:bg-violet-950',
+              )}
+            >
+              {copy.chart.see3D}
+            </Link>
           </div>
         </div>
       )}

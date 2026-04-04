@@ -1,5 +1,5 @@
 /**
- * Real ephemeris for the 3d solar-system view: same engine as ../astro/planets / ../astro/points.
+ * Real ephemeris for the 3D solar-system view: same engine as ../astro/planets / ../astro/points.
  * Scene uses heliocentric ecliptic angles × visual ORBIT radii; aspect angles and chord lines use
  * geocentric ecliptic longitudes (Earth as observer).
  */
