@@ -64,7 +64,7 @@ export function DashboardTransitNews({ natal, className }: Props) {
 
   return (
     <Card className={cn('w-full min-w-0', className)}>
-      <h2 className="text-xs font-bold text-violet-400 tracking-widest uppercase mb-4">
+      <h2 className="text-xs font-bold text-violet-400 tracking-widest uppercase mb-6">
         {copy.dashboard.transitNewsTitle}
       </h2>
       <ul className="space-y-4 text-xs sm:text-sm leading-relaxed">
@@ -96,9 +96,16 @@ export function DashboardTransitNews({ natal, className }: Props) {
                   <span className="text-muted-foreground">{copy.dashboard.transitNewsNatal}</span>
                   {' '}
                   <span className="text-muted-foreground">in {signLabel(ev.lonNatal)}</span>
+                  <span className="text-muted-foreground">,</span>{' '}
+                  <span className="font-bold text-foreground">
+                    on {formatNewsDate(ev.date)}
+                  </span>
                   <span className="text-muted-foreground tabular-nums">
-                    , on {formatNewsDate(ev.date)} at {natalPos.deg}°{natalPos.min}&apos;{' '}
-                    <span className="font-symbols text-[#2d1b4e] dark:text-[#8b7ab8]">{natalPos.glyph}</span>
+                    {' '}
+                    at {natalPos.deg}°{natalPos.min}&apos;{' '}
+                    <span className="font-symbols text-[#2d1b4e] dark:text-[#8b7ab8]">
+                      {natalPos.glyph}
+                    </span>
                   </span>
                 </p>
               </li>

@@ -369,7 +369,16 @@ export function TransitNatalGaussianPlot({ natal, transitDate, onAdjustDate, onT
 
   return (
     <section className="mt-16 w-full">
-      <h2 className="text-center text-xl font-serif font-bold text-foreground mb-6">
+      <div className="mb-6 flex items-center justify-center gap-2" aria-hidden>
+        <span className="h-px flex-1 max-w-20 bg-gradient-to-r from-transparent via-violet-400/30 to-violet-400/60 rounded-full" />
+        <span className="flex items-center gap-0.5 text-violet-400/90 text-sm drop-shadow-[0_0_8px_rgba(139,92,246,0.4)]">
+          <span className="opacity-70">✧</span>
+          <span className="text-base">✦</span>
+          <span className="opacity-70">✧</span>
+        </span>
+        <span className="h-px flex-1 max-w-20 bg-gradient-to-l from-transparent via-violet-400/30 to-violet-400/60 rounded-full" />
+      </div>
+      <h2 className="text-2xl font-serif font-bold text-center text-violet-400 mb-6">
         {copy.chart.transitsGaussianTitle}
       </h2>
       {showDateControls && (

@@ -142,8 +142,8 @@ export default function ChartTransitsPage() {
         >
           ← {copy.dashboard.title}
         </Link>
-        <h1 className="text-5xl md:text-6xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
-          {copy.chart.transitsTitle}
+        <h1 className="text-5xl md:text-6xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
+          {copy.chart.titlePrefix} {copy.chart.transitsTitle}
         </h1>
         <p className="text-muted-foreground text-sm mt-2 font-bold">
           {copy.chart.transitsSubtitle(transitLabel)}
@@ -170,9 +170,9 @@ export default function ChartTransitsPage() {
       <div className="flex flex-col lg:flex-row items-start justify-center gap-8 mt-8">
         <div className="flex flex-col items-center gap-6 shrink-0">
           <TransitsWheel natal={chart.chartResult} transit={transitResult} size={420} />
-          <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
+          <div className="flex flex-col items-center gap-1 text-sm text-muted-foreground text-center">
             <span><strong className="text-foreground">Outer wheel</strong> — current transits</span>
-            <span><strong className="text-foreground">Inner wheel</strong> — {chart.label} (natal)</span>
+            <span><strong className="text-foreground">Inner wheel</strong> — My chart (natal)</span>
           </div>
         </div>
         <div className="w-full lg:max-w-xl shrink-0">
