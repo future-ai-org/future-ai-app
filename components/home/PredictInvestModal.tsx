@@ -42,6 +42,7 @@ type PredictInvestCopy = typeof copy.predict & {
   investInvalidAmount?: string;
   investNotEnoughCoins?: string;
   investAddCoins?: string;
+  investLoadingBalance?: string;
 };
 
 export function PredictInvestModal({
@@ -266,11 +267,10 @@ export function PredictInvestModal({
             </div>
           </div>
         ) : loadingBalance ? (
-          <div className="mt-6 space-y-4">
-            <p className="text-sm text-muted-foreground">loading balance…</p>
-            <Button type="button" variant="secondary" className="!px-4 !py-2 !text-sm" onClick={onClose}>
-              {p.investCancel ?? 'Cancel'}
-            </Button>
+          <div className="mt-6 text-center">
+            <p className="text-sm font-bold text-muted-foreground">
+              {p.investLoadingBalance ?? 'loading balance'}
+            </p>
           </div>
         ) : showInsufficient ? (
           <div className="mt-6 space-y-4 text-center">

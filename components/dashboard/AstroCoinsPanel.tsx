@@ -1,37 +1,63 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { copy } from '@/lib/copy';
 import { cn } from '@/lib/utils';
 
-export function AstroCoinsPanel({ className }: { className?: string }) {
-  const [coins, setCoins] = useState<number | null>(null);
+type PanelProps = {
+  className?: string;
+  /** From server (Prisma → Postgres / Supabase); avoids a false “0” before the client fetch completes. */
+  initialCoins?: number;
+};
+
+export function AstroCoinsPanel({ className, initialCoins }: PanelProps) {
+  const { status } = useSession();
+  const [coins, setCoins] = useState<number>(() =>
+    typeof initialCoins === 'number' && Number.isFinite(initialCoins)
+      ? Math.max(0, Math.floor(initialCoins))
+      : 0,
+  );
   const [usd, setUsd] = useState('');
   const [flash, setFlash] = useState<string | null>(null);
-  const [loadingBalance, setLoadingBalance] = useState(true);
+  const [loadingBalance, setLoadingBalance] = useState(
+    () => typeof initialCoins !== 'number',
+  );
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const fetchBalance = useCallback(async () => {
-    setLoadingBalance(true);
+    if (status !== 'authenticated') return;
+    const quiet =
+      typeof initialCoins === 'number' && Number.isFinite(initialCoins);
+    if (!quiet) setLoadingBalance(true);
+    const opts: RequestInit = {
+      credentials: 'same-origin',
+      cache: 'no-store',
+    };
     try {
-      const res = await fetch('/api/astro-coins');
+      let res = await fetch('/api/astro-coins', opts);
+      if (res.status === 401) return;
+      if (!res.ok) {
+        await new Promise(r => setTimeout(r, 400));
+        res = await fetch('/api/astro-coins', opts);
+      }
       if (!res.ok) return;
-      const data = (await res.json()) as { coins?: number; stripeEnabled?: boolean };
+      const data = (await res.json()) as { coins?: number };
       if (typeof data.coins === 'number' && Number.isFinite(data.coins)) {
-        setCoins(data.coins);
+        setCoins(Math.max(0, Math.floor(data.coins)));
       }
     } catch {
-      /* ignore */
+      /* keep existing balance */
     } finally {
       setLoadingBalance(false);
     }
-  }, []);
+  }, [status, initialCoins]);
 
   useEffect(() => {
-    void fetchBalance();
-  }, [fetchBalance]);
+    if (status === 'authenticated') void fetchBalance();
+  }, [fetchBalance, status]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -87,8 +113,6 @@ export function AstroCoinsPanel({ className }: { className?: string }) {
     }
   }
 
-  const displayCoins = coins ?? 0;
-
   return (
     <Card
       className={cn(
@@ -103,7 +127,7 @@ export function AstroCoinsPanel({ className }: { className?: string }) {
           </h2>
           <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <span className="text-5xl font-bold tabular-nums tracking-tight text-foreground leading-none sm:text-6xl md:text-7xl lg:text-8xl">
-              {loadingBalance ? '…' : displayCoins.toLocaleString()}
+              {loadingBalance ? '…' : coins.toLocaleString()}
             </span>
             <span className="text-xl font-medium text-muted-foreground sm:text-2xl md:text-3xl">
               {copy.dashboard.astroCoinsLabel}
