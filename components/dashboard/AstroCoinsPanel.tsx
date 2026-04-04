@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -11,9 +11,11 @@ type PanelProps = {
   className?: string;
   /** From server (Prisma → Postgres / Supabase); avoids a false “0” before the client fetch completes. */
   initialCoins?: number;
+  /** Increment after wallet-changing actions (e.g. predict withdraw) to refetch balance. */
+  walletRefreshTick?: number;
 };
 
-export function AstroCoinsPanel({ className, initialCoins }: PanelProps) {
+export function AstroCoinsPanel({ className, initialCoins, walletRefreshTick = 0 }: PanelProps) {
   const { status } = useSession();
   const [coins, setCoins] = useState<number>(() =>
     typeof initialCoins === 'number' && Number.isFinite(initialCoins)
@@ -26,6 +28,7 @@ export function AstroCoinsPanel({ className, initialCoins }: PanelProps) {
     () => typeof initialCoins !== 'number',
   );
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const lastWalletTick = useRef(0);
 
   const fetchBalance = useCallback(async () => {
     if (status !== 'authenticated') return;
@@ -54,6 +57,13 @@ export function AstroCoinsPanel({ className, initialCoins }: PanelProps) {
       setLoadingBalance(false);
     }
   }, [status, initialCoins]);
+
+  useEffect(() => {
+    if (walletRefreshTick > 0 && walletRefreshTick !== lastWalletTick.current) {
+      lastWalletTick.current = walletRefreshTick;
+      void fetchBalance();
+    }
+  }, [walletRefreshTick, fetchBalance]);
 
   useEffect(() => {
     if (status === 'authenticated') void fetchBalance();

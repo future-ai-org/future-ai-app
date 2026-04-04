@@ -280,10 +280,6 @@
       "expiresAt": "2026-08-01"
     }
   ],
-  "investHeadlineVerb": "invest",
-  "investHeadlineIn": "in",
-  "investHeadlineCoin": "coin",
-  "investHeadlineCoins": "coins",
   "investModalHowMany": "how many astro coins do you want on this pick?",
   "investBalanceLabel": "your balance",
   "investSignInPrompt": "sign in to invest astrocoins on predictions.",

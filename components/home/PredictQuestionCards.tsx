@@ -166,6 +166,68 @@ export function PredictQuestionCards() {
     return () => window.clearTimeout(t);
   }, [pool, rowsShown, cardsPerRow]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const qRaw = params.get('predict');
+    const sideRaw = params.get('side')?.toLowerCase();
+    if (!qRaw || (sideRaw !== 'yes' && sideRaw !== 'no')) return;
+
+    const idNum = Number(qRaw);
+    if (!Number.isFinite(idNum)) {
+      params.delete('predict');
+      params.delete('side');
+      const qs = params.toString();
+      window.history.replaceState(
+        {},
+        '',
+        `${window.location.pathname}${qs ? `?${qs}` : ''}${window.location.hash}`,
+      );
+      return;
+    }
+
+    const idx = pool.findIndex(
+      x => x.id === idNum && x.outcome_type === 'Binary',
+    );
+    if (idx < 0) {
+      params.delete('predict');
+      params.delete('side');
+      const qs = params.toString();
+      window.history.replaceState(
+        {},
+        '',
+        `${window.location.pathname}${qs ? `?${qs}` : ''}${window.location.hash}`,
+      );
+      return;
+    }
+
+    const item = pool[idx];
+    const perRow = Math.max(1, cardsPerRow);
+    const needRows = Math.ceil((idx + 1) / perRow);
+    if (needRows > rowsShown) {
+      const expand = window.setTimeout(() => setRowsShown(needRows), 0);
+      return () => window.clearTimeout(expand);
+    }
+
+    params.delete('predict');
+    params.delete('side');
+    const qs = params.toString();
+    window.history.replaceState(
+      {},
+      '',
+      `${window.location.pathname}${qs ? `?${qs}` : ''}${window.location.hash}`,
+    );
+
+    const open = window.setTimeout(() => {
+      setInvest({
+        item,
+        index: idx,
+        side: sideRaw as 'yes' | 'no',
+      });
+    }, 0);
+    return () => window.clearTimeout(open);
+  }, [pool, rowsShown, cardsPerRow]);
+
   function handleLoadMore() {
     setRowsShown((r) => r + 1);
   }

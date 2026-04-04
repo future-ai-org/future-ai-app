@@ -8,56 +8,41 @@ import { Card } from '@/components/ui/Card';
 import { copy } from '@/lib/copy';
 import { adjustBetAmountInput, parseBetAmountInput } from '@/lib/predict-bet-amount-step';
 import { cn } from '@/lib/utils';
+import type { DashboardPredictionBet } from '@/components/dashboard/MyPredictionsSection';
 
-type PredictQuestionItem = {
-  id: number;
-  question: string;
-};
-
-type Props = {
-  open: boolean;
-  onClose: () => void;
-  question: PredictQuestionItem | null;
-  cardIndex: number;
-  side: 'yes' | 'no';
-  onInvested: (cardIndex: number, side: 'yes' | 'no', coins: number) => void;
-};
-
-const NOT_ENOUGH_KEY = 'not_enough';
-
-/** Same gradient treatment as `HeroSection` predict title. */
 const predictTitleRainbow =
   'bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent';
 
-type PredictInvestCopy = typeof copy.predict & {
-  investModalHowMany?: string;
+const NOT_ENOUGH_KEY = 'not_enough';
+
+type PredictCopy = typeof copy.predict & {
   investBalanceLabel?: string;
-  investSignInPrompt?: string;
-  investGoDashboard?: string;
-  investGoSignIn?: string;
   investAmountLabel?: string;
   investConfirm?: string;
   investCancel?: string;
   investSubmitting?: string;
-  investSuccessToast?: string;
   investErrorGeneric?: string;
   investInvalidAmount?: string;
   investNotEnoughCoins?: string;
   investAddCoins?: string;
+  investGoDashboard?: string;
   investLoadingBalance?: string;
+  investSignInPrompt?: string;
+  investGoSignIn?: string;
 };
 
-export function PredictInvestModal({
-  open,
-  onClose,
-  question,
-  cardIndex,
-  side,
-  onInvested,
-}: Props) {
+type Props = {
+  open: boolean;
+  bet: DashboardPredictionBet | null;
+  onClose: () => void;
+  onSuccess: () => void;
+};
+
+export function PredictBetMoreModal({ open, bet, onClose, onSuccess }: Props) {
   const { status } = useSession();
   const titleId = useId();
-  const p = copy.predict as PredictInvestCopy;
+  const p = copy.predict as PredictCopy;
+  const d = copy.dashboard;
 
   const [balance, setBalance] = useState(0);
   const [loadingBalance, setLoadingBalance] = useState(false);
@@ -71,11 +56,7 @@ export function PredictInvestModal({
     setLoadingBalance(true);
     setAuthRequired(false);
     try {
-      const opts: RequestInit = {
-        credentials: 'same-origin',
-        cache: 'no-store',
-      };
-
+      const opts: RequestInit = { credentials: 'same-origin', cache: 'no-store' };
       let res = await fetch('/api/astro-coins', opts);
       if (res.status === 401) {
         setAuthRequired(true);
@@ -96,11 +77,9 @@ export function PredictInvestModal({
         return;
       }
       const data = (await res.json()) as { coins?: number };
-      const n =
-        typeof data.coins === 'number' && Number.isFinite(data.coins)
-          ? Math.max(0, Math.floor(data.coins))
-          : 0;
-      setBalance(n);
+      if (typeof data.coins === 'number' && Number.isFinite(data.coins)) {
+        setBalance(Math.max(0, Math.floor(data.coins)));
+      }
     } catch {
       setBalance(0);
     } finally {
@@ -109,23 +88,20 @@ export function PredictInvestModal({
   }, [status]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !bet) return;
     setErrorKey(null);
     setAmount('1');
     setAuthRequired(false);
-    if (status === 'authenticated') {
-      void fetchBalance();
-    } else {
-      setBalance(0);
-    }
-  }, [open, status, fetchBalance]);
+    if (status === 'authenticated') void fetchBalance();
+    else setBalance(0);
+  }, [open, bet, status, fetchBalance]);
 
   useEffect(() => {
-    if (!open || loadingBalance || status !== 'authenticated') return;
+    if (!open || loadingBalance || status !== 'authenticated' || !bet) return;
     if (balance >= 1) {
       setAmount(String(Math.min(10, balance)));
     }
-  }, [open, loadingBalance, status, balance]);
+  }, [open, loadingBalance, status, balance, bet]);
 
   useEffect(() => {
     if (!open) return;
@@ -138,7 +114,7 @@ export function PredictInvestModal({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!question || status !== 'authenticated' || authRequired) return;
+    if (!bet || status !== 'authenticated' || authRequired) return;
     setErrorKey(null);
     const n = Number.parseInt(amount.replace(/\D/g, ''), 10);
     if (!Number.isFinite(n) || n < 1) {
@@ -152,20 +128,12 @@ export function PredictInvestModal({
 
     setSubmitting(true);
     try {
-      const res = await fetch('/api/predict/bet', {
+      const res = await fetch(`/api/predict/bets/${bet.id}/add`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
-        body: JSON.stringify({
-          questionId: question.id,
-          side,
-          coins: n,
-        }),
+        body: JSON.stringify({ coins: n }),
       });
-      const data = (await res.json().catch(() => ({}))) as {
-        error?: string;
-        balance?: number;
-      };
       if (res.status === 402) {
         setErrorKey(NOT_ENOUGH_KEY);
         void fetchBalance();
@@ -175,10 +143,7 @@ export function PredictInvestModal({
         setErrorKey('generic');
         return;
       }
-      onInvested(cardIndex, side, n);
-      if (typeof data.balance === 'number' && Number.isFinite(data.balance)) {
-        setBalance(Math.max(0, Math.floor(data.balance)));
-      }
+      onSuccess();
       onClose();
     } catch {
       setErrorKey('generic');
@@ -187,14 +152,13 @@ export function PredictInvestModal({
     }
   }
 
-  if (!open || !question) return null;
+  if (!open || !bet) return null;
 
-  const sideLabel = side === 'yes' ? copy.predict.yes : copy.predict.no;
+  const sideNorm = bet.side.trim().toLowerCase();
+  if (sideNorm !== 'yes' && sideNorm !== 'no') return null;
+
+  const sideLabel = sideNorm === 'yes' ? copy.predict.yes : copy.predict.no;
   const notEnoughMessage = p.investNotEnoughCoins ?? "you don't have enough coins.";
-  const showInsufficient =
-    !loadingBalance && status === 'authenticated' && !authRequired && balance < 1;
-  const showForm =
-    status === 'authenticated' && !authRequired && !loadingBalance && balance >= 1;
 
   return (
     <div
@@ -202,15 +166,11 @@ export function PredictInvestModal({
       role="presentation"
       onClick={onClose}
     >
-      <div
-        className="absolute inset-0 bg-black/55 backdrop-blur-[2px]"
-        aria-hidden
-      />
+      <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px]" aria-hidden />
       <Card
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        aria-describedby={`${titleId}-question`}
         className={cn(
           'relative z-[101] w-full max-w-2xl border-violet-500/25 bg-card/95 p-5 sm:p-7 shadow-xl',
         )}
@@ -225,20 +185,22 @@ export function PredictInvestModal({
         >
           {sideLabel}
         </h2>
-        <p
-          id={`${titleId}-question`}
-          className="mt-5 text-center text-xl font-semibold leading-snug text-foreground sm:mt-6 sm:text-2xl md:text-3xl md:leading-tight"
-        >
-          {question.question}
+        <p className="mt-5 text-center text-xl font-semibold leading-snug text-foreground sm:mt-6 sm:text-2xl md:text-3xl md:leading-tight">
+          {bet.question}
+        </p>
+        <p className="mt-3 text-center text-sm text-muted-foreground">
+          {d.myPredictionsBetMoreCurrent}:{' '}
+          <span className="font-semibold tabular-nums text-foreground">
+            {bet.coins.toLocaleString()}
+          </span>{' '}
+          {d.myPredictionsCoins} {d.myPredictionsOn} {sideLabel}
         </p>
 
         {status === 'unauthenticated' || status === 'loading' ? (
           <div className="mt-6 space-y-4">
-            <p className="text-sm text-muted-foreground">
-              {p.investSignInPrompt ?? 'Sign in to invest.'}
-            </p>
+            <p className="text-sm text-muted-foreground">{p.investSignInPrompt ?? 'Sign in.'}</p>
             <div className="flex flex-wrap gap-2">
-              <Link href="/login?callbackUrl=/">
+              <Link href="/login?callbackUrl=/dashboard">
                 <Button type="button" variant="primary" className="!px-4 !py-2 !text-sm">
                   {p.investGoSignIn ?? 'Sign in'}
                 </Button>
@@ -250,55 +212,44 @@ export function PredictInvestModal({
           </div>
         ) : authRequired ? (
           <div className="mt-6 space-y-4">
-            <p className="text-sm text-muted-foreground">
-              {p.investSignInPrompt ?? 'Sign in to continue.'}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <Link href="/login?callbackUrl=/">
-                <Button type="button" variant="primary" className="!px-4 !py-2 !text-sm">
-                  {p.investGoSignIn ?? 'Sign in'}
-                </Button>
-              </Link>
-              <Button type="button" variant="secondary" className="!px-4 !py-2 !text-sm" onClick={onClose}>
-                {p.investCancel ?? 'Cancel'}
+            <p className="text-sm text-muted-foreground">{p.investSignInPrompt ?? 'Sign in.'}</p>
+            <Link href="/login?callbackUrl=/dashboard">
+              <Button type="button" variant="primary" className="!px-4 !py-2 !text-sm">
+                {p.investGoSignIn ?? 'Sign in'}
               </Button>
-            </div>
+            </Link>
           </div>
         ) : loadingBalance ? (
           <div className="mt-6 text-center">
             <p className="text-sm font-bold text-muted-foreground">
-              {p.investLoadingBalance ?? 'loading balance'}
+              {p.investLoadingBalance ?? 'loading…'}
             </p>
           </div>
-        ) : showInsufficient ? (
+        ) : balance < 1 ? (
           <div className="mt-6 space-y-4 text-center">
             <p className="text-sm font-bold text-muted-foreground">{notEnoughMessage}</p>
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <Link href="/dashboard">
-                <Button type="button" variant="primary" className="!px-4 !py-2 !text-sm">
-                  {p.investAddCoins ?? p.investGoDashboard ?? 'Add coins'}
-                </Button>
-              </Link>
-              <Button type="button" variant="secondary" className="!px-4 !py-2 !text-sm" onClick={onClose}>
-                {p.investCancel ?? 'Cancel'}
+            <Link href="/dashboard">
+              <Button type="button" variant="primary" className="!px-4 !py-2 !text-sm">
+                {p.investAddCoins ?? p.investGoDashboard ?? 'Add coins'}
               </Button>
-            </div>
+            </Link>
           </div>
-        ) : showForm ? (
+        ) : (
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <p className="text-xs text-muted-foreground">
               {p.investBalanceLabel ?? 'Balance'}:{' '}
-              <span className="font-semibold tabular-nums text-foreground">
-                {balance.toLocaleString()}
-              </span>
+              <span className="font-semibold tabular-nums text-foreground">{balance.toLocaleString()}</span>
             </p>
-            <p className="text-sm text-muted-foreground">{p.investModalHowMany}</p>
+            <p className="text-sm text-muted-foreground">{d.myPredictionsBetMoreHowMany}</p>
             <div>
-              <label htmlFor="predict-invest-amount" className="mb-1 block text-xs font-medium text-muted-foreground">
+              <label
+                htmlFor="predict-bet-more-amount"
+                className="mb-1 block text-xs font-medium text-muted-foreground"
+              >
                 {p.investAmountLabel ?? 'Amount'}
               </label>
               <input
-                id="predict-invest-amount"
+                id="predict-bet-more-amount"
                 type="text"
                 inputMode="numeric"
                 autoComplete="off"
@@ -360,42 +311,22 @@ export function PredictInvestModal({
             {errorKey === 'generic' ? (
               <p className="text-sm text-red-400/90">{p.investErrorGeneric ?? 'Error'}</p>
             ) : null}
-            {errorKey === NOT_ENOUGH_KEY ? (
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <Link href="/dashboard">
-                  <Button type="button" variant="primary" className="!px-4 !py-2 !text-sm">
-                    {p.investAddCoins ?? p.investGoDashboard ?? 'Add coins'}
-                  </Button>
-                </Link>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="!px-4 !py-2 !text-sm"
-                  disabled={submitting}
-                  onClick={onClose}
-                >
-                  {p.investCancel ?? 'Cancel'}
-                </Button>
-              </div>
-            ) : null}
             <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
               <Button type="submit" variant="primary" disabled={submitting} className="!px-4 !py-2 !text-sm">
                 {submitting ? p.investSubmitting ?? '…' : p.investConfirm ?? 'Confirm'}
               </Button>
-              {errorKey !== NOT_ENOUGH_KEY ? (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="!px-4 !py-2 !text-sm"
-                  disabled={submitting}
-                  onClick={onClose}
-                >
-                  {p.investCancel ?? 'Cancel'}
-                </Button>
-              ) : null}
+              <Button
+                type="button"
+                variant="secondary"
+                className="!px-4 !py-2 !text-sm"
+                disabled={submitting}
+                onClick={onClose}
+              >
+                {p.investCancel ?? 'Cancel'}
+              </Button>
             </div>
           </form>
-        ) : null}
+        )}
       </Card>
     </div>
   );

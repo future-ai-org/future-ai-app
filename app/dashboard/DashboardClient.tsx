@@ -37,6 +37,8 @@ export default function DashboardClient({ initialAstroCoins }: Props) {
   const [predictions, setPredictions] = useState<DashboardPredictionBet[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [dataRefreshKey, setDataRefreshKey] = useState(0);
+  const [walletRefreshTick, setWalletRefreshTick] = useState(0);
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.replace('/login?callbackUrl=/dashboard');
@@ -68,7 +70,7 @@ export default function DashboardClient({ initialAstroCoins }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [status, router]);
+  }, [status, router, dataRefreshKey]);
 
   async function handleDelete(id: string) {
     setDeletingId(id);
@@ -96,13 +98,17 @@ export default function DashboardClient({ initialAstroCoins }: Props) {
         </h1>
       </div>
 
-      <AstroCoinsPanel initialCoins={initialAstroCoins} />
+      <AstroCoinsPanel initialCoins={initialAstroCoins} walletRefreshTick={walletRefreshTick} />
 
       {loading ? (
         <p className="text-muted-foreground text-sm">loading your dashboard…</p>
       ) : (
         <>
-          <MyPredictionsSection bets={predictions} />
+          <MyPredictionsSection
+            bets={predictions}
+            onPredictionsRefresh={() => setDataRefreshKey(k => k + 1)}
+            onWalletRefresh={() => setWalletRefreshTick(t => t + 1)}
+          />
           {(() => {
             const primary = charts.find(c => c.isPrimary === true);
             if (!primary) return null;
