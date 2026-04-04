@@ -12,10 +12,10 @@ import { copy } from '@/lib/copy';
 import { computeCompatibility, planetGlyph } from '@/lib/astro/compatibility';
 import {
   getCompatibilityExplanation,
-  getPlacementScore,
+  getSymmetricPlacementScore,
   getOverallScore,
   getSameSignPlanets,
-  getElementCompatiblePlanets,
+  getElementRelationPerPlanet,
 } from '@/lib/astro/compatibilityInterpretations';
 import type { ChartResult } from '@/lib/astro/types';
 import type { PlanetName } from '@/lib/astro/types';
@@ -172,7 +172,7 @@ function CompatibilityContent() {
                 }}
                 className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground text-sm mb-2"
               >
-                <option value="">{copy.compatibility.chooseChart}</option>
+                <option value="" disabled hidden />
                 {savedCharts
                   .filter(c => !(chartB?.type === 'saved' && c.id === chartB.id))
                   .map(c => (
@@ -269,7 +269,7 @@ function CompatibilityContent() {
                 }}
                 className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground text-sm mb-2"
               >
-                <option value="">{copy.compatibility.chooseChart}</option>
+                <option value="" disabled hidden />
                 {savedCharts
                   .filter(c => !(chartA?.type === 'saved' && c.id === chartA.id))
                   .map(c => (
@@ -324,7 +324,12 @@ function CompatibilityContent() {
       {/* Compatibility result */}
       {compatibilityResult && (() => {
         const sameSignPlanets = getSameSignPlanets(compatibilityResult.aInB, compatibilityResult.bInA);
-        const elementCompatiblePlanets = getElementCompatiblePlanets(compatibilityResult.aInB, compatibilityResult.bInA);
+        const elementRelationByPlanet = getElementRelationPerPlanet(
+          compatibilityResult.aInB,
+          compatibilityResult.bInA,
+        );
+        const houseAinB = new Map(compatibilityResult.aInB.map((r) => [r.planet.name, r.house]));
+        const houseBinA = new Map(compatibilityResult.bInA.map((r) => [r.planet.name, r.house]));
         const overall = getOverallScore(compatibilityResult.aInB, compatibilityResult.bInA);
         const scoreLabelClass = (label: string) =>
           label === 'high'
@@ -367,11 +372,14 @@ function CompatibilityContent() {
                     </thead>
                     <tbody>
                       {compatibilityResult.aInB.map((row, i) => {
-                        const placement = getPlacementScore(
-                          row.planet.name as PlanetName,
+                        const name = row.planet.name as PlanetName;
+                        const hBA = houseBinA.get(row.planet.name) ?? row.house;
+                        const placement = getSymmetricPlacementScore(
+                          name,
                           row.house,
+                          hBA,
                           sameSignPlanets,
-                          elementCompatiblePlanets,
+                          elementRelationByPlanet.get(name) ?? 'none',
                         );
                         return (
                           <tr
@@ -429,11 +437,14 @@ function CompatibilityContent() {
                     </thead>
                     <tbody>
                       {compatibilityResult.bInA.map((row, i) => {
-                        const placement = getPlacementScore(
-                          row.planet.name as PlanetName,
+                        const name = row.planet.name as PlanetName;
+                        const hAB = houseAinB.get(row.planet.name) ?? row.house;
+                        const placement = getSymmetricPlacementScore(
+                          name,
+                          hAB,
                           row.house,
                           sameSignPlanets,
-                          elementCompatiblePlanets,
+                          elementRelationByPlanet.get(name) ?? 'none',
                         );
                         return (
                           <tr

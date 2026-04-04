@@ -178,7 +178,6 @@ export const copy = {
     chart2: 'chart 2',
     selectSaved: 'saved chart',
     calculateNew: 'calculate new',
-    chooseChart: 'choose a chart',
     yourCharts: 'your saved charts',
     noCharts: 'No saved charts. Calculate one above or go to dashboard.',
     planetsInHouses: (name: string) => `${name}'s planets in the other's houses`,

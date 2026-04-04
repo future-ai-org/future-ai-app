@@ -74,12 +74,19 @@ const SIGN_ELEMENTS: Element[] = [
   'fire', 'earth', 'air', 'water', 'fire', 'earth', 'air', 'water', 'fire', 'earth', 'air', 'water',
 ];
 
-/** Earth–Water and Fire–Air are compatible; same element is compatible. */
+/** Same element (strongest ease); earth–water and fire–air (good complementary pairs); else no elemental harmony. */
+export type ElementRelation = 'same' | 'complementary' | 'none';
+
+export function getElementRelation(elA: Element, elB: Element): ElementRelation {
+  if (elA === elB) return 'same';
+  if ((elA === 'earth' && elB === 'water') || (elA === 'water' && elB === 'earth')) return 'complementary';
+  if ((elA === 'fire' && elB === 'air') || (elA === 'air' && elB === 'fire')) return 'complementary';
+  return 'none';
+}
+
+/** True when {@link getElementRelation} is same or complementary. */
 export function elementsCompatible(elA: Element, elB: Element): boolean {
-  if (elA === elB) return true;
-  if ((elA === 'earth' && elB === 'water') || (elA === 'water' && elB === 'earth')) return true;
-  if ((elA === 'fire' && elB === 'air') || (elA === 'air' && elB === 'fire')) return true;
-  return false;
+  return getElementRelation(elA, elB) !== 'none';
 }
 
 export function getElementForSign(signIndex: number): Element {
@@ -108,47 +115,66 @@ export function getSameSignPlanets(
   return same;
 }
 
-/** For each planet, whether the two charts have compatible elements (earth/water, fire/air, or same). */
-export function getElementCompatiblePlanets(
+/** Per-planet elemental harmony between the two charts (symmetric in A/B). */
+export function getElementRelationPerPlanet(
   aInB: { planet: { name: string; longitude: number } }[],
   bInA: { planet: { name: string; longitude: number } }[],
-): Set<PlanetName> {
+): Map<PlanetName, ElementRelation> {
   const signA = new Map<string, number>();
   const signB = new Map<string, number>();
   aInB.forEach((r) => signA.set(r.planet.name, SIGN_INDEX(r.planet.longitude)));
   bInA.forEach((r) => signB.set(r.planet.name, SIGN_INDEX(r.planet.longitude)));
-  const compatible = new Set<PlanetName>();
+  const out = new Map<PlanetName, ElementRelation>();
   signA.forEach((sign, name) => {
     const other = signB.get(name);
     if (other === undefined) return;
-    if (elementsCompatible(getElementForSign(sign), getElementForSign(other)))
-      compatible.add(name as PlanetName);
+    out.set(
+      name as PlanetName,
+      getElementRelation(getElementForSign(sign), getElementForSign(other)),
+    );
   });
-  return compatible;
+  return out;
+}
+
+const SAME_ELEMENT_SCORE_BOOST = 3;
+const COMPLEMENTARY_ELEMENT_SCORE_BOOST = 1;
+
+function houseScoreDelta(planetName: PlanetName, house: number): number {
+  let d = 0;
+  if (HARMONIOUS[planetName]?.includes(house)) d += 2;
+  if (CHALLENGING[planetName]?.includes(house)) d -= 2;
+  if ([5, 7, 8].includes(house) && ['Venus', 'Moon', 'Sun'].includes(planetName)) d += 1;
+  return d;
+}
+
+function elementNote(relation: ElementRelation): string | null {
+  if (relation === 'same') return 'Same element — very natural rapport';
+  if (relation === 'complementary')
+    return 'Earth supports water (and vice versa); fire and air energise each other';
+  return null;
 }
 
 /**
- * Returns a compatibility score (1–10), label, and short note for a planet-in-house placement.
- * Same sign => 10. Compatible elements (earth/water, fire/air, or same) => +2. House logic as before.
+ * One score per planet for both compatibility tables: averages house effects from
+ * "A's planet in B's house" and "B's planet in A's house", then applies elemental tier
+ * (same element strongest; earth–water and fire–air a lighter boost).
  */
-export function getPlacementScore(
+export function getSymmetricPlacementScore(
   planetName: PlanetName,
-  house: number,
+  houseAPlanetInB: number,
+  houseBPlanetInA: number,
   sameSignPlanets?: Set<PlanetName>,
-  elementCompatiblePlanets?: Set<PlanetName>,
+  elementRelation: ElementRelation = 'none',
 ): PlacementScore {
   if (sameSignPlanets?.has(planetName)) {
     return { score: 10, label: 'high', note: 'Same sign — strong resonance' };
   }
-  const harmonious = HARMONIOUS[planetName]?.includes(house) ?? false;
-  const challenging = CHALLENGING[planetName]?.includes(house) ?? false;
-  let score = BASE_SCORE;
-  if (harmonious) score += 2;
-  if (challenging) score -= 2;
-  if ([5, 7, 8].includes(house) && ['Venus', 'Moon', 'Sun'].includes(planetName))
-    score = Math.min(10, score + 1);
-  if (elementCompatiblePlanets?.has(planetName))
-    score = Math.min(10, score + 2);
+
+  const houseBlend =
+    (houseScoreDelta(planetName, houseAPlanetInB) + houseScoreDelta(planetName, houseBPlanetInA)) / 2;
+  let score = BASE_SCORE + Math.round(houseBlend);
+  if (elementRelation === 'same') score += SAME_ELEMENT_SCORE_BOOST;
+  else if (elementRelation === 'complementary') score += COMPLEMENTARY_ELEMENT_SCORE_BOOST;
   score = Math.max(1, Math.min(10, score));
 
   const label: PlacementScore['label'] =
@@ -158,9 +184,8 @@ export function getPlacementScore(
     medium: 'Neutral to mixed',
     low: 'May need awareness',
   };
-  const note = elementCompatiblePlanets?.has(planetName)
-    ? 'Compatible elements (earth–water, fire–air, or same)'
-    : notes[label];
+  const elementLine = elementNote(elementRelation);
+  const note = elementLine ?? notes[label];
   return { score, label, note };
 }
 
@@ -193,14 +218,21 @@ export function getOverallScore(
     };
   }
 
-  const elementCompatiblePlanets = getElementCompatiblePlanets(aInB, bInA);
-  const placements = [
-    ...aInB.map((r) => ({ planet: r.planet.name as PlanetName, house: r.house })),
-    ...bInA.map((r) => ({ planet: r.planet.name as PlanetName, house: r.house })),
-  ];
-  const scores = placements.map((p) =>
-    getPlacementScore(p.planet, p.house, sameSignPlanets, elementCompatiblePlanets).score,
-  );
+  const elementRelationByPlanet = getElementRelationPerPlanet(aInB, bInA);
+  const houseBinA = new Map(bInA.map((r) => [r.planet.name, r.house]));
+  const scores = aInB.map((r) => {
+    const name = r.planet.name as PlanetName;
+    const hAB = r.house;
+    const hBA = houseBinA.get(r.planet.name);
+    if (hBA === undefined) return BASE_SCORE;
+    return getSymmetricPlacementScore(
+      name,
+      hAB,
+      hBA,
+      sameSignPlanets,
+      elementRelationByPlanet.get(name) ?? 'none',
+    ).score;
+  });
   const avg = scores.reduce((a, b) => a + b, 0) / (scores.length || 1);
   const scoreOutOf100 = Math.round((avg / 10) * 100);
 
