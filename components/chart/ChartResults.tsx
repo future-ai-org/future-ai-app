@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ChartWheel } from './ChartWheel';
 import { AscendantCard } from './AscendantCard';
 import { PlanetTable } from './PlanetTable';
+import { NatalAspectsTable } from './NatalAspectsTable';
 import { Button } from '@/components/ui/Button';
 import { copy } from '@/lib/copy';
 import { cn } from '@/lib/utils';
@@ -25,9 +26,11 @@ interface Props {
   onAdjustHours?: (delta: number) => void;
   /** When true, only render the chart wheel (and time controls); no planet table. Use when placing the wheel beside another panel. */
   wheelOnly?: boolean;
+  /** When false, the natal major-aspects table is omitted. Default true. */
+  showNatalAspectsTable?: boolean;
 }
 
-export function ChartResults({ result, showAscendant = true, showAngles = showAscendant, showAscOnly = false, showHouses = showAscendant, chartSize = DEFAULT_CHART_SIZE, onAdjustHours, wheelOnly = false }: Props) {
+export function ChartResults({ result, showAscendant = true, showAngles = showAscendant, showAscOnly = false, showHouses = showAscendant, chartSize = DEFAULT_CHART_SIZE, onAdjustHours, wheelOnly = false, showNatalAspectsTable = true }: Props) {
   const ascAngleUnknown = result.calculation?.ascendantAngleUnknown === true;
   const effectiveShowAscOnly = ascAngleUnknown || showAscOnly;
 
@@ -84,12 +87,15 @@ export function ChartResults({ result, showAscendant = true, showAngles = showAs
       {wheelOnly ? (
         wheelBlock
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start min-w-0">
-          {wheelBlock}
-          <div className="min-w-0">
-            <PlanetTable result={result} showHouses={showHouses} />
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start min-w-0">
+            {wheelBlock}
+            <div className="min-w-0">
+              <PlanetTable result={result} showHouses={showHouses} />
+            </div>
           </div>
-        </div>
+          {showNatalAspectsTable ? <NatalAspectsTable result={result} className="mt-8" /> : null}
+        </>
       )}
     </div>
   );

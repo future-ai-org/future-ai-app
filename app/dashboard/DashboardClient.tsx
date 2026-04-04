@@ -113,6 +113,8 @@ export default function DashboardClient({ initialAstroCoins }: Props) {
           {(() => {
             const primary = charts.find(c => c.isPrimary === true);
             if (!primary) return null;
+            const showPrimaryTitle =
+              primary.label.trim().toLowerCase() !== copy.dashboard.myChart;
             const primarySectionHeading = (
               <h2 className="text-sm sm:text-base md:text-lg font-extrabold text-violet-500 dark:text-violet-400 tracking-widest uppercase mb-8">
                 {copy.dashboard.yourChartAndTransits}
@@ -126,15 +128,17 @@ export default function DashboardClient({ initialAstroCoins }: Props) {
                 <section className="mb-12 mx-auto w-full max-w-6xl">
                   {primarySectionHeading}
                   <div className="flex items-center gap-3">
-                    <p
-                      className={cn(
-                        'text-sm font-semibold',
-                        'bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent',
-                        'dark:from-violet-400 dark:to-fuchsia-300',
-                      )}
-                    >
-                      {primary.label}
-                    </p>
+                    {showPrimaryTitle ? (
+                      <p
+                        className={cn(
+                          'text-sm font-semibold',
+                          'bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent',
+                          'dark:from-violet-400 dark:to-fuchsia-300',
+                        )}
+                      >
+                        {primary.label}
+                      </p>
+                    ) : null}
                     <Link href={`/chart/${primary.id}`}>
                       <Button variant="secondary" className="px-3 py-2 text-sm">
                         {copy.dashboard.view}
@@ -148,15 +152,17 @@ export default function DashboardClient({ initialAstroCoins }: Props) {
             return (
               <section className="mb-12 mx-auto w-full max-w-6xl">
                 {primarySectionHeading}
-                <p
-                  className={cn(
-                    'mb-6 mx-auto max-w-2xl text-center text-2xl sm:text-3xl font-semibold tracking-tight px-2 text-balance',
-                    'bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent',
-                    'dark:from-violet-400 dark:to-fuchsia-300',
-                  )}
-                >
-                  {primary.label}
-                </p>
+                {showPrimaryTitle ? (
+                  <p
+                    className={cn(
+                      'mb-6 mx-auto max-w-2xl text-center text-2xl sm:text-3xl font-semibold tracking-tight px-2 text-balance',
+                      'bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent',
+                      'dark:from-violet-400 dark:to-fuchsia-300',
+                    )}
+                  >
+                    {primary.label}
+                  </p>
+                ) : null}
                 <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] gap-10 lg:gap-12 lg:items-center justify-items-center">
                   <div className="flex w-full flex-col items-center text-center">
                     <div className="w-full max-w-[min(420px,100%)]">

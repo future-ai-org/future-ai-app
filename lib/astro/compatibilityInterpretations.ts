@@ -198,6 +198,26 @@ export function getCompatibilityExplanation(
   return `Your ${planet} touches their ${houseMeaning}.`;
 }
 
+/**
+ * Single row blurb for the score-adjacent column: planet meaning once, both
+ * cross-chart houses (avoids repeating the same planet line under A and B).
+ */
+export function getMergedCrossChartExplanation(
+  planetName: PlanetName,
+  houseAPlanetInB: number,
+  houseBPlanetInA: number,
+  chartALabel: string,
+  chartBLabel: string,
+): string {
+  const planet = PLANET_MEANINGS[planetName] ?? planetName.toLowerCase();
+  const areaB = HOUSE_MEANINGS[houseAPlanetInB] ?? `house ${houseAPlanetInB}`;
+  const areaA = HOUSE_MEANINGS[houseBPlanetInA] ?? `house ${houseBPlanetInA}`;
+  if (houseAPlanetInB === houseBPlanetInA) {
+    return `${planetName} (${planet}) meets the same life area in both charts (${areaB}).`;
+  }
+  return `${chartALabel}'s ${planetName} (${planet}) colours ${chartBLabel}'s ${areaB}. ${chartBLabel}'s ${planetName} colours ${chartALabel}'s ${areaA}.`;
+}
+
 const ALL_PLANETS_COUNT = 10;
 
 /**

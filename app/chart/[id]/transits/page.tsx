@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { TransitsWheel } from '@/components/chart/TransitsWheel';
 import { TransitsTable } from '@/components/chart/TransitsTable';
+import { TransitNatalAspectsSnapshot } from '@/components/chart/TransitNatalAspectsSnapshot';
 import { TransitNatalGaussianPlot } from '@/components/chart/TransitNatalGaussianPlot';
 import { Button } from '@/components/ui/Button';
 import { copy } from '@/lib/copy';
@@ -188,6 +189,7 @@ export default function ChartTransitsPage() {
           <TransitsTable natal={chart.chartResult} transit={transitResult} />
         </div>
       </div>
+      <TransitNatalAspectsSnapshot natal={chart.chartResult} transit={transitResult} />
       <TransitNatalGaussianPlot
           natal={chart.chartResult}
           transitDate={transitDate}

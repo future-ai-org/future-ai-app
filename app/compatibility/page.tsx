@@ -11,7 +11,7 @@ import { useChartCalculation } from '@/hooks/useChartCalculation';
 import { copy } from '@/lib/copy';
 import { computeCompatibility, planetGlyph } from '@/lib/astro/compatibility';
 import {
-  getCompatibilityExplanation,
+  getMergedCrossChartExplanation,
   getSymmetricPlacementScore,
   getOverallScore,
   getSameSignPlanets,
@@ -354,7 +354,7 @@ function CompatibilityContent() {
             </Card>
             <Card className="p-4 overflow-hidden">
               <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-                <table className="w-full text-sm min-w-[52rem] border-separate border-spacing-0">
+                <table className="w-full text-sm min-w-[44rem] border-separate border-spacing-0">
                   <thead>
                     <tr className="text-left text-muted-foreground border-b border-border">
                       <th className="pb-2 pr-3 align-bottom whitespace-nowrap" rowSpan={2}>
@@ -374,13 +374,13 @@ function CompatibilityContent() {
                       </th>
                       <th
                         className="pb-2 px-3 align-bottom text-fuchsia-300 font-medium border-l border-border/60"
-                        colSpan={3}
+                        colSpan={2}
                       >
                         {compatibilityResult.chartALabel}
                       </th>
                       <th
                         className="pb-2 pl-3 align-bottom text-fuchsia-300 font-medium border-l border-border/60"
-                        colSpan={3}
+                        colSpan={2}
                       >
                         {compatibilityResult.chartBLabel}
                       </th>
@@ -390,12 +390,10 @@ function CompatibilityContent() {
                         {copy.compatibility.sign}
                       </th>
                       <th className="pb-2 pr-2 pt-1 whitespace-nowrap">{copy.compatibility.house}</th>
-                      <th className="pb-2 pr-2 pt-1 min-w-[7rem]">{copy.compatibility.explanation}</th>
                       <th className="pb-2 pr-2 pt-1 whitespace-nowrap border-l border-border/60 pl-3">
                         {copy.compatibility.sign}
                       </th>
-                      <th className="pb-2 pr-2 pt-1 whitespace-nowrap">{copy.compatibility.house}</th>
-                      <th className="pb-2 pt-1 min-w-[7rem]">{copy.compatibility.explanation}</th>
+                      <th className="pb-2 pt-1 whitespace-nowrap">{copy.compatibility.house}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -425,8 +423,16 @@ function CompatibilityContent() {
                               {placement.score}/10
                             </span>
                           </td>
-                          <td className="py-2.5 pr-4 text-muted-foreground text-xs leading-snug align-top max-w-[18rem]">
-                            {placement.note}
+                          <td className="py-2.5 pr-4 text-muted-foreground text-xs leading-snug align-top max-w-[22rem]">
+                            <span className="font-medium text-violet-200/90">{placement.note}</span>
+                            {' '}
+                            {getMergedCrossChartExplanation(
+                              name,
+                              rowA.house,
+                              rowB.house,
+                              compatibilityResult.chartALabel,
+                              compatibilityResult.chartBLabel,
+                            )}
                           </td>
                           <td className="py-2.5 pr-2 border-l border-border/40 pl-3 whitespace-nowrap">
                             <span className="inline-flex items-center gap-1">
@@ -435,9 +441,6 @@ function CompatibilityContent() {
                             </span>
                           </td>
                           <td className="py-2.5 pr-2 whitespace-nowrap">house {rowA.house}</td>
-                          <td className="py-2.5 pr-2 text-muted-foreground text-xs max-w-[14rem]">
-                            {getCompatibilityExplanation(name, rowA.house)}
-                          </td>
                           <td className="py-2.5 pr-2 border-l border-border/40 pl-3 whitespace-nowrap">
                             <span className="inline-flex items-center gap-1">
                               <span aria-hidden>{rowB.glyph}</span>
@@ -445,9 +448,6 @@ function CompatibilityContent() {
                             </span>
                           </td>
                           <td className="py-2.5 pr-2 whitespace-nowrap">house {rowB.house}</td>
-                          <td className="py-2.5 text-muted-foreground text-xs max-w-[14rem]">
-                            {getCompatibilityExplanation(name, rowB.house)}
-                          </td>
                         </tr>
                       );
                     })}

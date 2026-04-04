@@ -266,7 +266,15 @@ export default function TodayPage() {
 
       {result ? (
         <div className="w-full flex justify-center overflow-hidden">
-          <ChartResults result={result} chartSize={720} onAdjustHours={adjustHours} showAscendant={false} showAngles showHouses />
+          <ChartResults
+            result={result}
+            chartSize={720}
+            onAdjustHours={adjustHours}
+            showAscendant={false}
+            showAngles
+            showHouses
+            showNatalAspectsTable={false}
+          />
         </div>
       ) : (
         <p className="text-muted-foreground text-center py-12">loading…</p>

@@ -188,7 +188,7 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
               </label>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs text-muted-foreground tracking-wider">
+                <label className="text-xs font-bold text-muted-foreground tracking-wider">
                   {copy.form.ascendantSignLabel}
                 </label>
                 <select

@@ -130,7 +130,7 @@ export const copy = {
     delete: 'delete',
     view: 'view',
     createdAt: 'saved',
-    transitNewsTitle: 'upcoming aspects',
+    transitNewsTitle: 'upcoming aspects for my chart',
     transitNewsNoneInRange: 'none in search range',
     /** Inline verb phrase between transit sign and natal planet (see DashboardTransitNews). */
     transitNewsAspectVerb: {
@@ -261,7 +261,21 @@ export const copy = {
     transitsSubtitle: (dateLabel: string) => `current sky as of ${dateLabel}`,
     transitsTableNatal: 'natal',
     transitsTableTransits: 'transits',
-    transitsGaussianTitle: 'transit–natal influences',
+    transitNatalInfluencesTableTitle: 'transit–natal influences table',
+    transitNatalInfluencesPlotsTitle: 'transit–natal influences plots',
+    /** Snapshot table on /chart/[id]/transits: major aspects at the selected moment. */
+    transitNatalSnapshotNone: 'no major transit–natal aspects in orb at this moment.',
+    transitNatalSnapshotColTransit: 'transit',
+    transitNatalSnapshotColNatal: 'natal',
+    transitNatalSnapshotColSigns: 'signs',
+    /** Whole-sign house of the natal planet in the birth chart. */
+    transitNatalSnapshotColNatalHouse: 'natal house',
+    natalAspectsTitle: 'natal major aspects',
+    natalAspectsNone: 'no major aspects in orb for listed bodies.',
+    natalAspectsColPoint1: 'point 1',
+    natalAspectsColAspect: 'aspect',
+    natalAspectsColPoint2: 'point 2',
+    natalAspectsColOrb: 'orb',
   },
 
   today: {
@@ -344,7 +358,6 @@ export const copy = {
 
   ascendant: {
     title: 'ascendant (rising sign)',
-    risingSuffix: '— rising sign',
     mcLabel: 'mc (midheaven):',
     houseLabel: (n: number) => `house ${n}:`,
   },
