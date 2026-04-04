@@ -11,6 +11,8 @@ export const copy = {
 
   nav: {
     home: 'home',
+    predict: 'predict',
+    chartOfMoment: 'current sky',
     chart: 'start your journey',
     todayChart: "today's chart",
     influence: 'influences',
@@ -128,7 +130,8 @@ export const copy = {
     moonTargetFull: 'full',
     moonTargetNew: 'new',
     links: [
-      { label: 'home', href: '/' },
+      { label: 'predict', href: '/' },
+      { label: 'current sky', href: '/today' },
       { label: 'start your journey', href: '/chart' },
       { label: 'influences', href: '/influence' },
       { label: 'compatibility', href: '/compatibility' },
@@ -169,6 +172,21 @@ export const copy = {
     features: [
       { icon: '☉', label: 'learn about yourself' },
       { icon: 'handshake', label: 'check compatibility with others' },
+    ],
+  },
+
+  predict: {
+    heroIcon: '✦',
+    title: 'predict',
+    yes: 'yes',
+    no: 'no',
+    questionsAria: 'quick questions',
+    questions: [
+      'have you ever had a chart calculated for your birth time and place?',
+      'do you notice when mercury is retrograde?',
+      'would you like timing hints for the next few weeks?',
+      'are you comparing your chart with someone else’s?',
+      'do you check the moon sign from day to day?',
     ],
   },
 
@@ -226,7 +244,7 @@ export const copy = {
   },
 
   today: {
-    title: "chart of the moment",
+    title: 'current sky',
     subtitle: 'current transits in San Francisco',
     goToToday: 'go back to today',
     prevDay: '1 day before',
