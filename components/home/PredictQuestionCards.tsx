@@ -294,9 +294,7 @@ export function PredictQuestionCards() {
               <Card
                 className={cn(
                   'w-full max-w-[13.5rem] sm:max-w-[15rem] lg:max-w-none flex flex-col p-3.5 sm:p-4 min-h-0',
-                  isMc
-                    ? 'min-h-[16.5rem] sm:min-h-[18.5rem]'
-                    : 'aspect-[10/11] max-h-[min(100vw,30rem)]',
+                  'aspect-[10/11] max-h-[min(100vw,30rem)]',
                   'border-violet-500/20 bg-card/80',
                 )}
               >
@@ -304,19 +302,33 @@ export function PredictQuestionCards() {
                   {item.question}
                 </p>
 
-                <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center px-0.5 py-5 sm:py-6 gap-2">
-                  <p className="pt-3 sm:pt-4 text-sm sm:text-base font-bold text-muted-foreground leading-tight tracking-wide">
-                    {copy.predict.estimationPrefix}
-                  </p>
-                  <p
-                    className="pb-3 sm:pb-4 text-4xl sm:text-5xl font-serif font-bold tabular-nums leading-none tracking-tight bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent"
-                    aria-hidden
+                <div className="flex-1 min-h-0 flex flex-col">
+                  <div
+                    className={cn(
+                      'flex flex-col items-center justify-center text-center px-0.5 gap-2',
+                      isMc ? 'shrink-0 py-2 sm:py-3' : 'min-h-0 flex-1 py-5 sm:py-6',
+                    )}
                   >
-                    {pct}%
-                  </p>
-                </div>
+                    <p
+                      className={cn(
+                        'text-sm sm:text-base font-bold text-muted-foreground leading-tight tracking-wide',
+                        isMc ? 'pt-1' : 'pt-3 sm:pt-4',
+                      )}
+                    >
+                      {copy.predict.estimationPrefix}
+                    </p>
+                    <p
+                      className={cn(
+                        'text-4xl sm:text-5xl font-serif font-bold tabular-nums leading-none tracking-tight bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent',
+                        isMc ? 'pb-1' : 'pb-3 sm:pb-4',
+                      )}
+                      aria-hidden
+                    >
+                      {pct}%
+                    </p>
+                  </div>
 
-                {isBinary ? (
+                  {isBinary ? (
                   <div
                     className="shrink-0 flex justify-center gap-1.5 sm:gap-2 w-full pt-1"
                     role="group"
@@ -357,33 +369,37 @@ export function PredictQuestionCards() {
                   </div>
                 ) : (
                   <div
-                    className="shrink-0 grid grid-cols-1 gap-1 w-full pt-1"
+                    className="min-h-0 flex-1 overflow-y-auto overscroll-contain w-full pt-1 -mx-0.5 px-0.5 [scrollbar-gutter:stable]"
                     role="group"
                     aria-label={item.question}
                   >
-                    {options.map((opt, optIdx) => (
-                      <Button
-                        key={opt}
-                        type="button"
-                        variant={selected === opt ? 'primary' : 'secondary'}
-                        className={cn(
-                          '!px-2.5 !py-1.5 !text-[0.65rem] sm:!text-xs min-w-0 !leading-tight text-left justify-start',
-                          selected === opt &&
-                            'ring-1 ring-violet-400/60 ring-offset-1 ring-offset-background',
-                        )}
-                        aria-pressed={selected === opt}
-                        onClick={() => setSelection(i, opt)}
-                      >
-                        <span className="font-bold tabular-nums truncate w-full">
-                          {opt}{' '}
-                          <span className="opacity-90 font-bold">
-                            {equalOptionPercent(optIdx, options.length)}%
+                    <div className="grid grid-cols-1 gap-1 w-full pb-0.5">
+                      {options.map((opt, optIdx) => (
+                        <Button
+                          key={opt}
+                          type="button"
+                          variant={selected === opt ? 'primary' : 'secondary'}
+                          className={cn(
+                            '!px-2.5 !py-1.5 !text-[0.65rem] sm:!text-xs min-w-0 !leading-tight text-left justify-start',
+                            selected === opt &&
+                              'ring-1 ring-violet-400/60 ring-offset-1 ring-offset-background',
+                          )}
+                          aria-pressed={selected === opt}
+                          onClick={() => setSelection(i, opt)}
+                        >
+                          <span className="font-bold tabular-nums truncate w-full">
+                            {opt}{' '}
+                            <span className="opacity-90 font-bold">
+                              {equalOptionPercent(optIdx, options.length)}%
+                            </span>
                           </span>
-                        </span>
-                      </Button>
-                    ))}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
                 )}
+                </div>
+
                 <div className="shrink-0 pt-4 flex flex-row items-baseline justify-between gap-x-2 gap-y-1 w-full min-w-0">
                   <span className="min-w-0 text-left text-[0.6rem] sm:text-[0.65rem] font-semibold uppercase tracking-wide text-muted-foreground leading-tight line-clamp-1">
                     {item.category}
