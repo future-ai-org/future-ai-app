@@ -132,7 +132,7 @@ export function AstroCoinsPanel({ className, initialCoins, walletRefreshTick = 0
     >
       <div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between sm:gap-10">
         <div className="min-w-0 flex-1 space-y-3 sm:space-y-4">
-          <h2 className="text-sm font-extrabold uppercase tracking-widest text-violet-500 dark:text-violet-400">
+          <h2 className="text-base font-extrabold uppercase tracking-widest text-violet-500 dark:text-violet-400">
             {copy.dashboard.astroCoinsTitle}
           </h2>
           <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">

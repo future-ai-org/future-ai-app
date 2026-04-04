@@ -120,7 +120,7 @@ function CompatibilityContent() {
         >
           ← {copy.dashboard.backToDashboard}
         </Link>
-        <h1 className="text-5xl md:text-6xl font-serif mt-4 mb-8 md:mb-10 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
+        <h1 className="text-6xl md:text-7xl font-serif mt-4 mb-8 md:mb-10 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
           {copy.chart.titlePrefix} {copy.compatibility.title} {copy.chart.titleSuffix}
         </h1>
       </div>
@@ -128,7 +128,7 @@ function CompatibilityContent() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
         {/* Chart 1 */}
         <Card className="p-4">
-          <h2 className="text-sm font-extrabold text-violet-900 dark:text-violet-300 tracking-widest uppercase mb-3">
+          <h2 className="text-base font-extrabold text-violet-900 dark:text-violet-300 tracking-widest uppercase mb-3">
             {copy.compatibility.chart1}
           </h2>
           <div className="flex gap-2 mb-3">
@@ -225,7 +225,7 @@ function CompatibilityContent() {
 
         {/* Chart 2 */}
         <Card className="p-4">
-          <h2 className="text-sm font-extrabold text-violet-900 dark:text-violet-300 tracking-widest uppercase mb-3">
+          <h2 className="text-base font-extrabold text-violet-900 dark:text-violet-300 tracking-widest uppercase mb-3">
             {copy.compatibility.chart2}
           </h2>
           <div className="flex gap-2 mb-3">
@@ -342,7 +342,7 @@ function CompatibilityContent() {
                 {copy.compatibility.overall}
               </h3>
               <div className="flex flex-wrap items-baseline gap-3 mb-2">
-                <span className="text-3xl font-serif text-fuchsia-300">
+                <span className="text-4xl font-serif text-fuchsia-300">
                   {overall.scoreOutOf100}
                 </span>
                 <span className="text-muted-foreground text-sm">/ 100</span>

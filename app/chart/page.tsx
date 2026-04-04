@@ -55,7 +55,7 @@ export default function ChartPage() {
   return (
     <main className="max-w-5xl mx-auto px-4 pb-20">
       <div className="pt-8 pb-6 text-center">
-        <h1 className="text-5xl md:text-6xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
+        <h1 className="text-6xl md:text-7xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
           {copy.chart.titlePrefix} {copy.chart.title} {copy.chart.titleSuffix}
         </h1>
       </div>

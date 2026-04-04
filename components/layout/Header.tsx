@@ -22,14 +22,14 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/95 backdrop-blur-sm">
       <div className="mx-auto flex min-h-14 max-w-6xl items-center justify-between gap-2 px-3 sm:px-6">
-        <a
+        <Link
           href="/"
           className="flex items-center gap-2 text-foreground no-underline transition-opacity hover:opacity-90"
           aria-label={`${copy.site.title} — ${copy.nav.home}`}
         >
           <span className="inline-block text-xl sm:text-2xl text-violet-500 dark:text-violet-400 scale-x-[-1]" aria-hidden>☽</span>
           <span className="hidden sm:inline text-base sm:text-lg font-semibold tracking-tight text-foreground">{copy.site.title}</span>
-        </a>
+        </Link>
         <nav aria-label={copy.nav.ariaLabel} className="flex max-w-[70vw] items-center gap-1 overflow-x-auto">
           <Link href="/chart" className={navLinkClass('/chart')}>
             {copy.nav.chart}

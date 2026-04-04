@@ -210,7 +210,7 @@ export default function TodayPage() {
   return (
     <main className="max-w-6xl mx-auto px-3 sm:px-4 pb-20 flex flex-col items-center">
       <div id="current-sky" className="pt-8 pb-6 text-center scroll-mt-20">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif mt-4 mb-1 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
+        <h1 className="text-5xl sm:text-6xl md:text-7xl font-serif mt-4 mb-1 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
           {copy.chart.titlePrefix} {copy.today.title} {copy.chart.titleSuffix}
         </h1>
         <div className="mt-2 pb-3 flex flex-wrap items-center justify-center gap-2 sm:gap-3">

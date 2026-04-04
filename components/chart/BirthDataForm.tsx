@@ -103,7 +103,7 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
 
   return (
     <Card className="mb-6">
-      <h2 className="text-sm sm:text-base font-extrabold text-violet-500 dark:text-violet-400 tracking-widest uppercase mb-8 sm:mb-10">
+      <h2 className="text-base sm:text-lg font-extrabold text-violet-500 dark:text-violet-400 tracking-widest uppercase mb-8 sm:mb-10">
         {copy.form.sectionTitle}
       </h2>
       <form onSubmit={handleSubmit}>

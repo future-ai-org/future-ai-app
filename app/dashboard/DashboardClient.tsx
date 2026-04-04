@@ -94,7 +94,7 @@ export default function DashboardClient({ initialAstroCoins }: Props) {
   return (
     <main className="max-w-6xl mx-auto px-4 pb-20">
       <div className="pt-8 pb-8 text-center">
-        <h1 className="text-5xl md:text-6xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
+        <h1 className="text-6xl md:text-7xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
           {copy.chart.titlePrefix} {copy.dashboard.title} {copy.chart.titleSuffix}
         </h1>
       </div>
@@ -116,7 +116,7 @@ export default function DashboardClient({ initialAstroCoins }: Props) {
             const showPrimaryTitle =
               primary.label.trim().toLowerCase() !== copy.dashboard.myChart;
             const primarySectionHeading = (
-              <h2 className="text-sm sm:text-base md:text-lg font-extrabold text-violet-500 dark:text-violet-400 tracking-widest uppercase mb-8">
+              <h2 className="text-base sm:text-lg md:text-xl font-extrabold text-violet-500 dark:text-violet-400 tracking-widest uppercase mb-8">
                 {copy.dashboard.yourChartAndTransits}
               </h2>
             );
@@ -199,7 +199,7 @@ export default function DashboardClient({ initialAstroCoins }: Props) {
             );
           })()}
           <section>
-            <h2 className="text-sm sm:text-base md:text-lg font-extrabold text-violet-500 dark:text-violet-400 tracking-widest uppercase mb-4">
+            <h2 className="text-base sm:text-lg md:text-xl font-extrabold text-violet-500 dark:text-violet-400 tracking-widest uppercase mb-4">
               {copy.dashboard.otherCharts}
             </h2>
             {charts.filter(c => c.isPrimary !== true).length === 0 ? (
@@ -230,19 +230,24 @@ export default function DashboardClient({ initialAstroCoins }: Props) {
                             <div className="min-w-0">
                               <h3
                                 className={cn(
-                                  'text-xl sm:text-2xl font-semibold truncate leading-tight',
+                                  'text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight truncate leading-tight',
                                   'bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent',
                                   'dark:from-violet-400 dark:to-fuchsia-300',
                                 )}
                               >
                                 {chart.label}
                               </h3>
-                              <p className="text-sm text-muted-foreground truncate">{birthLabel}</p>
-                              <p className="text-xs text-muted-foreground mt-0.5">
-                                {copy.dashboard.createdAt}{' '}
-                                {new Date(chart.createdAt).toLocaleDateString(undefined, {
-                                  dateStyle: 'medium',
-                                })}
+                              <p className="mt-1.5 text-sm sm:text-base text-muted-foreground flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                                <span className="tabular-nums">{birthLabel}</span>
+                                <span className="text-muted-foreground/50" aria-hidden>
+                                  ·
+                                </span>
+                                <span className="whitespace-nowrap">
+                                  {copy.dashboard.createdAt}{' '}
+                                  {new Date(chart.createdAt).toLocaleDateString(undefined, {
+                                    dateStyle: 'medium',
+                                  })}
+                                </span>
                               </p>
                             </div>
                             <div className="flex flex-wrap gap-2 shrink-0">

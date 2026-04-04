@@ -172,7 +172,10 @@ export function getSymmetricPlacementScore(
 
   const houseBlend =
     (houseScoreDelta(planetName, houseAPlanetInB) + houseScoreDelta(planetName, houseBPlanetInA)) / 2;
-  let score = BASE_SCORE + Math.round(houseBlend);
+  const hb = Math.round(houseBlend);
+  /** Positive blends step down by one so a mild +1 blend reads 5/10, not 6/10. */
+  const houseContribution = hb <= 0 ? hb : hb - 1;
+  let score = BASE_SCORE + houseContribution;
   if (elementRelation === 'same') score += SAME_ELEMENT_SCORE_BOOST;
   else if (elementRelation === 'complementary') score += COMPLEMENTARY_ELEMENT_SCORE_BOOST;
   score = Math.max(1, Math.min(10, score));

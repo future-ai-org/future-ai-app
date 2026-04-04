@@ -41,7 +41,7 @@ export function MyPredictionsSection({
   const [withdrawBet, setWithdrawBet] = useState<DashboardPredictionBet | null>(null);
   const [betMoreBet, setBetMoreBet] = useState<DashboardPredictionBet | null>(null);
   const headingClass =
-    'text-sm sm:text-base md:text-lg font-extrabold text-violet-500 dark:text-violet-400 tracking-widest uppercase mb-8';
+    'text-base sm:text-lg md:text-xl font-extrabold text-violet-500 dark:text-violet-400 tracking-widest uppercase mb-8';
 
   if (bets.length === 0) {
     return (

@@ -32,7 +32,7 @@ export function TransitNatalAspectsSnapshot({ natal, transit }: Props) {
         </span>
         <span className="h-px flex-1 max-w-20 bg-gradient-to-l from-transparent via-violet-400/30 to-violet-400/60 rounded-full" />
       </div>
-      <h2 className="text-2xl font-serif font-bold text-center text-violet-400 mb-6">
+      <h2 className="text-3xl font-serif font-bold text-center text-violet-400 mb-6">
         {c.transitNatalInfluencesTableTitle}
       </h2>
       <Card className="w-full max-w-lg min-w-0">
