@@ -109,7 +109,6 @@ export const copy = {
     delete: 'delete',
     view: 'view',
     createdAt: 'saved',
-    setAsMyChart: 'set as my chart',
     transitNewsTitle: 'upcoming to your chart',
     transitNewsNoneInRange: 'none in search range',
     /** Inline verb phrase between transit sign and natal planet (see DashboardTransitNews). */
@@ -226,7 +225,8 @@ export const copy = {
     see3D: 'see it in 3D',
     checkTransits: 'check transits',
     deleteChart: 'delete chart',
-    transitsTitle: 'transits',
+    transitsForMyChart: 'transits for my chart',
+    transitsForSavedChart: (label: string) => `transits for ${label}`,
     transitsSubtitle: (dateLabel: string) => `current sky as of ${dateLabel}`,
     transitsTableNatal: 'natal',
     transitsTableTransits: 'transits',

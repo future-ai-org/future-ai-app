@@ -93,7 +93,7 @@ export function SaveChart({ result, onSaved }: Props) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          label: 'My chart',
+          label: copy.dashboard.myChart,
           isPrimary: true,
           birthData: result.birthData,
           chartResult: result,

@@ -190,31 +190,6 @@ export default function DashboardPage() {
                                 {copy.compatibility.compatibility}
                               </Button>
                             </Link>
-                            {!chart.isPrimary && (
-                              <Button
-                                variant="secondary"
-                                type="button"
-                                onClick={async () => {
-                                  const res = await fetch(`/api/charts/${chart.id}`, {
-                                    method: 'PATCH',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ isPrimary: true }),
-                                  });
-                                  if (res.ok) {
-                                    const data = await res.json();
-                                    const newPrimaryId = data.chart?.id;
-                                    setCharts(prev =>
-                                      prev.map(c => ({
-                                        ...c,
-                                        isPrimary: Boolean(newPrimaryId && c.id === newPrimaryId),
-                                      }))
-                                    );
-                                  }
-                                }}
-                              >
-                                {copy.dashboard.setAsMyChart}
-                              </Button>
-                            )}
                             <Button
                               variant="secondary"
                               type="button"

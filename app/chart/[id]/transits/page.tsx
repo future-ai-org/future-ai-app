@@ -56,7 +56,11 @@ export default function ChartTransitsPage() {
   const router = useRouter();
   const { status } = useSession();
   const id = typeof params.id === 'string' ? params.id : '';
-  const [chart, setChart] = useState<{ label: string; chartResult: ChartResult } | null>(null);
+  const [chart, setChart] = useState<{
+    label: string;
+    isPrimary?: boolean;
+    chartResult: ChartResult;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [transitDate, setTransitDate] = useState<Date>(() => new Date());
@@ -117,7 +121,7 @@ export default function ChartTransitsPage() {
     return (
       <main className="max-w-5xl mx-auto px-4 py-16">
         <Link href="/dashboard" className="text-violet-400 text-sm hover:text-violet-300">
-          ← {copy.dashboard.title}
+          ← {copy.dashboard.backToDashboard}
         </Link>
         <p className={`text-center mt-8 ${error ? 'text-red-400' : 'text-muted-foreground'}`}>{error || 'loading…'}</p>
       </main>
@@ -133,6 +137,10 @@ export default function ChartTransitsPage() {
     timeStyle: 'short',
   });
 
+  const transitsHeadingText = chart.isPrimary
+    ? copy.chart.transitsForMyChart
+    : copy.chart.transitsForSavedChart(chart.label);
+
   return (
     <main className="max-w-5xl mx-auto px-4 pb-20">
       <div className="pt-8 pb-6 text-center">
@@ -140,10 +148,10 @@ export default function ChartTransitsPage() {
           href="/dashboard"
           className="text-muted-foreground text-sm hover:text-violet-400 transition-colors"
         >
-          ← {copy.dashboard.title}
+          ← {copy.dashboard.backToDashboard}
         </Link>
-        <h1 className="text-5xl md:text-6xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
-          {copy.chart.titlePrefix} {copy.chart.transitsTitle}
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight px-2 break-words">
+          {copy.chart.titlePrefix} {transitsHeadingText}
         </h1>
         <p className="text-muted-foreground text-sm mt-2 font-bold">
           {copy.chart.transitsSubtitle(transitLabel)}

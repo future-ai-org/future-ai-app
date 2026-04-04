@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -29,6 +30,12 @@ interface SavedChartItem {
   label: string;
   birthData: string;
   chartResult: string;
+}
+
+/** Primary chart label may be stored as "My chart"; show copy.dashboard.myChart on this page. */
+function compatibilityChartLabel(label: string): string {
+  if (label.trim().toLowerCase() === 'my chart') return copy.dashboard.myChart;
+  return label;
 }
 
 function CompatibilityContent() {
@@ -89,14 +96,25 @@ function CompatibilityContent() {
 
   const compatibilityResult =
     chartA && chartB
-      ? computeCompatibility(chartA.result, chartB.result, chartA.label, chartB.label)
+      ? computeCompatibility(
+          chartA.result,
+          chartB.result,
+          compatibilityChartLabel(chartA.label),
+          compatibilityChartLabel(chartB.label),
+        )
       : null;
 
   return (
     <main className="max-w-4xl mx-auto px-4 pb-20">
-      <div className="pt-8 pb-6">
-        <h1 className="text-4xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
-          {copy.compatibility.title}
+      <div className="pt-8 pb-6 text-center">
+        <Link
+          href="/dashboard"
+          className="text-muted-foreground text-sm hover:text-violet-400 transition-colors"
+        >
+          ← {copy.dashboard.backToDashboard}
+        </Link>
+        <h1 className="text-5xl md:text-6xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
+          {copy.chart.titlePrefix} {copy.compatibility.title}
         </h1>
       </div>
 
@@ -137,6 +155,9 @@ function CompatibilityContent() {
                     try {
                       const result = JSON.parse(c.chartResult) as ChartResult;
                       setChartA({ type: 'saved', id: c.id, label: c.label, result });
+                      if (chartB?.type === 'saved' && chartB.id === c.id) {
+                        setChartB(null);
+                      }
                     } catch {
                       setChartA(null);
                     }
@@ -145,11 +166,13 @@ function CompatibilityContent() {
                 className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground text-sm mb-2"
               >
                 <option value="">{copy.compatibility.chooseChart}</option>
-                {savedCharts.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.label}
-                  </option>
-                ))}
+                {savedCharts
+                  .filter(c => !(chartB?.type === 'saved' && c.id === chartB.id))
+                  .map(c => (
+                    <option key={c.id} value={c.id}>
+                      {compatibilityChartLabel(c.label)}
+                    </option>
+                  ))}
               </select>
               {status !== 'authenticated' && (
                 <p className="text-xs text-muted-foreground">{copy.compatibility.noCharts}</p>
@@ -189,7 +212,7 @@ function CompatibilityContent() {
             </>
           )}
           {chartA && modeA === 'saved' && (
-            <p className="text-sm text-muted-foreground mt-2">✓ {chartA.label}</p>
+            <p className="text-sm text-muted-foreground mt-2">✓ {compatibilityChartLabel(chartA.label)}</p>
           )}
         </Card>
 
@@ -229,6 +252,9 @@ function CompatibilityContent() {
                     try {
                       const result = JSON.parse(c.chartResult) as ChartResult;
                       setChartB({ type: 'saved', id: c.id, label: c.label, result });
+                      if (chartA?.type === 'saved' && chartA.id === c.id) {
+                        setChartA(null);
+                      }
                     } catch {
                       setChartB(null);
                     }
@@ -237,11 +263,13 @@ function CompatibilityContent() {
                 className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground text-sm mb-2"
               >
                 <option value="">{copy.compatibility.chooseChart}</option>
-                {savedCharts.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.label}
-                  </option>
-                ))}
+                {savedCharts
+                  .filter(c => !(chartA?.type === 'saved' && c.id === chartA.id))
+                  .map(c => (
+                    <option key={c.id} value={c.id}>
+                      {compatibilityChartLabel(c.label)}
+                    </option>
+                  ))}
               </select>
               {status !== 'authenticated' && (
                 <p className="text-xs text-muted-foreground">{copy.compatibility.noCharts}</p>
@@ -281,7 +309,7 @@ function CompatibilityContent() {
             </>
           )}
           {chartB && modeB === 'saved' && (
-            <p className="text-sm text-muted-foreground mt-2">✓ {chartB.label}</p>
+            <p className="text-sm text-muted-foreground mt-2">✓ {compatibilityChartLabel(chartB.label)}</p>
           )}
         </Card>
       </div>
