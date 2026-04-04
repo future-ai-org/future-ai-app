@@ -1,51 +1,93 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { copy } from '@/lib/copy';
 import { cn } from '@/lib/utils';
 
-const STORAGE_KEY = 'future-ai-astro-coins';
-/** Demo conversion: USD → astro coins (no real payments). */
-const COINS_PER_USD = 100;
-
 export function AstroCoinsPanel({ className }: { className?: string }) {
-  const [coins, setCoins] = useState(0);
+  const [coins, setCoins] = useState<number | null>(null);
   const [usd, setUsd] = useState('');
-  const [buyNotice, setBuyNotice] = useState(false);
+  const [flash, setFlash] = useState<string | null>(null);
+  const [loadingBalance, setLoadingBalance] = useState(true);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
-  useEffect(() => {
+  const fetchBalance = useCallback(async () => {
+    setLoadingBalance(true);
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw == null) return;
-      const n = Number.parseInt(raw, 10);
-      if (!Number.isNaN(n) && n >= 0) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot hydrate from localStorage after mount
-        setCoins(n);
+      const res = await fetch('/api/astro-coins');
+      if (!res.ok) return;
+      const data = (await res.json()) as { coins?: number; stripeEnabled?: boolean };
+      if (typeof data.coins === 'number' && Number.isFinite(data.coins)) {
+        setCoins(data.coins);
       }
     } catch {
       /* ignore */
+    } finally {
+      setLoadingBalance(false);
     }
   }, []);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, String(coins));
-    } catch {
-      /* ignore */
-    }
-  }, [coins]);
+    void fetchBalance();
+  }, [fetchBalance]);
 
-  function handleDeposit(e: React.FormEvent) {
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('astro_purchase');
+    if (status === 'success') {
+      setFlash(copy.dashboard.astroCoinsPurchaseSuccess);
+      void fetchBalance();
+    } else if (status === 'cancelled') {
+      setFlash(copy.dashboard.astroCoinsPurchaseCancelled);
+    }
+    if (status != null) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('astro_purchase');
+      const next = url.pathname + (url.search ? url.search : '');
+      window.history.replaceState({}, '', next);
+    }
+  }, [fetchBalance]);
+
+  async function handleCheckout(e: React.FormEvent) {
     e.preventDefault();
+    setFlash(null);
     const amount = Number.parseFloat(usd.replace(',', '.'));
-    if (!Number.isFinite(amount) || amount <= 0) return;
-    const added = Math.floor(amount * COINS_PER_USD);
-    if (added <= 0) return;
-    setCoins((c) => c + added);
-    setUsd('');
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setFlash(copy.dashboard.astroCoinsAmountRequired);
+      return;
+    }
+
+    setCheckoutLoading(true);
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amountUsd: amount }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        url?: string;
+        error?: string;
+      };
+      if (!res.ok || typeof data.url !== 'string') {
+        const serverMsg =
+          typeof data.error === 'string' && data.error.trim() !== ''
+            ? data.error
+            : null;
+        setFlash(serverMsg ?? copy.dashboard.astroCoinsCheckoutError);
+        return;
+      }
+      window.location.href = data.url;
+    } catch {
+      setFlash(copy.dashboard.astroCoinsCheckoutError);
+    } finally {
+      setCheckoutLoading(false);
+    }
   }
+
+  const displayCoins = coins ?? 0;
 
   return (
     <Card
@@ -54,14 +96,14 @@ export function AstroCoinsPanel({ className }: { className?: string }) {
         className,
       )}
     >
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between sm:gap-10">
         <div className="min-w-0 flex-1 space-y-3 sm:space-y-4">
           <h2 className="text-sm font-extrabold uppercase tracking-widest text-violet-500 dark:text-violet-400">
             {copy.dashboard.astroCoinsTitle}
           </h2>
           <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <span className="text-5xl font-bold tabular-nums tracking-tight text-foreground leading-none sm:text-6xl md:text-7xl lg:text-8xl">
-              {coins.toLocaleString()}
+              {loadingBalance ? '…' : displayCoins.toLocaleString()}
             </span>
             <span className="text-xl font-medium text-muted-foreground sm:text-2xl md:text-3xl">
               {copy.dashboard.astroCoinsLabel}
@@ -69,42 +111,46 @@ export function AstroCoinsPanel({ className }: { className?: string }) {
           </p>
         </div>
 
-        <div className="flex w-full min-w-0 flex-col gap-4 sm:w-auto sm:max-w-md sm:shrink-0">
-          <form onSubmit={handleDeposit} className="flex flex-col gap-2 sm:flex-row sm:items-end">
-            <div className="min-w-0 flex-1">
-              <label htmlFor="astro-deposit-usd" className="mb-1 block text-xs font-medium text-muted-foreground">
-                {copy.dashboard.astroCoinsDepositLabel}
+        <div className="flex w-full min-w-0 flex-col items-stretch gap-4 sm:w-auto sm:max-w-md sm:shrink-0 sm:justify-center">
+          <form
+            onSubmit={handleCheckout}
+            className="flex w-full flex-col gap-3 sm:flex-row sm:items-end sm:gap-3"
+          >
+            <div className="min-w-0 flex-1 text-left">
+              <label
+                htmlFor="astro-amount-usd"
+                className="mb-1.5 block text-left text-xs font-medium text-muted-foreground sm:text-sm"
+              >
+                {copy.dashboard.astroCoinsAmountLabel}
               </label>
               <input
-                id="astro-deposit-usd"
+                id="astro-amount-usd"
                 type="text"
                 inputMode="decimal"
                 autoComplete="off"
-                placeholder={copy.dashboard.astroCoinsDepositPlaceholder}
+                placeholder={copy.dashboard.astroCoinsAmountPlaceholder}
                 value={usd}
-                onChange={(e) => setUsd(e.target.value)}
-                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none ring-violet-500/30 placeholder:text-muted-foreground focus:border-violet-500/50 focus:ring-2"
+                onChange={e => setUsd(e.target.value)}
+                disabled={checkoutLoading}
+                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none ring-violet-500/30 placeholder:text-muted-foreground focus:border-violet-500/50 focus:ring-2 disabled:opacity-50"
               />
             </div>
-            <Button type="submit" variant="secondary" className="w-full shrink-0 sm:w-auto">
-              {copy.dashboard.astroCoinsDeposit}
+            <Button
+              type="submit"
+              disabled={checkoutLoading}
+              className="w-full shrink-0 px-4 py-2.5 text-sm sm:w-auto bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-90 dark:from-violet-600 dark:to-fuchsia-600"
+            >
+              {checkoutLoading ? 'redirecting…' : copy.dashboard.astroCoinsBuyStripe}
             </Button>
           </form>
 
-          <div className="flex flex-col gap-2">
-            <Button
-              type="button"
-              className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white hover:from-violet-500 hover:to-fuchsia-500 sm:w-auto"
-              onClick={() => {
-                setBuyNotice(true);
-              }}
-            >
-              {copy.dashboard.astroCoinsBuy}
-            </Button>
-            {buyNotice ? (
-              <p className="text-xs text-muted-foreground">{copy.dashboard.astroCoinsBuyNotice}</p>
-            ) : null}
-          </div>
+          <p className="text-left text-xs font-medium leading-snug text-muted-foreground sm:text-sm">
+            {copy.dashboard.astroCoinsBuyStripeHint}
+          </p>
+
+          {flash ? (
+            <p className="text-left text-xs text-muted-foreground">{flash}</p>
+          ) : null}
         </div>
       </div>
     </Card>

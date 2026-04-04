@@ -64,6 +64,7 @@ So:
    - `DATABASE_URL` — Supabase **transaction** pooler URL with `?pgbouncer=true`.
    - `DIRECT_URL` — Supabase **direct/session** URL (for running migrations; optional on Vercel if you run migrations from CI/local).
    - `AUTH_SECRET` — same as local (e.g. from `npx auth secret`).
+   - (Optional) `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` — astro coin Checkout; see **[STRIPE.md](STRIPE.md)**.
 
 3. **Migrations:** Run them **before** or **after** deploy:
    - **Option A:** In a GitHub Action (or similar): run `npx prisma migrate deploy` with `DIRECT_URL` (and `DATABASE_URL`) set.

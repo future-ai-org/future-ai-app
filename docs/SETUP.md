@@ -89,6 +89,10 @@ To enable “Sign in with Google” and “Sign in with GitHub” on the login/r
 
 If these are not set, the app still runs; auth buttons simply won’t appear.
 
+### Optional (Stripe — astro coin checkout)
+
+For **dashboard** wallet purchases with Stripe (API keys, webhooks, local CLI), see **[STRIPE.md](STRIPE.md)**.
+
 ---
 
 ## 3. Run database migrations
@@ -134,6 +138,7 @@ make start
 - [ ] `DATABASE_URL` and `DIRECT_URL` set (e.g. from Supabase)
 - [ ] `AUTH_SECRET` set (`npx auth secret`)
 - [ ] (Optional) `AUTH_GOOGLE_*` and/or `AUTH_GITHUB_*` set for OAuth
+- [ ] (Optional) Stripe keys and webhook — [STRIPE.md](STRIPE.md)
 - [ ] Migrations applied (`npx prisma migrate deploy`)
 - [ ] App running (`npm run dev` or `make dev`)
 
