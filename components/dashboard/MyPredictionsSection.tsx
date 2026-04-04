@@ -14,6 +14,8 @@ export type DashboardPredictionBet = {
   expiresAt: string | null;
   coins: number;
   createdAt: string;
+  /** Larger of yes/no market share (same engine as predict cards). */
+  leadingMarketPercent?: string;
 };
 
 function formatExpires(isoDate: string): string {
@@ -53,33 +55,41 @@ export function MyPredictionsSection({ bets }: Props) {
             bet.side === 'yes' ? copy.predict.yes : bet.side === 'no' ? copy.predict.no : bet.side;
           return (
             <li key={bet.id}>
-              <Card className="flex flex-col gap-2 p-4 sm:p-5">
-                {bet.category ? (
-                  <p className="text-[0.65rem] sm:text-xs font-semibold uppercase tracking-wide text-muted-foreground leading-tight">
-                    {bet.category}
-                  </p>
-                ) : null}
-                <h3 className="text-base sm:text-lg font-semibold text-foreground leading-snug">
-                  {bet.question}
-                </h3>
-                <p className="text-sm text-foreground">
-                  <span className="font-bold tabular-nums">{bet.coins.toLocaleString()}</span>{' '}
-                  {copy.dashboard.myPredictionsCoins}{' '}
-                  <span className="font-bold">{copy.dashboard.myPredictionsOn}</span>{' '}
-                  <span className="font-bold">{sideLabel}</span>
-                  <span className="text-muted-foreground font-medium">
-                    {' · '}
-                    {copy.dashboard.myPredictionsInvested}{' '}
-                    {new Date(bet.createdAt).toLocaleDateString(undefined, {
-                      dateStyle: 'medium',
-                    })}
-                  </span>
+              <Card className="flex flex-row items-start gap-6 sm:gap-10 p-4 sm:p-5">
+                <p
+                  className="shrink-0 pt-0.5 text-4xl sm:text-5xl font-serif font-bold tabular-nums leading-none tracking-tight bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent"
+                  aria-label={`Leading market share ${bet.leadingMarketPercent ?? '50%'}`}
+                >
+                  {bet.leadingMarketPercent ?? '50%'}
                 </p>
-                {bet.expiresAt ? (
-                  <p className="pt-3 text-[0.55rem] sm:text-xs font-bold text-muted-foreground/90 leading-tight tabular-nums">
-                    {copy.predict.questionExpiresPrefix} {formatExpires(bet.expiresAt)}
+                <div className="min-w-0 flex-1 flex flex-col gap-2">
+                  {bet.category ? (
+                    <p className="text-[0.65rem] sm:text-xs font-semibold uppercase tracking-wide text-muted-foreground leading-tight">
+                      {bet.category}
+                    </p>
+                  ) : null}
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground leading-snug">
+                    {bet.question}
+                  </h3>
+                  <p className="text-base sm:text-lg text-foreground leading-snug">
+                    <span className="font-bold tabular-nums">{bet.coins.toLocaleString()}</span>{' '}
+                    {copy.dashboard.myPredictionsCoins}{' '}
+                    <span className="font-bold">{copy.dashboard.myPredictionsOn}</span>{' '}
+                    <span className="font-bold">{sideLabel}</span>
+                    <span className="text-muted-foreground font-semibold sm:font-bold">
+                      {' · '}
+                      {copy.dashboard.myPredictionsInvested}{' '}
+                      {new Date(bet.createdAt).toLocaleDateString(undefined, {
+                        dateStyle: 'medium',
+                      })}
+                    </span>
                   </p>
-                ) : null}
+                  {bet.expiresAt ? (
+                    <p className="pt-3 text-sm sm:text-base font-bold text-muted-foreground/90 leading-tight tabular-nums">
+                      {copy.predict.questionExpiresPrefix} {formatExpires(bet.expiresAt)}
+                    </p>
+                  ) : null}
+                </div>
               </Card>
             </li>
           );
