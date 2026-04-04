@@ -137,7 +137,8 @@ export function getElementRelationPerPlanet(
 }
 
 const SAME_ELEMENT_SCORE_BOOST = 3;
-const COMPLEMENTARY_ELEMENT_SCORE_BOOST = 1;
+/** Earth–water and fire–air pairs use a fixed per-planet score (see {@link getSymmetricPlacementScore}). */
+const COMPLEMENTARY_ELEMENT_PLACEMENT_SCORE = 8;
 
 function houseScoreDelta(planetName: PlanetName, house: number): number {
   let d = 0;
@@ -157,7 +158,7 @@ function elementNote(relation: ElementRelation): string | null {
 /**
  * One score per planet for both compatibility tables: averages house effects from
  * "A's planet in B's house" and "B's planet in A's house", then applies elemental tier
- * (same element strongest; earth–water and fire–air a lighter boost).
+ * (same element strongest; earth–water and fire–air a fixed 8/10).
  */
 export function getSymmetricPlacementScore(
   planetName: PlanetName,
@@ -177,7 +178,7 @@ export function getSymmetricPlacementScore(
   const houseContribution = hb <= 0 ? hb : hb - 1;
   let score = BASE_SCORE + houseContribution;
   if (elementRelation === 'same') score += SAME_ELEMENT_SCORE_BOOST;
-  else if (elementRelation === 'complementary') score += COMPLEMENTARY_ELEMENT_SCORE_BOOST;
+  else if (elementRelation === 'complementary') score = COMPLEMENTARY_ELEMENT_PLACEMENT_SCORE;
   score = Math.max(1, Math.min(10, score));
 
   const label: PlacementScore['label'] =
