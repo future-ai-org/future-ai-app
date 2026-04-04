@@ -83,7 +83,7 @@ export const copy = {
   },
 
   dashboard: {
-    title: 'dashboard',
+    title: 'Your Journey',
     backToDashboard: 'back to dashboard',
     subtitle: 'saved charts',
     tabCharts: 'charts',
@@ -106,6 +106,16 @@ export const copy = {
     view: 'view',
     createdAt: 'saved',
     setAsMyChart: 'set as my chart',
+    transitNewsTitle: 'upcoming to your chart',
+    transitNewsNoneInRange: 'none in search range',
+    /** Inline verb phrase between transit sign and natal planet (see DashboardTransitNews). */
+    transitNewsAspectVerb: {
+      conjunction: 'conjuncting to',
+      opposition: 'in opposition to',
+      trine: 'trining to',
+      sextile: 'sextiling to',
+    },
+    transitNewsNatal: 'natal',
     askPlaceholder: 'Ask anything…',
     askSend: 'Send',
     askError: 'Could not get a reply. Check ANTHROPIC_API_KEY in .env.',

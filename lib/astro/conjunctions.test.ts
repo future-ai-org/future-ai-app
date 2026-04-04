@@ -3,6 +3,8 @@ import {
   findAspectsInRange,
   findConjunctionsInRange,
   findNextNConjunctions,
+  findNextNTransitNatalAspects,
+  findNextNTransitNatalAspectsChronological,
   findTransitNatalAspectsInRange,
 } from "./conjunctions";
 
@@ -65,6 +67,46 @@ describe("conjunctions", () => {
         15,
       );
       expect(Array.isArray(events)).toBe(true);
+    });
+  });
+
+  describe("findNextNTransitNatalAspects", () => {
+    it("returns at most n events", () => {
+      const natal = {
+        planets: [{ name: "Sun" as const, longitude: 120 }],
+      };
+      const peaks = findNextNTransitNatalAspects(
+        "trine",
+        natal,
+        day(2024, 1, 1),
+        2,
+      );
+      expect(peaks.length).toBeLessThanOrEqual(2);
+    });
+
+    it("returns empty when natal has no planets", () => {
+      const peaks = findNextNTransitNatalAspects(
+        "conjunction",
+        { planets: [] },
+        day(2024, 1, 1),
+        3,
+      );
+      expect(peaks).toEqual([]);
+    });
+  });
+
+  describe("findNextNTransitNatalAspectsChronological", () => {
+    it("returns at most n events", () => {
+      const natal = {
+        planets: [{ name: "Sun" as const, longitude: 120 }],
+      };
+      const out = findNextNTransitNatalAspectsChronological(natal, day(2024, 1, 1), 8);
+      expect(out.length).toBeLessThanOrEqual(8);
+    });
+
+    it("returns empty when natal has no planets", () => {
+      const out = findNextNTransitNatalAspectsChronological({ planets: [] }, day(2024, 1, 1), 8);
+      expect(out).toEqual([]);
     });
   });
 });

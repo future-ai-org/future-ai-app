@@ -289,5 +289,96 @@ export function findTransitNatalConjunctionsInRange(
   return findTransitNatalAspectsInRange('conjunction', natal, startDate, endDate, orbDeg);
 }
 
+function transitNatalPairKey(transit: PlanetName, natal: PlanetName): string {
+  return `${transit}→${natal}`;
+}
+
+const MAX_NEXT_TRANSIT_NATAL_CHUNKS = 80;
+
+/**
+ * Find the next N transit→natal aspect peaks from fromDate (noon UTC stepping).
+ * Each peak is the day of closest approach for a (transit, natal) pair within a run of
+ * consecutive days in orb (one event per pair per run), earliest peaks first.
+ */
+export function findNextNTransitNatalAspects(
+  aspectId: AspectKind,
+  natal: { planets: { name: PlanetName; longitude: number }[] },
+  fromDate: Date,
+  n: number,
+  orbDeg?: number
+): TransitNatalAspectEvent[] {
+  const hasNatal = natal.planets?.some((p) => PLANET_NAMES.includes(p.name));
+  if (!hasNatal) return [];
+
+  const peaks: TransitNatalAspectEvent[] = [];
+  let start = new Date(fromDate);
+  start.setUTCHours(12, 0, 0, 0);
+  const chunkDays = 400;
+  let chunks = 0;
+
+  while (peaks.length < n && chunks < MAX_NEXT_TRANSIT_NATAL_CHUNKS) {
+    chunks++;
+    const end = new Date(start);
+    end.setUTCDate(end.getUTCDate() + chunkDays);
+    const events = findTransitNatalAspectsInRange(aspectId, natal, start, end, orbDeg);
+    const byPair = new Map<string, TransitNatalAspectEvent[]>();
+    for (const e of events) {
+      const key = transitNatalPairKey(e.transitPlanet, e.natalPlanet);
+      if (!byPair.has(key)) byPair.set(key, []);
+      byPair.get(key)!.push({ ...e, date: new Date(e.date) });
+    }
+    for (const arr of byPair.values()) {
+      arr.sort((a, b) => a.date.getTime() - b.date.getTime());
+      let i = 0;
+      while (i < arr.length) {
+        const run: TransitNatalAspectEvent[] = [arr[i]];
+        let j = i + 1;
+        while (
+          j < arr.length &&
+          arr[j].date.getTime() - arr[j - 1].date.getTime() <= MS_PER_DAY * 1.5
+        ) {
+          run.push(arr[j]);
+          j++;
+        }
+        const best = run.reduce((a, b) =>
+          a.orbFromExactDeg <= b.orbFromExactDeg ? a : b
+        );
+        peaks.push(best);
+        i = j;
+      }
+    }
+    peaks.sort((a, b) => a.date.getTime() - b.date.getTime());
+    if (peaks.length >= n) return peaks.slice(0, n);
+    start = new Date(end);
+    start.setUTCDate(start.getUTCDate() + 1);
+  }
+  return peaks.slice(0, n);
+}
+
+const TRANSIT_DASHBOARD_ASPECT_KINDS = [
+  'conjunction',
+  'opposition',
+  'trine',
+  'sextile',
+] as const satisfies readonly AspectKind[];
+
+/**
+ * Next `n` transit–natal aspect peaks across conjunction, opposition, trine, and sextile,
+ * merged and sorted by date (earliest first).
+ */
+export function findNextNTransitNatalAspectsChronological(
+  natal: { planets: { name: PlanetName; longitude: number }[] },
+  fromDate: Date,
+  n: number,
+  orbDeg?: number
+): TransitNatalAspectEvent[] {
+  const pool: TransitNatalAspectEvent[] = [];
+  for (const aspectId of TRANSIT_DASHBOARD_ASPECT_KINDS) {
+    pool.push(...findNextNTransitNatalAspects(aspectId, natal, fromDate, n, orbDeg));
+  }
+  pool.sort((a, b) => a.date.getTime() - b.date.getTime());
+  return pool.slice(0, n);
+}
+
 // Re-export track key helper for UI layers that pair planets + aspect
 export { aspectPairTrackKey };
