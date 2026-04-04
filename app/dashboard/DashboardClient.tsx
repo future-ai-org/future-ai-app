@@ -14,6 +14,7 @@ import {
   type DashboardPredictionBet,
 } from '@/components/dashboard/MyPredictionsSection';
 import { copy } from '@/lib/copy';
+import { cn } from '@/lib/utils';
 import { reapplyWholeSignHouses } from '@/lib/astro/calculate';
 import type { ChartResult } from '@/lib/astro/types';
 
@@ -125,7 +126,15 @@ export default function DashboardClient({ initialAstroCoins }: Props) {
                 <section className="mb-12 mx-auto w-full max-w-6xl">
                   {primarySectionHeading}
                   <div className="flex items-center gap-3">
-                    <p className="text-muted-foreground text-sm">{primary.label}</p>
+                    <p
+                      className={cn(
+                        'text-sm font-semibold',
+                        'bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent',
+                        'dark:from-violet-400 dark:to-fuchsia-300',
+                      )}
+                    >
+                      {primary.label}
+                    </p>
                     <Link href={`/chart/${primary.id}`}>
                       <Button variant="secondary" className="px-3 py-2 text-sm">
                         {copy.dashboard.view}
@@ -139,6 +148,15 @@ export default function DashboardClient({ initialAstroCoins }: Props) {
             return (
               <section className="mb-12 mx-auto w-full max-w-6xl">
                 {primarySectionHeading}
+                <p
+                  className={cn(
+                    'mb-6 mx-auto max-w-2xl text-center text-2xl sm:text-3xl font-semibold tracking-tight px-2 text-balance',
+                    'bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent',
+                    'dark:from-violet-400 dark:to-fuchsia-300',
+                  )}
+                >
+                  {primary.label}
+                </p>
                 <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] gap-10 lg:gap-12 lg:items-center justify-items-center">
                   <div className="flex w-full flex-col items-center text-center">
                     <div className="w-full max-w-[min(420px,100%)]">
@@ -204,7 +222,13 @@ export default function DashboardClient({ initialAstroCoins }: Props) {
                         <li key={chart.id}>
                           <Card className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div className="min-w-0">
-                              <h3 className="text-xl sm:text-2xl font-semibold text-foreground truncate leading-tight">
+                              <h3
+                                className={cn(
+                                  'text-xl sm:text-2xl font-semibold truncate leading-tight',
+                                  'bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent',
+                                  'dark:from-violet-400 dark:to-fuchsia-300',
+                                )}
+                              >
                                 {chart.label}
                               </h3>
                               <p className="text-sm text-muted-foreground truncate">{birthLabel}</p>

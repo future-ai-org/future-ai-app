@@ -4,19 +4,38 @@ import { prisma } from '@/lib/db';
 import { getPredictQuestionMeta } from '@/lib/predict-question-map';
 import {
   formatPermilleAsPercent,
+  marketPermilleByChoice,
   marketPermilleFromSideCoins,
 } from '@/lib/predict-market-odds';
+import { getMcOptionsForQuestion, isValidBinaryPredictQuestionId } from '@/lib/predict-validate';
 
 export const dynamic = 'force-dynamic';
 
 function leadingMarketPercentForQuestion(
-  byQuestion: Map<number, { yes: number; no: number }>,
+  fullMap: Map<number, Map<string, number>>,
   questionId: number,
 ): string {
-  const cur = byQuestion.get(questionId) ?? { yes: 0, no: 0 };
-  const { yesPermille, noPermille } = marketPermilleFromSideCoins(cur.yes, cur.no);
-  const leadingPermille = Math.max(yesPermille, noPermille);
-  return formatPermilleAsPercent(leadingPermille);
+  const sideMap = fullMap.get(questionId);
+  if (!sideMap || sideMap.size === 0) return '50%';
+
+  if (isValidBinaryPredictQuestionId(questionId)) {
+    const yes = sideMap.get('yes') ?? 0;
+    const no = sideMap.get('no') ?? 0;
+    const { yesPermille, noPermille } = marketPermilleFromSideCoins(yes, no);
+    return formatPermilleAsPercent(Math.max(yesPermille, noPermille));
+  }
+
+  const opts = getMcOptionsForQuestion(questionId);
+  if (opts) {
+    const permilles = marketPermilleByChoice(sideMap, opts);
+    const maxP = Math.max(0, ...permilles.values());
+    return formatPermilleAsPercent(maxP);
+  }
+
+  const total = [...sideMap.values()].reduce((a, b) => a + b, 0);
+  if (total <= 0) return '50%';
+  const maxCoins = Math.max(...sideMap.values());
+  return formatPermilleAsPercent(Math.round((maxCoins / total) * 1000));
 }
 
 export async function GET() {
@@ -40,7 +59,7 @@ export async function GET() {
 
     const questionIds = [...new Set(rows.map(r => r.questionId))];
 
-    const byQuestion = new Map<number, { yes: number; no: number }>();
+    const byQuestion = new Map<number, Map<string, number>>();
     if (questionIds.length > 0) {
       const agg = await prisma.predictBet.groupBy({
         by: ['questionId', 'side'],
@@ -49,10 +68,12 @@ export async function GET() {
       });
       for (const row of agg) {
         const coins = row._sum.coins ?? 0;
-        const cur = byQuestion.get(row.questionId) ?? { yes: 0, no: 0 };
-        if (row.side === 'yes') cur.yes = coins;
-        else if (row.side === 'no') cur.no = coins;
-        byQuestion.set(row.questionId, cur);
+        const inner = byQuestion.get(row.questionId) ?? new Map<string, number>();
+        const key = isValidBinaryPredictQuestionId(row.questionId)
+          ? row.side.trim().toLowerCase()
+          : row.side;
+        inner.set(key, (inner.get(key) ?? 0) + coins);
+        byQuestion.set(row.questionId, inner);
       }
     }
 
@@ -70,10 +91,7 @@ export async function GET() {
             : `question #${row.questionId}`,
         category: meta && meta.category.trim() !== '' ? meta.category : null,
         expiresAt: meta && meta.expiresAt.trim() !== '' ? meta.expiresAt : null,
-        leadingMarketPercent: leadingMarketPercentForQuestion(
-          byQuestion,
-          row.questionId,
-        ),
+        leadingMarketPercent: leadingMarketPercentForQuestion(byQuestion, row.questionId),
       };
     });
 

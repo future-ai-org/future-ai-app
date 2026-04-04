@@ -131,11 +131,17 @@ export function PredictWithdrawModal({ open, bet, onClose, onSuccess }: Props) {
 
           {error ? <p className="text-sm text-red-400/90">{error}</p> : null}
 
-          <div className="flex flex-wrap gap-2 justify-end">
-            <Button type="button" variant="secondary" disabled={submitting} onClick={onClose}>
+          <div className="flex flex-wrap gap-3 justify-end">
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={submitting}
+              onClick={onClose}
+              className="!px-8 !py-3.5 !text-base"
+            >
               {copy.dashboard.myPredictionsWithdrawCancel}
             </Button>
-            <Button type="submit" variant="primary" disabled={submitting}>
+            <Button type="submit" variant="primary" disabled={submitting} className="!px-8 !py-3.5 !text-base">
               {submitting
                 ? copy.dashboard.myPredictionsWithdrawSubmitting
                 : copy.dashboard.myPredictionsWithdrawConfirm}

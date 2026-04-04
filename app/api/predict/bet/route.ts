@@ -4,7 +4,7 @@ import {
   applyAstroCoinDelta,
   InsufficientAstroCoinsError,
 } from '@/lib/astro-coins-ledger';
-import { isValidBinaryPredictQuestionId } from '@/lib/predict-validate';
+import { isValidPredictQuestionId, normalizePredictBetSide } from '@/lib/predict-validate';
 import { prisma } from '@/lib/db';
 
 const MAX_COINS_PER_BET = 1_000_000;
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     body !== null &&
     'side' in body &&
     typeof (body as { side: unknown }).side === 'string'
-      ? (body as { side: string }).side.trim().toLowerCase()
+      ? (body as { side: string }).side.trim()
       : '';
 
   const coinsRaw =
@@ -54,15 +54,15 @@ export async function POST(request: Request) {
     );
   }
 
-  if (sideRaw !== 'yes' && sideRaw !== 'no') {
-    return NextResponse.json({ error: 'side must be yes or no' }, { status: 400 });
+  const normalizedSide = normalizePredictBetSide(questionId, sideRaw);
+  if (normalizedSide === null || !isValidPredictQuestionId(questionId)) {
+    return NextResponse.json(
+      { error: 'Unknown question or invalid choice' },
+      { status: 400 },
+    );
   }
 
-  if (!isValidBinaryPredictQuestionId(questionId)) {
-    return NextResponse.json({ error: 'Unknown question' }, { status: 400 });
-  }
-
-  const refId = `${questionId}:${sideRaw}`;
+  const refId = `${questionId}:${normalizedSide}`;
 
   try {
     const balance = await prisma.$transaction(async tx => {
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
         data: {
           userId: session.user.id,
           questionId,
-          side: sideRaw,
+          side: normalizedSide,
           coins,
         },
       });

@@ -91,10 +91,12 @@ function selectionAt(map: Record<number, string>, i: number): string | null {
 type InvestState = {
   item: PredictQuestionItem;
   index: number;
-  side: 'yes' | 'no';
-};
+} & (
+  | { kind: 'binary'; side: 'yes' | 'no' }
+  | { kind: 'mc'; choice: string }
+);
 
-type MarketOddsRow = { yes: string; no: string };
+type MarketOddsRow = { yes: string; no: string; choicePercents?: Record<string, string> };
 
 export function PredictQuestionCards() {
   const pool = useMemo(() => normalizePool(copy.predict.questions), []);
@@ -130,7 +132,16 @@ export function PredictQuestionCards() {
           const yesPercent = (entry as { yesPercent?: unknown }).yesPercent;
           const noPercent = (entry as { noPercent?: unknown }).noPercent;
           if (typeof yesPercent !== 'string' || typeof noPercent !== 'string') continue;
-          next[id] = { yes: yesPercent, no: noPercent };
+          const row: MarketOddsRow = { yes: yesPercent, no: noPercent };
+          const cp = (entry as { choicePercents?: unknown }).choicePercents;
+          if (typeof cp === 'object' && cp !== null && !Array.isArray(cp)) {
+            const choicePercents: Record<string, string> = {};
+            for (const [k, v] of Object.entries(cp)) {
+              if (typeof v === 'string') choicePercents[k] = v;
+            }
+            if (Object.keys(choicePercents).length > 0) row.choicePercents = choicePercents;
+          }
+          next[id] = row;
         }
         setMarketOdds(next);
       })
@@ -222,6 +233,7 @@ export function PredictQuestionCards() {
       setInvest({
         item,
         index: idx,
+        kind: 'binary',
         side: sideRaw as 'yes' | 'no',
       });
     }, 0);
@@ -238,8 +250,12 @@ export function PredictQuestionCards() {
     setAnswers(prev => ({ ...prev, [index]: value }));
   }
 
-  function openInvestModal(item: PredictQuestionItem, index: number, side: 'yes' | 'no') {
-    setInvest({ item, index, side });
+  function openInvestModal(
+    item: PredictQuestionItem,
+    index: number,
+    bet: { kind: 'binary'; side: 'yes' | 'no' } | { kind: 'mc'; choice: string },
+  ) {
+    setInvest({ item, index, ...bet });
   }
 
   return (
@@ -249,16 +265,19 @@ export function PredictQuestionCards() {
         onClose={() => setInvest(null)}
         question={invest?.item ?? null}
         cardIndex={invest?.index ?? 0}
-        side={invest?.side ?? 'yes'}
+        betKind={invest?.kind ?? 'binary'}
+        side={invest ? (invest.kind === 'binary' ? invest.side : invest.choice) : 'yes'}
         onInvested={(cardIndex, side, coins) => {
           setSelection(cardIndex, side);
           setOddsRefreshKey(k => k + 1);
           const predictCopy = copy.predict as { investSuccessToast?: string };
           const tpl = predictCopy.investSuccessToast ?? '';
+          const sideDisplay =
+            side === 'yes' ? copy.predict.yes : side === 'no' ? copy.predict.no : side;
           const msg = tpl
             .replace('{coins}', String(coins))
-            .replace('{side}', side === 'yes' ? copy.predict.yes : copy.predict.no);
-          setToast(msg.trim() !== '' ? msg : `Invested ${coins} on ${side}.`);
+            .replace('{side}', sideDisplay);
+          setToast(msg.trim() !== '' ? msg : `Invested ${coins} on ${sideDisplay}.`);
           window.setTimeout(() => setToast(null), 5000);
         }}
       />
@@ -343,7 +362,7 @@ export function PredictQuestionCards() {
                           'ring-1 ring-violet-400/60 ring-offset-1 ring-offset-background',
                       )}
                       aria-pressed={selected === 'yes'}
-                      onClick={() => openInvestModal(item, i, 'yes')}
+                      onClick={() => openInvestModal(item, i, { kind: 'binary', side: 'yes' })}
                     >
                       <span className="inline-flex items-baseline gap-1 font-bold tabular-nums">
                         <span>{copy.predict.yes}</span>
@@ -359,7 +378,7 @@ export function PredictQuestionCards() {
                           'ring-1 ring-violet-400/60 ring-offset-1 ring-offset-background',
                       )}
                       aria-pressed={selected === 'no'}
-                      onClick={() => openInvestModal(item, i, 'no')}
+                      onClick={() => openInvestModal(item, i, { kind: 'binary', side: 'no' })}
                     >
                       <span className="inline-flex items-baseline gap-1 font-bold tabular-nums">
                         <span>{copy.predict.no}</span>
@@ -374,27 +393,30 @@ export function PredictQuestionCards() {
                     aria-label={item.question}
                   >
                     <div className="grid grid-cols-1 gap-1 w-full pb-0.5">
-                      {options.map((opt, optIdx) => (
-                        <Button
-                          key={opt}
-                          type="button"
-                          variant={selected === opt ? 'primary' : 'secondary'}
-                          className={cn(
-                            '!px-2.5 !py-1.5 !text-[0.65rem] sm:!text-xs min-w-0 !leading-tight text-left justify-start',
-                            selected === opt &&
-                              'ring-1 ring-violet-400/60 ring-offset-1 ring-offset-background',
-                          )}
-                          aria-pressed={selected === opt}
-                          onClick={() => setSelection(i, opt)}
-                        >
-                          <span className="font-bold tabular-nums truncate w-full">
-                            {opt}{' '}
-                            <span className="opacity-90 font-bold">
-                              {equalOptionPercent(optIdx, options.length)}%
+                      {options.map((opt, optIdx) => {
+                        const mcPct =
+                          oddsRow?.choicePercents?.[opt] ??
+                          equalOptionPercent(optIdx, options.length) + '%';
+                        return (
+                          <Button
+                            key={opt}
+                            type="button"
+                            variant={selected === opt ? 'primary' : 'secondary'}
+                            className={cn(
+                              '!px-2.5 !py-1.5 !text-[0.65rem] sm:!text-xs min-w-0 !leading-tight text-left justify-start',
+                              selected === opt &&
+                                'ring-1 ring-violet-400/60 ring-offset-1 ring-offset-background',
+                            )}
+                            aria-pressed={selected === opt}
+                            onClick={() => openInvestModal(item, i, { kind: 'mc', choice: opt })}
+                          >
+                            <span className="font-bold tabular-nums truncate w-full">
+                              {opt}{' '}
+                              <span className="opacity-90 font-bold">{mcPct}</span>
                             </span>
-                          </span>
-                        </Button>
-                      ))}
+                          </Button>
+                        );
+                      })}
                     </div>
                   </div>
                 )}

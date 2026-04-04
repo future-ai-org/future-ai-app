@@ -154,10 +154,12 @@ export function PredictBetMoreModal({ open, bet, onClose, onSuccess }: Props) {
 
   if (!open || !bet) return null;
 
-  const sideNorm = bet.side.trim().toLowerCase();
-  if (sideNorm !== 'yes' && sideNorm !== 'no') return null;
-
-  const sideLabel = sideNorm === 'yes' ? copy.predict.yes : copy.predict.no;
+  const sideLabel =
+    bet.side === 'yes' || bet.side === 'no'
+      ? bet.side === 'yes'
+        ? copy.predict.yes
+        : copy.predict.no
+      : bet.side;
   const notEnoughMessage = p.investNotEnoughCoins ?? "you don't have enough coins.";
 
   return (
@@ -179,7 +181,10 @@ export function PredictBetMoreModal({ open, bet, onClose, onSuccess }: Props) {
         <h2
           id={titleId}
           className={cn(
-            'text-center text-4xl font-serif font-extrabold leading-tight tracking-tight sm:text-6xl md:text-7xl lg:text-8xl',
+            'text-center font-serif font-extrabold leading-tight tracking-tight',
+            bet.side === 'yes' || bet.side === 'no'
+              ? 'text-4xl sm:text-6xl md:text-7xl lg:text-8xl'
+              : 'text-2xl sm:text-4xl md:text-5xl line-clamp-4 break-words px-1',
             predictTitleRainbow,
           )}
         >
@@ -201,11 +206,11 @@ export function PredictBetMoreModal({ open, bet, onClose, onSuccess }: Props) {
             <p className="text-sm text-muted-foreground">{p.investSignInPrompt ?? 'Sign in.'}</p>
             <div className="flex flex-wrap gap-2">
               <Link href="/login?callbackUrl=/dashboard">
-                <Button type="button" variant="primary" className="!px-4 !py-2 !text-sm">
+                <Button type="button" variant="primary" className="!px-8 !py-3.5 !text-base">
                   {p.investGoSignIn ?? 'Sign in'}
                 </Button>
               </Link>
-              <Button type="button" variant="secondary" className="!px-4 !py-2 !text-sm" onClick={onClose}>
+              <Button type="button" variant="secondary" className="!px-8 !py-3.5 !text-base" onClick={onClose}>
                 {p.investCancel ?? 'Cancel'}
               </Button>
             </div>
@@ -214,7 +219,7 @@ export function PredictBetMoreModal({ open, bet, onClose, onSuccess }: Props) {
           <div className="mt-6 space-y-4">
             <p className="text-sm text-muted-foreground">{p.investSignInPrompt ?? 'Sign in.'}</p>
             <Link href="/login?callbackUrl=/dashboard">
-              <Button type="button" variant="primary" className="!px-4 !py-2 !text-sm">
+              <Button type="button" variant="primary" className="!px-8 !py-3.5 !text-base">
                 {p.investGoSignIn ?? 'Sign in'}
               </Button>
             </Link>
@@ -229,7 +234,7 @@ export function PredictBetMoreModal({ open, bet, onClose, onSuccess }: Props) {
           <div className="mt-6 space-y-4 text-center">
             <p className="text-sm font-bold text-muted-foreground">{notEnoughMessage}</p>
             <Link href="/dashboard">
-              <Button type="button" variant="primary" className="!px-4 !py-2 !text-sm">
+              <Button type="button" variant="primary" className="!px-8 !py-3.5 !text-base">
                 {p.investAddCoins ?? p.investGoDashboard ?? 'Add coins'}
               </Button>
             </Link>
@@ -262,7 +267,7 @@ export function PredictBetMoreModal({ open, bet, onClose, onSuccess }: Props) {
                 className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-violet-500/50 focus:ring-2 ring-violet-500/20"
               />
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-2">
               <Button
                 type="button"
                 variant="secondary"
@@ -312,13 +317,13 @@ export function PredictBetMoreModal({ open, bet, onClose, onSuccess }: Props) {
               <p className="text-sm text-red-400/90">{p.investErrorGeneric ?? 'Error'}</p>
             ) : null}
             <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
-              <Button type="submit" variant="primary" disabled={submitting} className="!px-4 !py-2 !text-sm">
+              <Button type="submit" variant="primary" disabled={submitting} className="!px-8 !py-3.5 !text-base">
                 {submitting ? p.investSubmitting ?? '…' : p.investConfirm ?? 'Confirm'}
               </Button>
               <Button
                 type="button"
                 variant="secondary"
-                className="!px-4 !py-2 !text-sm"
+                className="!px-8 !py-3.5 !text-base"
                 disabled={submitting}
                 onClick={onClose}
               >

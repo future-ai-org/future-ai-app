@@ -14,13 +14,17 @@ type PredictQuestionItem = {
   question: string;
 };
 
+type PredictInvestBetKind = 'binary' | 'mc';
+
 type Props = {
   open: boolean;
   onClose: () => void;
   question: PredictQuestionItem | null;
   cardIndex: number;
-  side: 'yes' | 'no';
-  onInvested: (cardIndex: number, side: 'yes' | 'no', coins: number) => void;
+  betKind: PredictInvestBetKind;
+  /** Binary: `yes` | `no`. Multiple choice: exact option label from the question. */
+  side: string;
+  onInvested: (cardIndex: number, side: string, coins: number) => void;
 };
 
 const NOT_ENOUGH_KEY = 'not_enough';
@@ -52,6 +56,7 @@ export function PredictInvestModal({
   onClose,
   question,
   cardIndex,
+  betKind,
   side,
   onInvested,
 }: Props) {
@@ -189,7 +194,12 @@ export function PredictInvestModal({
 
   if (!open || !question) return null;
 
-  const sideLabel = side === 'yes' ? copy.predict.yes : copy.predict.no;
+  const sideLabel =
+    betKind === 'mc'
+      ? side
+      : side === 'yes'
+        ? copy.predict.yes
+        : copy.predict.no;
   const notEnoughMessage = p.investNotEnoughCoins ?? "you don't have enough coins.";
   const showInsufficient =
     !loadingBalance && status === 'authenticated' && !authRequired && balance < 1;
@@ -219,7 +229,10 @@ export function PredictInvestModal({
         <h2
           id={titleId}
           className={cn(
-            'text-center text-4xl font-serif font-extrabold leading-tight tracking-tight sm:text-6xl md:text-7xl lg:text-8xl',
+            'text-center font-serif font-extrabold leading-tight tracking-tight',
+            betKind === 'mc'
+              ? 'text-2xl sm:text-4xl md:text-5xl line-clamp-4 break-words px-1'
+              : 'text-4xl sm:text-6xl md:text-7xl lg:text-8xl',
             predictTitleRainbow,
           )}
         >
@@ -239,11 +252,11 @@ export function PredictInvestModal({
             </p>
             <div className="flex flex-wrap gap-2">
               <Link href="/login?callbackUrl=/">
-                <Button type="button" variant="primary" className="!px-4 !py-2 !text-sm">
+                <Button type="button" variant="primary" className="!px-8 !py-3.5 !text-base">
                   {p.investGoSignIn ?? 'Sign in'}
                 </Button>
               </Link>
-              <Button type="button" variant="secondary" className="!px-4 !py-2 !text-sm" onClick={onClose}>
+              <Button type="button" variant="secondary" className="!px-8 !py-3.5 !text-base" onClick={onClose}>
                 {p.investCancel ?? 'Cancel'}
               </Button>
             </div>
@@ -255,11 +268,11 @@ export function PredictInvestModal({
             </p>
             <div className="flex flex-wrap gap-2">
               <Link href="/login?callbackUrl=/">
-                <Button type="button" variant="primary" className="!px-4 !py-2 !text-sm">
+                <Button type="button" variant="primary" className="!px-8 !py-3.5 !text-base">
                   {p.investGoSignIn ?? 'Sign in'}
                 </Button>
               </Link>
-              <Button type="button" variant="secondary" className="!px-4 !py-2 !text-sm" onClick={onClose}>
+              <Button type="button" variant="secondary" className="!px-8 !py-3.5 !text-base" onClick={onClose}>
                 {p.investCancel ?? 'Cancel'}
               </Button>
             </div>
@@ -275,11 +288,11 @@ export function PredictInvestModal({
             <p className="text-sm font-bold text-muted-foreground">{notEnoughMessage}</p>
             <div className="flex flex-wrap items-center justify-center gap-2">
               <Link href="/dashboard">
-                <Button type="button" variant="primary" className="!px-4 !py-2 !text-sm">
+                <Button type="button" variant="primary" className="!px-8 !py-3.5 !text-base">
                   {p.investAddCoins ?? p.investGoDashboard ?? 'Add coins'}
                 </Button>
               </Link>
-              <Button type="button" variant="secondary" className="!px-4 !py-2 !text-sm" onClick={onClose}>
+              <Button type="button" variant="secondary" className="!px-8 !py-3.5 !text-base" onClick={onClose}>
                 {p.investCancel ?? 'Cancel'}
               </Button>
             </div>
@@ -311,7 +324,7 @@ export function PredictInvestModal({
                 className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none focus:border-violet-500/50 focus:ring-2 ring-violet-500/20"
               />
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-2">
               <Button
                 type="button"
                 variant="secondary"
@@ -363,14 +376,14 @@ export function PredictInvestModal({
             {errorKey === NOT_ENOUGH_KEY ? (
               <div className="flex flex-wrap items-center justify-center gap-2">
                 <Link href="/dashboard">
-                  <Button type="button" variant="primary" className="!px-4 !py-2 !text-sm">
+                  <Button type="button" variant="primary" className="!px-8 !py-3.5 !text-base">
                     {p.investAddCoins ?? p.investGoDashboard ?? 'Add coins'}
                   </Button>
                 </Link>
                 <Button
                   type="button"
                   variant="secondary"
-                  className="!px-4 !py-2 !text-sm"
+                  className="!px-8 !py-3.5 !text-base"
                   disabled={submitting}
                   onClick={onClose}
                 >
@@ -379,14 +392,14 @@ export function PredictInvestModal({
               </div>
             ) : null}
             <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
-              <Button type="submit" variant="primary" disabled={submitting} className="!px-4 !py-2 !text-sm">
+              <Button type="submit" variant="primary" disabled={submitting} className="!px-8 !py-3.5 !text-base">
                 {submitting ? p.investSubmitting ?? '…' : p.investConfirm ?? 'Confirm'}
               </Button>
               {errorKey !== NOT_ENOUGH_KEY ? (
                 <Button
                   type="button"
                   variant="secondary"
-                  className="!px-4 !py-2 !text-sm"
+                  className="!px-8 !py-3.5 !text-base"
                   disabled={submitting}
                   onClick={onClose}
                 >

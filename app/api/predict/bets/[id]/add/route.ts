@@ -4,7 +4,11 @@ import {
   applyAstroCoinDelta,
   InsufficientAstroCoinsError,
 } from '@/lib/astro-coins-ledger';
-import { isValidBinaryPredictQuestionId } from '@/lib/predict-validate';
+import {
+  getMcOptionsForQuestion,
+  isValidBinaryPredictQuestionId,
+  isValidPredictQuestionId,
+} from '@/lib/predict-validate';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -59,13 +63,15 @@ export async function POST(
         throw new Error('NOT_FOUND');
       }
 
-      const side = bet.side.trim().toLowerCase();
-      if (side !== 'yes' && side !== 'no') {
-        throw new Error('NOT_BINARY');
-      }
-
-      if (!isValidBinaryPredictQuestionId(bet.questionId)) {
+      if (!isValidPredictQuestionId(bet.questionId)) {
         throw new Error('BAD_QUESTION');
+      }
+      if (isValidBinaryPredictQuestionId(bet.questionId)) {
+        const side = bet.side.trim().toLowerCase();
+        if (side !== 'yes' && side !== 'no') throw new Error('BAD_QUESTION');
+      } else {
+        const opts = getMcOptionsForQuestion(bet.questionId);
+        if (!opts || !opts.includes(bet.side)) throw new Error('BAD_QUESTION');
       }
 
       const refId = `add:${bet.id}`;
@@ -89,9 +95,6 @@ export async function POST(
   } catch (e) {
     if (e instanceof Error && e.message === 'NOT_FOUND') {
       return NextResponse.json({ error: 'Bet not found' }, { status: 404 });
-    }
-    if (e instanceof Error && e.message === 'NOT_BINARY') {
-      return NextResponse.json({ error: 'Only yes/no bets can be extended' }, { status: 400 });
     }
     if (e instanceof Error && e.message === 'BAD_QUESTION') {
       return NextResponse.json({ error: 'Question no longer available' }, { status: 400 });

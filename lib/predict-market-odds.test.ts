@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   formatPermilleAsPercent,
+  marketPermilleByChoice,
   marketPermilleFromSideCoins,
   PREDICT_MARKET_PERMILLE_TOTAL,
 } from '@/lib/predict-market-odds';
@@ -44,6 +45,25 @@ describe('marketPermilleFromSideCoins', () => {
       const { yesPermille, noPermille } = marketPermilleFromSideCoins(y, n);
       expect(yesPermille + noPermille).toBe(PREDICT_MARKET_PERMILLE_TOTAL);
     }
+  });
+});
+
+describe('marketPermilleByChoice', () => {
+  it('splits equally when there is no volume', () => {
+    const m = marketPermilleByChoice(new Map(), ['a', 'b', 'c', 'd']);
+    expect([...m.values()].reduce((x, y) => x + y, 0)).toBe(PREDICT_MARKET_PERMILLE_TOTAL);
+    expect(m.get('a')).toBe(250);
+  });
+
+  it('permille parts sum to total', () => {
+    const m = marketPermilleByChoice(
+      new Map([
+        ['a', 1],
+        ['b', 3],
+      ]),
+      ['a', 'b'],
+    );
+    expect([...m.values()].reduce((x, y) => x + y, 0)).toBe(PREDICT_MARKET_PERMILLE_TOTAL);
   });
 });
 

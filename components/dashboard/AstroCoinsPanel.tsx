@@ -136,10 +136,16 @@ export function AstroCoinsPanel({ className, initialCoins, walletRefreshTick = 0
             {copy.dashboard.astroCoinsTitle}
           </h2>
           <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="text-5xl font-bold tabular-nums tracking-tight text-foreground leading-none sm:text-6xl md:text-7xl lg:text-8xl">
+            <span
+              className={cn(
+                'text-5xl font-bold tabular-nums tracking-tight leading-none sm:text-6xl md:text-7xl lg:text-8xl',
+                'bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent',
+                'dark:from-violet-400 dark:to-fuchsia-300',
+              )}
+            >
               {loadingBalance ? '…' : coins.toLocaleString()}
             </span>
-            <span className="text-xl font-medium text-muted-foreground sm:text-2xl md:text-3xl">
+            <span className="text-xl font-medium text-violet-700 dark:text-muted-foreground sm:text-2xl md:text-3xl">
               {copy.dashboard.astroCoinsLabel}
             </span>
           </p>

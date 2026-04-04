@@ -40,6 +40,43 @@ export function marketPermilleFromSideCoins(
   return { yesPermille: clampedYes, noPermille };
 }
 
+/**
+ * Split {@link PREDICT_MARKET_PERMILLE_TOTAL} across named choices by coin share.
+ * No coins → equal split across `orderedChoices`.
+ */
+export function marketPermilleByChoice(
+  choiceCoins: ReadonlyMap<string, number>,
+  orderedChoices: readonly string[],
+): Map<string, number> {
+  const out = new Map<string, number>();
+  if (orderedChoices.length === 0) return out;
+  const counts = orderedChoices.map(k => Math.max(0, Math.floor(choiceCoins.get(k) ?? 0)));
+  const total = counts.reduce((a, b) => a + b, 0);
+  if (total <= 0) {
+    const base = Math.floor(PREDICT_MARKET_PERMILLE_TOTAL / orderedChoices.length);
+    const rem = PREDICT_MARKET_PERMILLE_TOTAL - orderedChoices.length * base;
+    orderedChoices.forEach((k, i) => {
+      out.set(k, base + (i < rem ? 1 : 0));
+    });
+    return out;
+  }
+  let sum = 0;
+  const raws = orderedChoices.map((k, i) => {
+    const raw = (PREDICT_MARKET_PERMILLE_TOTAL * counts[i]!) / total;
+    const fl = Math.floor(raw);
+    sum += fl;
+    return { k, fl, frac: raw - fl };
+  });
+  let rem = PREDICT_MARKET_PERMILLE_TOTAL - sum;
+  raws.sort((a, b) => b.frac - a.frac);
+  for (let i = 0; i < raws.length && rem > 0; i++) {
+    raws[i]!.fl++;
+    rem--;
+  }
+  for (const { k, fl } of raws) out.set(k, fl);
+  return out;
+}
+
 /** Display string for a side (permille / 10 = percent, up to one decimal). */
 export function formatPermilleAsPercent(permille: number): string {
   const p = permille / 10;

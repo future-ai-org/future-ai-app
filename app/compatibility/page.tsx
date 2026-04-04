@@ -328,8 +328,6 @@ function CompatibilityContent() {
           compatibilityResult.aInB,
           compatibilityResult.bInA,
         );
-        const houseAinB = new Map(compatibilityResult.aInB.map((r) => [r.planet.name, r.house]));
-        const houseBinA = new Map(compatibilityResult.bInA.map((r) => [r.planet.name, r.house]));
         const overall = getOverallScore(compatibilityResult.aInB, compatibilityResult.bInA);
         const scoreLabelClass = (label: string) =>
           label === 'high'
@@ -354,138 +352,109 @@ function CompatibilityContent() {
               </div>
               <p className="text-sm text-muted-foreground">{overall.summary}</p>
             </Card>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="p-4">
-                <h3 className="text-xs text-fuchsia-300 font-medium mb-3">
-                  {copy.compatibility.planetsInHouses(compatibilityResult.chartALabel)}
-                </h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm min-w-[520px]">
-                    <thead>
-                      <tr className="text-left text-muted-foreground border-b border-border">
-                        <th className="pb-2 pr-2 whitespace-nowrap">{copy.compatibility.planet}</th>
-                        <th className="pb-2 pr-2 whitespace-nowrap">{copy.compatibility.sign}</th>
-                        <th className="pb-2 pr-2 whitespace-nowrap">{copy.compatibility.house}</th>
-                        <th className="pb-2 pr-2 whitespace-nowrap">{copy.compatibility.score}</th>
-                        <th className="pb-2 min-w-[8rem]">{copy.compatibility.explanation}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {compatibilityResult.aInB.map((row, i) => {
-                        const name = row.planet.name as PlanetName;
-                        const hBA = houseBinA.get(row.planet.name) ?? row.house;
-                        const placement = getSymmetricPlacementScore(
-                          name,
-                          row.house,
-                          hBA,
-                          sameSignPlanets,
-                          elementRelationByPlanet.get(name) ?? 'none',
-                        );
-                        return (
-                          <tr
-                            key={i}
-                            className="border-b border-border/50 align-middle"
-                          >
-                            <td className="py-2 pr-2 whitespace-nowrap">
-                              <span className="inline-flex items-center gap-1">
-                                <span aria-hidden>{planetGlyph(row.planet.name)}</span>
-                                {row.planet.name}
-                              </span>
-                            </td>
-                            <td className="py-2 pr-2 whitespace-nowrap">
-                              <span className="inline-flex items-center gap-1">
-                                <span aria-hidden>{row.glyph}</span>
-                                {row.inSign}
-                              </span>
-                            </td>
-                            <td className="py-2 pr-2 whitespace-nowrap">house {row.house}</td>
-                            <td className="py-2 pr-2 whitespace-nowrap">
-                              <span
-                                className={`text-xs font-medium ${scoreLabelClass(placement.label)}`}
-                                title={placement.note}
-                              >
-                                {placement.score}/10
-                              </span>
-                            </td>
-                            <td className="py-2 text-muted-foreground text-xs align-top max-w-[14rem]">
-                              {getCompatibilityExplanation(
-                                row.planet.name as PlanetName,
-                                row.house,
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </Card>
-              <Card className="p-4">
-                <h3 className="text-xs text-fuchsia-300 font-medium mb-3">
-                  {copy.compatibility.planetsInHouses(compatibilityResult.chartBLabel)}
-                </h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm min-w-[520px]">
-                    <thead>
-                      <tr className="text-left text-muted-foreground border-b border-border">
-                        <th className="pb-2 pr-2 whitespace-nowrap">{copy.compatibility.planet}</th>
-                        <th className="pb-2 pr-2 whitespace-nowrap">{copy.compatibility.sign}</th>
-                        <th className="pb-2 pr-2 whitespace-nowrap">{copy.compatibility.house}</th>
-                        <th className="pb-2 pr-2 whitespace-nowrap">{copy.compatibility.score}</th>
-                        <th className="pb-2 min-w-[8rem]">{copy.compatibility.explanation}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {compatibilityResult.bInA.map((row, i) => {
-                        const name = row.planet.name as PlanetName;
-                        const hAB = houseAinB.get(row.planet.name) ?? row.house;
-                        const placement = getSymmetricPlacementScore(
-                          name,
-                          hAB,
-                          row.house,
-                          sameSignPlanets,
-                          elementRelationByPlanet.get(name) ?? 'none',
-                        );
-                        return (
-                          <tr
-                            key={i}
-                            className="border-b border-border/50 align-middle"
-                          >
-                            <td className="py-2 pr-2 whitespace-nowrap">
-                              <span className="inline-flex items-center gap-1">
-                                <span aria-hidden>{planetGlyph(row.planet.name)}</span>
-                                {row.planet.name}
-                              </span>
-                            </td>
-                            <td className="py-2 pr-2 whitespace-nowrap">
-                              <span className="inline-flex items-center gap-1">
-                                <span aria-hidden>{row.glyph}</span>
-                                {row.inSign}
-                              </span>
-                            </td>
-                            <td className="py-2 pr-2 whitespace-nowrap">house {row.house}</td>
-                            <td className="py-2 pr-2 whitespace-nowrap">
-                              <span
-                                className={`text-xs font-medium ${scoreLabelClass(placement.label)}`}
-                                title={placement.note}
-                              >
-                                {placement.score}/10
-                              </span>
-                            </td>
-                            <td className="py-2 text-muted-foreground text-xs align-top max-w-[14rem]">
-                              {getCompatibilityExplanation(
-                                row.planet.name as PlanetName,
-                                row.house,
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </Card>
-            </div>
+            <Card className="p-4 overflow-hidden">
+              <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+                <table className="w-full text-sm min-w-[52rem] border-separate border-spacing-0">
+                  <thead>
+                    <tr className="text-left text-muted-foreground border-b border-border">
+                      <th className="pb-2 pr-3 align-bottom whitespace-nowrap" rowSpan={2}>
+                        {copy.compatibility.planet}
+                      </th>
+                      <th
+                        className="pb-2 pr-2 align-bottom whitespace-nowrap w-[4.5rem]"
+                        rowSpan={2}
+                      >
+                        {copy.compatibility.score}
+                      </th>
+                      <th
+                        className="pb-2 pr-4 align-bottom min-w-[10rem] max-w-[18rem]"
+                        rowSpan={2}
+                      >
+                        {copy.compatibility.explanation}
+                      </th>
+                      <th
+                        className="pb-2 px-3 align-bottom text-fuchsia-300 font-medium border-l border-border/60"
+                        colSpan={3}
+                      >
+                        {compatibilityResult.chartALabel}
+                      </th>
+                      <th
+                        className="pb-2 pl-3 align-bottom text-fuchsia-300 font-medium border-l border-border/60"
+                        colSpan={3}
+                      >
+                        {compatibilityResult.chartBLabel}
+                      </th>
+                    </tr>
+                    <tr className="text-left text-muted-foreground border-b border-border text-xs">
+                      <th className="pb-2 pr-2 pt-1 whitespace-nowrap border-l border-border/60 pl-3">
+                        {copy.compatibility.sign}
+                      </th>
+                      <th className="pb-2 pr-2 pt-1 whitespace-nowrap">{copy.compatibility.house}</th>
+                      <th className="pb-2 pr-2 pt-1 min-w-[7rem]">{copy.compatibility.explanation}</th>
+                      <th className="pb-2 pr-2 pt-1 whitespace-nowrap border-l border-border/60 pl-3">
+                        {copy.compatibility.sign}
+                      </th>
+                      <th className="pb-2 pr-2 pt-1 whitespace-nowrap">{copy.compatibility.house}</th>
+                      <th className="pb-2 pt-1 min-w-[7rem]">{copy.compatibility.explanation}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {compatibilityResult.aInB.map((rowA) => {
+                      const rowB = compatibilityResult.bInA.find((r) => r.planet.name === rowA.planet.name);
+                      if (!rowB) return null;
+                      const name = rowA.planet.name as PlanetName;
+                      const placement = getSymmetricPlacementScore(
+                        name,
+                        rowA.house,
+                        rowB.house,
+                        sameSignPlanets,
+                        elementRelationByPlanet.get(name) ?? 'none',
+                      );
+                      return (
+                        <tr key={rowA.planet.name} className="border-b border-border/50 align-top">
+                          <td className="py-2.5 pr-3 whitespace-nowrap">
+                            <span className="inline-flex items-center gap-1">
+                              <span aria-hidden>{planetGlyph(rowA.planet.name)}</span>
+                              {rowA.planet.name}
+                            </span>
+                          </td>
+                          <td className="py-2.5 pr-2 whitespace-nowrap align-top">
+                            <span
+                              className={`text-sm font-medium tabular-nums ${scoreLabelClass(placement.label)}`}
+                            >
+                              {placement.score}/10
+                            </span>
+                          </td>
+                          <td className="py-2.5 pr-4 text-muted-foreground text-xs leading-snug align-top max-w-[18rem]">
+                            {placement.note}
+                          </td>
+                          <td className="py-2.5 pr-2 border-l border-border/40 pl-3 whitespace-nowrap">
+                            <span className="inline-flex items-center gap-1">
+                              <span aria-hidden>{rowA.glyph}</span>
+                              {rowA.inSign}
+                            </span>
+                          </td>
+                          <td className="py-2.5 pr-2 whitespace-nowrap">house {rowA.house}</td>
+                          <td className="py-2.5 pr-2 text-muted-foreground text-xs max-w-[14rem]">
+                            {getCompatibilityExplanation(name, rowA.house)}
+                          </td>
+                          <td className="py-2.5 pr-2 border-l border-border/40 pl-3 whitespace-nowrap">
+                            <span className="inline-flex items-center gap-1">
+                              <span aria-hidden>{rowB.glyph}</span>
+                              {rowB.inSign}
+                            </span>
+                          </td>
+                          <td className="py-2.5 pr-2 whitespace-nowrap">house {rowB.house}</td>
+                          <td className="py-2.5 text-muted-foreground text-xs max-w-[14rem]">
+                            {getCompatibilityExplanation(name, rowB.house)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
           </section>
         );
       })()}

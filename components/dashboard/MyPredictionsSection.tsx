@@ -82,7 +82,6 @@ export function MyPredictionsSection({
         {bets.map(bet => {
           const sideLabel =
             bet.side === 'yes' ? copy.predict.yes : bet.side === 'no' ? copy.predict.no : bet.side;
-          const canExtendBet = bet.side === 'yes' || bet.side === 'no';
           return (
             <li key={bet.id}>
               <Card className="flex flex-row items-stretch gap-4 sm:gap-8 p-4 sm:p-5">
@@ -132,16 +131,14 @@ export function MyPredictionsSection({
                     >
                       {copy.dashboard.myPredictionsWithdraw}
                     </Button>
-                    {canExtendBet ? (
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        className="whitespace-nowrap px-3 py-2 text-sm"
-                        onClick={() => setBetMoreBet(bet)}
-                      >
-                        {copy.dashboard.myPredictionsBetMore}
-                      </Button>
-                    ) : null}
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="whitespace-nowrap px-3 py-2 text-sm"
+                      onClick={() => setBetMoreBet(bet)}
+                    >
+                      {copy.dashboard.myPredictionsBetMore}
+                    </Button>
                   </div>
                 </div>
               </Card>
