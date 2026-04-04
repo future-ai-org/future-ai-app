@@ -155,7 +155,7 @@ export default function ChartTransitsPage() {
         <h1 className="text-4xl sm:text-6xl md:text-7xl font-serif mt-4 mb-0 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight px-2 break-words">
           {copy.chart.titlePrefix} {transitsHeadingText} {copy.chart.titleSuffix}
         </h1>
-        <p className="text-muted-foreground text-sm mt-5 md:mt-6 font-bold">
+        <p className="text-muted-foreground text-base sm:text-lg md:text-xl mt-5 md:mt-6 font-bold text-balance px-2">
           {copy.chart.transitsSubtitle(transitLabel)}
         </p>
         <div className="mt-3.5 sm:mt-4 flex flex-wrap items-center justify-center gap-2 md:gap-3 font-bold">
