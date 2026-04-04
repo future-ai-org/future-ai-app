@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { copy } from "./copy";
 
 describe("copy.nav", () => {
-  it("includes solar system nav label", () => {
-    expect(copy.nav.solarSystem).toBe("solar system");
+  it("includes main navigation aria label", () => {
+    expect(copy.nav.ariaLabel).toBe("main navigation");
   });
 });

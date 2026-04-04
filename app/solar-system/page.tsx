@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { copy } from '@/lib/copy';
 
 const SolarSystemClient = dynamic(() => import('@/components/solar-system/SolarSystemClient'), {
   ssr: false,
@@ -14,12 +15,11 @@ const SolarSystemClient = dynamic(() => import('@/components/solar-system/SolarS
 
 export default function SolarSystemPage() {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6">
-      <header className="mb-5 max-w-2xl">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">solar system</h1>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
-          our small corner of a beautiful, dark, and vast universe
-        </p>
+    <div className="mx-auto max-w-6xl px-3 sm:px-4 pb-6">
+      <header className="pt-8 pb-6 text-center scroll-mt-20">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif mt-4 mb-1 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
+          {copy.chart.titlePrefix} {copy.solarSystem.title}
+        </h1>
       </header>
       <SolarSystemClient />
     </div>

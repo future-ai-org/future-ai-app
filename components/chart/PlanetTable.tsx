@@ -15,9 +15,6 @@ export function PlanetTable({ result, showHouses = true }: Props) {
   const data = reapplyWholeSignHouses(result);
   return (
     <Card>
-      <h2 className="text-xs text-violet-400 tracking-widest uppercase mb-3 border-b border-border pb-2">
-        {copy.planetTable.title}
-      </h2>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[28rem] border-collapse text-sm">
           <thead>
