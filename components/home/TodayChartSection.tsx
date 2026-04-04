@@ -69,7 +69,7 @@ export function TodayChartSection() {
       <div className="mx-auto max-w-6xl px-4 md:px-8">
         <div className="text-center mb-12 md:mb-16">
           <h2 className="text-3xl md:text-4xl font-serif bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
-            {copy.chart.titlePrefix} {copy.today.title}
+            {copy.chart.titlePrefix} {copy.today.title} {copy.chart.titleSuffix}
           </h2>
           <p className="text-muted-foreground text-sm md:text-base mt-2 tracking-wide max-w-xl mx-auto">
             {copy.today.subtitle}

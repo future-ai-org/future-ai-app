@@ -64,7 +64,7 @@ export function DashboardTransitNews({ natal, className }: Props) {
 
   return (
     <Card className={cn('w-full min-w-0', className)}>
-      <h2 className="text-xs font-bold text-violet-400 tracking-widest uppercase mb-6">
+      <h2 className="text-sm sm:text-base md:text-lg font-extrabold text-violet-500 dark:text-violet-400 tracking-widest uppercase mb-6">
         {copy.dashboard.transitNewsTitle}
       </h2>
       <ul className="space-y-4 text-xs sm:text-sm leading-relaxed">

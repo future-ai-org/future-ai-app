@@ -103,11 +103,15 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
 
   return (
     <Card className="mb-6">
-      <h2 className="text-sm text-violet-400 tracking-widest uppercase mb-5">{copy.form.sectionTitle}</h2>
+      <h2 className="text-sm sm:text-base font-extrabold text-violet-500 dark:text-violet-400 tracking-widest uppercase mb-8 sm:mb-10">
+        {copy.form.sectionTitle}
+      </h2>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-muted-foreground tracking-wider">{copy.form.dateLabel}</label>
+            <label className="text-base sm:text-lg font-bold text-violet-500 dark:text-violet-400 tracking-wide">
+              {copy.form.dateLabel}
+            </label>
             <input
               type="date"
               value={date}
@@ -119,7 +123,9 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-muted-foreground tracking-wider">{copy.form.timeLabel}</label>
+            <label className="text-base sm:text-lg font-bold text-violet-500 dark:text-violet-400 tracking-wide">
+              {copy.form.timeLabel}
+            </label>
             <input
               type="time"
               value={time}
@@ -144,7 +150,9 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
           </div>
 
           <div className="flex flex-col gap-1.5 sm:col-span-2">
-            <label className="text-xs text-muted-foreground tracking-wider">{copy.form.cityLabel}</label>
+            <label className="text-base sm:text-lg font-bold text-violet-500 dark:text-violet-400 tracking-wide">
+              {copy.form.cityLabel}
+            </label>
             <CitySearch onResult={handleGeoResult} onReset={handleGeoReset} disabled={cityNotKnown} />
             <label className="flex items-center gap-2 cursor-pointer w-fit mt-2">
               <input

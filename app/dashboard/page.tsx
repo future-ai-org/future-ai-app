@@ -70,7 +70,7 @@ export default function DashboardPage() {
     <main className="max-w-6xl mx-auto px-4 pb-20">
       <div className="pt-8 pb-8 text-center">
         <h1 className="text-5xl md:text-6xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
-          {copy.chart.titlePrefix} {copy.dashboard.title}
+          {copy.chart.titlePrefix} {copy.dashboard.title} {copy.chart.titleSuffix}
         </h1>
       </div>
 
@@ -135,7 +135,7 @@ export default function DashboardPage() {
             );
           })()}
           <section>
-            <h2 className="text-sm font-bold text-violet-400 tracking-widest uppercase mb-3">
+            <h2 className="text-sm sm:text-base md:text-lg font-extrabold text-violet-500 dark:text-violet-400 tracking-widest uppercase mb-4">
               {copy.dashboard.otherCharts}
             </h2>
             {charts.filter(c => c.isPrimary !== true).length === 0 ? (

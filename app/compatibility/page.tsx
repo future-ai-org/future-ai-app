@@ -114,7 +114,7 @@ function CompatibilityContent() {
           ← {copy.dashboard.backToDashboard}
         </Link>
         <h1 className="text-5xl md:text-6xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
-          {copy.chart.titlePrefix} {copy.compatibility.title}
+          {copy.chart.titlePrefix} {copy.compatibility.title} {copy.chart.titleSuffix}
         </h1>
       </div>
 
@@ -347,109 +347,125 @@ function CompatibilityContent() {
                 <h3 className="text-xs text-fuchsia-300 font-medium mb-3">
                   {copy.compatibility.planetsInHouses(compatibilityResult.chartALabel)}
                 </h3>
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="text-left text-muted-foreground border-b border-border">
-                      <th className="pb-2 pr-2">{copy.compatibility.planet}</th>
-                      <th className="pb-2 pr-2">{copy.compatibility.sign}</th>
-                      <th className="pb-2 pr-2">{copy.compatibility.house}</th>
-                      <th className="pb-2 pr-2">{copy.compatibility.score}</th>
-                      <th className="pb-2">{copy.compatibility.explanation}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {compatibilityResult.aInB.map((row, i) => {
-                      const placement = getPlacementScore(
-                        row.planet.name as PlanetName,
-                        row.house,
-                        sameSignPlanets,
-                        elementCompatiblePlanets,
-                      );
-                      return (
-                        <tr
-                          key={i}
-                          className="border-b border-border/50 align-top"
-                        >
-                          <td className="py-2 pr-2">
-                            {planetGlyph(row.planet.name)} {row.planet.name}
-                          </td>
-                          <td className="py-2 pr-2">
-                            {row.glyph} {row.inSign}
-                          </td>
-                          <td className="py-2 pr-2">house {row.house}</td>
-                          <td className="py-2 pr-2">
-                            <span
-                              className={`text-xs font-medium ${scoreLabelClass(placement.label)}`}
-                              title={placement.note}
-                            >
-                              {placement.score}/10
-                            </span>
-                          </td>
-                          <td className="py-2 text-muted-foreground text-xs">
-                            {getCompatibilityExplanation(
-                              row.planet.name as PlanetName,
-                              row.house,
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm min-w-[520px]">
+                    <thead>
+                      <tr className="text-left text-muted-foreground border-b border-border">
+                        <th className="pb-2 pr-2 whitespace-nowrap">{copy.compatibility.planet}</th>
+                        <th className="pb-2 pr-2 whitespace-nowrap">{copy.compatibility.sign}</th>
+                        <th className="pb-2 pr-2 whitespace-nowrap">{copy.compatibility.house}</th>
+                        <th className="pb-2 pr-2 whitespace-nowrap">{copy.compatibility.score}</th>
+                        <th className="pb-2 min-w-[8rem]">{copy.compatibility.explanation}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {compatibilityResult.aInB.map((row, i) => {
+                        const placement = getPlacementScore(
+                          row.planet.name as PlanetName,
+                          row.house,
+                          sameSignPlanets,
+                          elementCompatiblePlanets,
+                        );
+                        return (
+                          <tr
+                            key={i}
+                            className="border-b border-border/50 align-middle"
+                          >
+                            <td className="py-2 pr-2 whitespace-nowrap">
+                              <span className="inline-flex items-center gap-1">
+                                <span aria-hidden>{planetGlyph(row.planet.name)}</span>
+                                {row.planet.name}
+                              </span>
+                            </td>
+                            <td className="py-2 pr-2 whitespace-nowrap">
+                              <span className="inline-flex items-center gap-1">
+                                <span aria-hidden>{row.glyph}</span>
+                                {row.inSign}
+                              </span>
+                            </td>
+                            <td className="py-2 pr-2 whitespace-nowrap">house {row.house}</td>
+                            <td className="py-2 pr-2 whitespace-nowrap">
+                              <span
+                                className={`text-xs font-medium ${scoreLabelClass(placement.label)}`}
+                                title={placement.note}
+                              >
+                                {placement.score}/10
+                              </span>
+                            </td>
+                            <td className="py-2 text-muted-foreground text-xs align-top max-w-[14rem]">
+                              {getCompatibilityExplanation(
+                                row.planet.name as PlanetName,
+                                row.house,
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </Card>
               <Card className="p-4">
                 <h3 className="text-xs text-fuchsia-300 font-medium mb-3">
                   {copy.compatibility.planetsInHouses(compatibilityResult.chartBLabel)}
                 </h3>
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="text-left text-muted-foreground border-b border-border">
-                      <th className="pb-2 pr-2">{copy.compatibility.planet}</th>
-                      <th className="pb-2 pr-2">{copy.compatibility.sign}</th>
-                      <th className="pb-2 pr-2">{copy.compatibility.house}</th>
-                      <th className="pb-2 pr-2">{copy.compatibility.score}</th>
-                      <th className="pb-2">{copy.compatibility.explanation}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {compatibilityResult.bInA.map((row, i) => {
-                      const placement = getPlacementScore(
-                        row.planet.name as PlanetName,
-                        row.house,
-                        sameSignPlanets,
-                        elementCompatiblePlanets,
-                      );
-                      return (
-                        <tr
-                          key={i}
-                          className="border-b border-border/50 align-top"
-                        >
-                          <td className="py-2 pr-2">
-                            {planetGlyph(row.planet.name)} {row.planet.name}
-                          </td>
-                          <td className="py-2 pr-2">
-                            {row.glyph} {row.inSign}
-                          </td>
-                          <td className="py-2 pr-2">house {row.house}</td>
-                          <td className="py-2 pr-2">
-                            <span
-                              className={`text-xs font-medium ${scoreLabelClass(placement.label)}`}
-                              title={placement.note}
-                            >
-                              {placement.score}/10
-                            </span>
-                          </td>
-                          <td className="py-2 text-muted-foreground text-xs">
-                            {getCompatibilityExplanation(
-                              row.planet.name as PlanetName,
-                              row.house,
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm min-w-[520px]">
+                    <thead>
+                      <tr className="text-left text-muted-foreground border-b border-border">
+                        <th className="pb-2 pr-2 whitespace-nowrap">{copy.compatibility.planet}</th>
+                        <th className="pb-2 pr-2 whitespace-nowrap">{copy.compatibility.sign}</th>
+                        <th className="pb-2 pr-2 whitespace-nowrap">{copy.compatibility.house}</th>
+                        <th className="pb-2 pr-2 whitespace-nowrap">{copy.compatibility.score}</th>
+                        <th className="pb-2 min-w-[8rem]">{copy.compatibility.explanation}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {compatibilityResult.bInA.map((row, i) => {
+                        const placement = getPlacementScore(
+                          row.planet.name as PlanetName,
+                          row.house,
+                          sameSignPlanets,
+                          elementCompatiblePlanets,
+                        );
+                        return (
+                          <tr
+                            key={i}
+                            className="border-b border-border/50 align-middle"
+                          >
+                            <td className="py-2 pr-2 whitespace-nowrap">
+                              <span className="inline-flex items-center gap-1">
+                                <span aria-hidden>{planetGlyph(row.planet.name)}</span>
+                                {row.planet.name}
+                              </span>
+                            </td>
+                            <td className="py-2 pr-2 whitespace-nowrap">
+                              <span className="inline-flex items-center gap-1">
+                                <span aria-hidden>{row.glyph}</span>
+                                {row.inSign}
+                              </span>
+                            </td>
+                            <td className="py-2 pr-2 whitespace-nowrap">house {row.house}</td>
+                            <td className="py-2 pr-2 whitespace-nowrap">
+                              <span
+                                className={`text-xs font-medium ${scoreLabelClass(placement.label)}`}
+                                title={placement.note}
+                              >
+                                {placement.score}/10
+                              </span>
+                            </td>
+                            <td className="py-2 text-muted-foreground text-xs align-top max-w-[14rem]">
+                              {getCompatibilityExplanation(
+                                row.planet.name as PlanetName,
+                                row.house,
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </Card>
             </div>
           </section>

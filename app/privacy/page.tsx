@@ -16,7 +16,7 @@ export default function PrivacyPage() {
         {copy.privacy.backHome}
       </Link>
       <h1 className="text-4xl sm:text-5xl font-serif mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
-        {copy.privacy.title}
+        {copy.chart.titlePrefix} {copy.privacy.title} {copy.chart.titleSuffix}
       </h1>
       <p className="text-muted-foreground text-sm font-bold mb-10">{copy.privacy.lastUpdated}</p>
       <p className="text-foreground/90 leading-relaxed mb-10">{copy.privacy.intro}</p>

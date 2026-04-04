@@ -217,6 +217,7 @@ export const copy = {
     back: '← back',
     title: 'start your journey',
     titlePrefix: '✦',
+    titleSuffix: '✦',
     tagline: '',
     back15m: '−15m',
     forward15m: '+15m',

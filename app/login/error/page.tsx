@@ -38,7 +38,7 @@ export default function LoginErrorPage() {
           {copy.auth.errors.backToLogin}
         </Link>
         <h1 className="text-3xl font-serif mt-4 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
-          {copy.auth.errors.configTitle}
+          {copy.chart.titlePrefix} {copy.auth.errors.configTitle} {copy.chart.titleSuffix}
         </h1>
       </div>
       <Suspense fallback={<Card><p className="text-muted-foreground text-sm">loading…</p></Card>}>

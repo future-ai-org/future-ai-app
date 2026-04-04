@@ -1,16 +1,30 @@
 {
   "heroIcon": "✦",
   "title": "predict the future",
+  "subtitle": "because girls should have fun too",
   "yes": "yes",
   "no": "no",
   "estimationPrefix": "astro estimation:",
   "estimationPending": "—",
   "questionsAria": "quick questions",
+  "loadMore": "load more",
   "questions": [
     "have you ever had a chart calculated for your birth time and place?",
     "do you notice when mercury is retrograde?",
     "would you like timing hints for the next few weeks?",
     "are you comparing your chart with someone else's?",
     "do you check the moon sign from day to day?"
+  ],
+  "moreQuestions": [
+    "do you feel shifts when the moon changes sign?",
+    "would you use a daily cosmic nudge if it were short?",
+    "are you curious about your venus sign in love?",
+    "do you track retrogrades on a calendar?",
+    "have you ever compared charts with a friend?",
+    "do you read rising sign horoscopes too?",
+    "would you like a heads-up before intense aspects?",
+    "are you into synastry or composite charts?",
+    "do you notice moods around the full moon?",
+    "have you explored your north node story?"
   ]
 }

@@ -9,6 +9,7 @@ import { TransitsTable } from '@/components/chart/TransitsTable';
 import { TransitNatalGaussianPlot } from '@/components/chart/TransitNatalGaussianPlot';
 import { Button } from '@/components/ui/Button';
 import { copy } from '@/lib/copy';
+import { savedChartHeadingLabel } from '@/lib/utils';
 import { calculateChart } from '@/lib/astro/calculate';
 import { CHART_OF_MOMENT_OPTIONS } from '@/lib/astro/types';
 import type { BirthData, ChartResult } from '@/lib/astro/types';
@@ -139,7 +140,7 @@ export default function ChartTransitsPage() {
 
   const transitsHeadingText = chart.isPrimary
     ? copy.chart.transitsForMyChart
-    : copy.chart.transitsForSavedChart(chart.label);
+    : copy.chart.transitsForSavedChart(savedChartHeadingLabel(chart.label));
 
   return (
     <main className="max-w-5xl mx-auto px-4 pb-20">
@@ -151,7 +152,7 @@ export default function ChartTransitsPage() {
           ← {copy.dashboard.backToDashboard}
         </Link>
         <h1 className="text-3xl sm:text-5xl md:text-6xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight px-2 break-words">
-          {copy.chart.titlePrefix} {transitsHeadingText}
+          {copy.chart.titlePrefix} {transitsHeadingText} {copy.chart.titleSuffix}
         </h1>
         <p className="text-muted-foreground text-sm mt-2 font-bold">
           {copy.chart.transitsSubtitle(transitLabel)}

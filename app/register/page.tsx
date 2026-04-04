@@ -33,7 +33,7 @@ export default function RegisterPage() {
             ← {copy.site.title}
           </Link>
           <h1 className="text-3xl font-serif mt-4 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
-            {copy.auth.registerTitle}
+            {copy.chart.titlePrefix} {copy.auth.registerTitle} {copy.chart.titleSuffix}
           </h1>
         </div>
         <Card>
@@ -51,7 +51,7 @@ export default function RegisterPage() {
             ← {copy.site.title}
           </Link>
           <h1 className="text-3xl font-serif mt-4 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
-            {copy.auth.registerTitle}
+            {copy.chart.titlePrefix} {copy.auth.registerTitle} {copy.chart.titleSuffix}
           </h1>
         </div>
         <Card>
@@ -71,7 +71,7 @@ export default function RegisterPage() {
           ← {copy.site.title}
         </Link>
         <h1 className="text-3xl font-serif mt-4 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
-          {copy.auth.registerTitle}
+          {copy.chart.titlePrefix} {copy.auth.registerTitle} {copy.chart.titleSuffix}
         </h1>
       </div>
       <Card>

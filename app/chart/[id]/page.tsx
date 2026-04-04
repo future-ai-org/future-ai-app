@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { ChartResults } from '@/components/chart/ChartResults';
 import { copy } from '@/lib/copy';
+import { savedChartHeadingLabel } from '@/lib/utils';
 import type { ChartResult } from '@/lib/astro/types';
 
 export default function ViewSavedChartPage() {
@@ -75,7 +76,7 @@ export default function ViewSavedChartPage() {
           ← {copy.dashboard.backToDashboard}
         </Link>
         <h1 className="text-5xl md:text-6xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
-          {copy.chart.titlePrefix} {chart.label}
+          {copy.chart.titlePrefix} {savedChartHeadingLabel(chart.label)} {copy.chart.titleSuffix}
         </h1>
       </div>
       <ChartResults result={chart.chartResult} />
