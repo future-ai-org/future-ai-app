@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import { ChartResults } from '@/components/chart/ChartResults';
+import { TarotDecanWheel } from '@/components/chart/TarotDecanWheel';
 import { copy } from '@/lib/copy';
 import type { ChartResult } from '@/lib/astro/types';
 
-export default function ViewSavedChartPage() {
+export default function ChartTarotPage() {
   const params = useParams();
   const router = useRouter();
   const { status } = useSession();
@@ -66,7 +66,7 @@ export default function ViewSavedChartPage() {
   if (!chart) return null;
 
   return (
-    <main className="max-w-5xl mx-auto px-4 pb-20">
+    <main className="max-w-6xl mx-auto px-4 pb-20">
       <div className="pt-8 pb-6 text-center">
         <Link
           href="/dashboard"
@@ -75,23 +75,30 @@ export default function ViewSavedChartPage() {
           ← {copy.dashboard.title}
         </Link>
         <h1 className="text-5xl md:text-6xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
-          {copy.chart.titlePrefix} {chart.label}
+          {copy.chart.tarotTitle}
         </h1>
+        <p className="text-muted-foreground text-sm mt-2 font-bold">{copy.chart.tarotSubtitle}</p>
+        <p className="text-foreground/90 mt-2 text-sm">
+          {copy.chart.titlePrefix} {chart.label}
+        </p>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+          <Link
+            href={`/chart/${id}`}
+            className="inline-flex items-center justify-center rounded-lg border border-violet-500/40 bg-violet-500/10 px-4 py-2 text-sm font-medium text-violet-800 dark:text-violet-200 hover:bg-violet-500/20 transition-colors"
+          >
+            {copy.chart.goToNatalChart}
+          </Link>
+          <Link
+            href={`/chart/${id}/transits`}
+            className="inline-flex items-center justify-center rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-500 transition-colors"
+          >
+            {copy.chart.checkTransits}
+          </Link>
+        </div>
       </div>
-      <ChartResults result={chart.chartResult} />
-      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-        <Link
-          href={`/chart/${id}/transits`}
-          className="inline-flex items-center justify-center rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-violet-500 transition-colors"
-        >
-          {copy.chart.checkTransits}
-        </Link>
-        <Link
-          href={`/chart/${id}/tarot`}
-          className="inline-flex items-center justify-center rounded-lg border border-violet-500/50 bg-violet-500/10 px-4 py-2.5 text-sm font-medium text-violet-800 dark:text-violet-200 hover:bg-violet-500/20 transition-colors"
-        >
-          {copy.chart.tarotMode}
-        </Link>
+
+      <div className="mt-4 flex flex-col items-center">
+        <TarotDecanWheel result={chart.chartResult} chartSize={420} />
       </div>
     </main>
   );

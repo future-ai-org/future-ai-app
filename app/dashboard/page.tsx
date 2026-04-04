@@ -113,6 +113,11 @@ export default function DashboardPage() {
                                 {copy.chart.checkTransits}
                               </Button>
                             </Link>
+                            <Link href={`/chart/${primary.id}/tarot`}>
+                              <Button variant="secondary" type="button">
+                                {copy.chart.tarotMode}
+                              </Button>
+                            </Link>
                             <Button
                               variant="secondary"
                               type="button"
@@ -183,6 +188,11 @@ export default function DashboardPage() {
                             <Link href={`/chart/${chart.id}/transits`}>
                               <Button variant="secondary" type="button">
                                 {copy.chart.checkTransits}
+                              </Button>
+                            </Link>
+                            <Link href={`/chart/${chart.id}/tarot`}>
+                              <Button variant="secondary" type="button">
+                                {copy.chart.tarotMode}
                               </Button>
                             </Link>
                             <Link href={`/compatibility?chart=${chart.id}`}>
