@@ -1,0 +1,16 @@
+{
+  "heroIcon": "✦",
+  "title": "predict the future",
+  "yes": "yes",
+  "no": "no",
+  "estimationPrefix": "astro estimation:",
+  "estimationPending": "—",
+  "questionsAria": "quick questions",
+  "questions": [
+    "have you ever had a chart calculated for your birth time and place?",
+    "do you notice when mercury is retrograde?",
+    "would you like timing hints for the next few weeks?",
+    "are you comparing your chart with someone else's?",
+    "do you check the moon sign from day to day?"
+  ]
+}

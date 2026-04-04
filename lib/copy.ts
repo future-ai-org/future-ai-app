@@ -1,5 +1,8 @@
+import predict from '@/data/predict.json';
+
 /**
  * Editable copy for the app. Change strings here to update text across the site.
+ * Predict page strings (hero + question cards) live in `data/predict.json`.
  */
 export const copy = {
   site: {
@@ -175,20 +178,7 @@ export const copy = {
     ],
   },
 
-  predict: {
-    heroIcon: '✦',
-    title: 'predict',
-    yes: 'yes',
-    no: 'no',
-    questionsAria: 'quick questions',
-    questions: [
-      'have you ever had a chart calculated for your birth time and place?',
-      'do you notice when mercury is retrograde?',
-      'would you like timing hints for the next few weeks?',
-      'are you comparing your chart with someone else’s?',
-      'do you check the moon sign from day to day?',
-    ],
-  },
+  predict,
 
   notFound: {
     title: 'page not found',
