@@ -32,6 +32,13 @@ interface SavedChartItem {
   chartResult: string;
 }
 
+/** Selected chart 1 / chart 2 mode tab — same ink as body text; violet wash only on the background. */
+const compatModeToggleActiveClass =
+  'bg-violet-500/15 text-foreground ring-1 ring-violet-500/30 dark:bg-violet-400/10 dark:text-foreground dark:ring-violet-400/25';
+
+/** Unselected tab — same ink as body; only the background differs from active. */
+const compatModeToggleInactiveClass = 'text-foreground';
+
 /** Primary chart label may be stored as "My chart"; show copy.dashboard.myChart on this page. */
 function compatibilityChartLabel(label: string): string {
   if (label.trim().toLowerCase() === 'my chart') return copy.dashboard.myChart;
@@ -121,21 +128,21 @@ function CompatibilityContent() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
         {/* Chart 1 */}
         <Card className="p-4">
-          <h2 className="text-sm text-violet-400 tracking-widest uppercase mb-3">
+          <h2 className="text-sm font-extrabold text-violet-900 dark:text-violet-300 tracking-widest uppercase mb-3">
             {copy.compatibility.chart1}
           </h2>
           <div className="flex gap-2 mb-3">
             <button
               type="button"
               onClick={() => setModeA('saved')}
-              className={`text-sm px-3 py-1.5 rounded-lg transition-colors ${modeA === 'saved' ? 'bg-border text-violet-600 dark:text-violet-300' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`text-sm px-3 py-1.5 rounded-lg transition-colors ${modeA === 'saved' ? compatModeToggleActiveClass : compatModeToggleInactiveClass}`}
             >
               {copy.compatibility.selectSaved}
             </button>
             <button
               type="button"
               onClick={() => setModeA('new')}
-              className={`text-sm px-3 py-1.5 rounded-lg transition-colors ${modeA === 'new' ? 'bg-border text-violet-600 dark:text-violet-300' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`text-sm px-3 py-1.5 rounded-lg transition-colors ${modeA === 'new' ? compatModeToggleActiveClass : compatModeToggleInactiveClass}`}
             >
               {copy.compatibility.calculateNew}
             </button>
@@ -212,27 +219,27 @@ function CompatibilityContent() {
             </>
           )}
           {chartA && modeA === 'saved' && (
-            <p className="text-sm text-muted-foreground mt-2">✓ {compatibilityChartLabel(chartA.label)}</p>
+            <p className="text-sm text-violet-800 dark:text-violet-200 mt-2">✓ {compatibilityChartLabel(chartA.label)}</p>
           )}
         </Card>
 
         {/* Chart 2 */}
         <Card className="p-4">
-          <h2 className="text-sm text-violet-400 tracking-widest uppercase mb-3">
+          <h2 className="text-sm font-extrabold text-violet-900 dark:text-violet-300 tracking-widest uppercase mb-3">
             {copy.compatibility.chart2}
           </h2>
           <div className="flex gap-2 mb-3">
             <button
               type="button"
               onClick={() => setModeB('saved')}
-              className={`text-sm px-3 py-1.5 rounded-lg transition-colors ${modeB === 'saved' ? 'bg-border text-violet-600 dark:text-violet-300' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`text-sm px-3 py-1.5 rounded-lg transition-colors ${modeB === 'saved' ? compatModeToggleActiveClass : compatModeToggleInactiveClass}`}
             >
               {copy.compatibility.selectSaved}
             </button>
             <button
               type="button"
               onClick={() => setModeB('new')}
-              className={`text-sm px-3 py-1.5 rounded-lg transition-colors ${modeB === 'new' ? 'bg-border text-violet-600 dark:text-violet-300' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`text-sm px-3 py-1.5 rounded-lg transition-colors ${modeB === 'new' ? compatModeToggleActiveClass : compatModeToggleInactiveClass}`}
             >
               {copy.compatibility.calculateNew}
             </button>
@@ -309,7 +316,7 @@ function CompatibilityContent() {
             </>
           )}
           {chartB && modeB === 'saved' && (
-            <p className="text-sm text-muted-foreground mt-2">✓ {compatibilityChartLabel(chartB.label)}</p>
+            <p className="text-sm text-violet-800 dark:text-violet-200 mt-2">✓ {compatibilityChartLabel(chartB.label)}</p>
           )}
         </Card>
       </div>

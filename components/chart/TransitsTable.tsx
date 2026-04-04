@@ -75,13 +75,13 @@ export function TransitsTable({ natal, transit }: Props) {
         <table className="w-full border-collapse text-sm min-w-[320px]">
           <thead>
             <tr>
-              <th className="text-left text-xs text-muted-foreground font-normal tracking-wider pb-2 px-1">
+              <th className="text-left text-xs text-muted-foreground font-bold tracking-wider pb-2 px-1">
                 {copy.planetTable.planet}
               </th>
-              <th className="text-left text-xs text-muted-foreground font-normal tracking-wider pb-2 px-1">
+              <th className="text-left text-xs text-muted-foreground font-bold tracking-wider pb-2 px-1">
                 {copy.chart.transitsTableNatal}
               </th>
-              <th className="text-left text-xs text-muted-foreground font-normal tracking-wider pb-2 px-1">
+              <th className="text-left text-xs text-muted-foreground font-bold tracking-wider pb-2 px-1">
                 {copy.chart.transitsTableTransits}
               </th>
             </tr>

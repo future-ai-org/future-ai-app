@@ -67,7 +67,7 @@ export function PredictQuestionCards() {
     <>
       <ul
         aria-label={copy.predict.questionsAria}
-        className="mt-14 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 w-full max-w-6xl mx-auto px-4 list-none"
+        className="mt-14 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-3 gap-y-8 sm:gap-x-4 sm:gap-y-10 w-full max-w-6xl mx-auto px-4 list-none"
       >
         {questions.map((question, i) => {
           const pct = randomEstimationPercent(i);

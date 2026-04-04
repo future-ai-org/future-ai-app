@@ -224,8 +224,8 @@ export function BirthDataForm({ onSubmit, isLoading }: Props) {
           )}
         </div>
 
-        <fieldset className="mb-4 pt-4 border-t border-border">
-          <legend className="text-sm text-violet-400 tracking-widest uppercase mb-3">
+        <fieldset className="mb-4 pt-8 border-t border-border">
+          <legend className="text-sm font-extrabold text-violet-500 dark:text-violet-400 tracking-widest uppercase mb-3">
             {copy.chartOptions.sectionTitle}
           </legend>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2">

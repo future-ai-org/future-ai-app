@@ -81,24 +81,33 @@ export default function DashboardPage() {
           {(() => {
             const primary = charts.find(c => c.isPrimary === true);
             if (!primary) return null;
+            const primarySectionHeading = (
+              <h2 className="text-sm sm:text-base md:text-lg font-extrabold text-violet-500 dark:text-violet-400 tracking-widest uppercase mb-8">
+                {copy.dashboard.yourChartAndTransits}
+              </h2>
+            );
             let result: ChartResult;
             try {
               result = JSON.parse(primary.chartResult) as ChartResult;
             } catch {
               return (
-                <div className="flex items-center gap-3 mb-8">
-                  <p className="text-muted-foreground text-sm">{primary.label}</p>
-                  <Link href={`/chart/${primary.id}`}>
-                    <Button variant="secondary" className="px-3 py-2 text-sm">
-                      {copy.dashboard.view}
-                    </Button>
-                  </Link>
-                </div>
+                <section className="mb-12 mx-auto w-full max-w-6xl">
+                  {primarySectionHeading}
+                  <div className="flex items-center gap-3">
+                    <p className="text-muted-foreground text-sm">{primary.label}</p>
+                    <Link href={`/chart/${primary.id}`}>
+                      <Button variant="secondary" className="px-3 py-2 text-sm">
+                        {copy.dashboard.view}
+                      </Button>
+                    </Link>
+                  </div>
+                </section>
               );
             }
             const displayResult = reapplyWholeSignHouses(result);
             return (
-              <div className="mb-12 mx-auto w-full max-w-6xl">
+              <section className="mb-12 mx-auto w-full max-w-6xl">
+                {primarySectionHeading}
                 <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] gap-10 lg:gap-12 lg:items-center justify-items-center">
                   <div className="flex w-full flex-col items-center text-center">
                     <div className="w-full max-w-[min(420px,100%)]">
@@ -131,7 +140,7 @@ export default function DashboardPage() {
                     className="w-full min-w-0 max-w-lg lg:max-w-none justify-self-stretch"
                   />
                 </div>
-              </div>
+              </section>
             );
           })()}
           <section>

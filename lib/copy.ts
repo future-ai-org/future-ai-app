@@ -87,7 +87,8 @@ export const copy = {
   },
 
   dashboard: {
-    title: 'Your Journey',
+    title: 'dashboard',
+    yourChartAndTransits: 'your chart and transits',
     backToDashboard: 'back to dashboard',
     subtitle: 'saved charts',
     tabCharts: 'charts',
@@ -109,7 +110,7 @@ export const copy = {
     delete: 'delete',
     view: 'view',
     createdAt: 'saved',
-    transitNewsTitle: 'upcoming to your chart',
+    transitNewsTitle: 'upcoming aspects',
     transitNewsNoneInRange: 'none in search range',
     /** Inline verb phrase between transit sign and natal planet (see DashboardTransitNews). */
     transitNewsAspectVerb: {
