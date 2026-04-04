@@ -146,6 +146,26 @@ export function PredictQuestionCards() {
 
   const questions = useMemo(() => pool.slice(0, visibleCount), [pool, visibleCount]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const hash = window.location.hash.slice(1);
+    if (!hash.startsWith('predict-question-')) return;
+    const idNum = Number(hash.replace('predict-question-', ''));
+    if (!Number.isFinite(idNum)) return;
+    const idx = pool.findIndex(q => q.id === idNum);
+    if (idx < 0) return;
+    const perRow = Math.max(1, cardsPerRow);
+    const needRows = Math.ceil((idx + 1) / perRow);
+    if (needRows > rowsShown) {
+      const expand = window.setTimeout(() => setRowsShown(needRows), 0);
+      return () => window.clearTimeout(expand);
+    }
+    const t = window.setTimeout(() => {
+      document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 80);
+    return () => window.clearTimeout(t);
+  }, [pool, rowsShown, cardsPerRow]);
+
   function handleLoadMore() {
     setRowsShown((r) => r + 1);
   }
@@ -204,7 +224,11 @@ export function PredictQuestionCards() {
           const isMc = item.outcome_type === 'Multiple Choice' && options.length > 0;
 
           return (
-            <li key={cardKey} className="min-w-0 flex justify-center">
+            <li
+              key={cardKey}
+              id={`predict-question-${item.id}`}
+              className="min-w-0 flex justify-center scroll-mt-24"
+            >
               <Card
                 className={cn(
                   'w-full max-w-[13.5rem] sm:max-w-[15rem] lg:max-w-none flex flex-col p-3.5 sm:p-4 min-h-0',
@@ -214,9 +238,6 @@ export function PredictQuestionCards() {
                   'border-violet-500/20 bg-card/80',
                 )}
               >
-                <p className="shrink-0 text-left text-[0.6rem] sm:text-[0.65rem] font-semibold uppercase tracking-wide text-muted-foreground leading-tight line-clamp-1 mb-0.5">
-                  {item.category}
-                </p>
                 <p className="shrink-0 text-left text-xs sm:text-sm font-bold text-foreground leading-snug line-clamp-5 sm:line-clamp-6">
                   {item.question}
                 </p>
@@ -301,10 +322,15 @@ export function PredictQuestionCards() {
                     ))}
                   </div>
                 )}
-                <p className="shrink-0 pt-4 text-center text-[0.55rem] sm:text-xs font-bold text-muted-foreground/90 leading-tight tabular-nums">
-                  {copy.predict.questionExpiresPrefix}{' '}
-                  {formatQuestionExpires(item.expiresAt)}
-                </p>
+                <div className="shrink-0 pt-4 flex flex-row items-baseline justify-between gap-x-2 gap-y-1 w-full min-w-0">
+                  <span className="min-w-0 text-left text-[0.6rem] sm:text-[0.65rem] font-semibold uppercase tracking-wide text-muted-foreground leading-tight line-clamp-1">
+                    {item.category}
+                  </span>
+                  <span className="shrink-0 text-right text-[0.55rem] sm:text-xs font-bold text-muted-foreground/90 leading-tight tabular-nums">
+                    {copy.predict.questionExpiresPrefix}{' '}
+                    {formatQuestionExpires(item.expiresAt)}
+                  </span>
+                </div>
               </Card>
             </li>
           );

@@ -55,7 +55,7 @@ export function MyPredictionsSection({ bets }: Props) {
             bet.side === 'yes' ? copy.predict.yes : bet.side === 'no' ? copy.predict.no : bet.side;
           return (
             <li key={bet.id}>
-              <Card className="flex flex-row items-start gap-6 sm:gap-10 p-4 sm:p-5">
+              <Card className="flex flex-row items-start gap-4 sm:gap-8 p-4 sm:p-5">
                 <p
                   className="shrink-0 pt-0.5 text-4xl sm:text-5xl font-serif font-bold tabular-nums leading-none tracking-tight bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent"
                   aria-label={`Leading market share ${bet.leadingMarketPercent ?? '50%'}`}
@@ -89,6 +89,13 @@ export function MyPredictionsSection({ bets }: Props) {
                       {copy.predict.questionExpiresPrefix} {formatExpires(bet.expiresAt)}
                     </p>
                   ) : null}
+                </div>
+                <div className="shrink-0 pt-0.5">
+                  <Link href={`/#predict-question-${bet.questionId}`}>
+                    <Button type="button" variant="secondary" className="whitespace-nowrap px-3 py-2 text-sm">
+                      {copy.dashboard.myPredictionsBetMore}
+                    </Button>
+                  </Link>
                 </div>
               </Card>
             </li>

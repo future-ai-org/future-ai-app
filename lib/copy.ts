@@ -95,6 +95,7 @@ export const copy = {
     myPredictionsCoins: 'astro coins',
     myPredictionsOn: 'on',
     myPredictionsInvested: 'invested',
+    myPredictionsBetMore: 'bet more',
     backToDashboard: 'back to dashboard',
     subtitle: 'saved charts',
     tabCharts: 'charts',
