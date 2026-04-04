@@ -1,10 +1,11 @@
 {
   "heroIcon": "✦",
+  "titleSuffix": "✦",
   "title": "predict the future",
   "subtitle": "because girls should have fun too",
   "yes": "yes",
   "no": "no",
-  "estimationPrefix": "astro estimation:",
+  "estimationPrefix": "astro prediction:",
   "estimationPending": "—",
   "questionsAria": "quick questions",
   "loadMore": "load more",
@@ -13,9 +14,7 @@
     "do you notice when mercury is retrograde?",
     "would you like timing hints for the next few weeks?",
     "are you comparing your chart with someone else's?",
-    "do you check the moon sign from day to day?"
-  ],
-  "moreQuestions": [
+    "do you check the moon sign from day to day?",
     "do you feel shifts when the moon changes sign?",
     "would you use a daily cosmic nudge if it were short?",
     "are you curious about your venus sign in love?",

@@ -15,7 +15,7 @@ export function HeroSection() {
           {copy.predict.title}
         </span>
         <span className={`text-5xl md:text-6xl leading-none shrink-0 ${predictHeroGradient}`} aria-hidden>
-          {copy.chart.titleSuffix}
+          {copy.predict.titleSuffix}
         </span>
       </h1>
       <p className="mt-5 max-w-2xl text-xl sm:text-2xl md:text-3xl font-semibold leading-snug px-2 text-violet-600 dark:text-violet-300">

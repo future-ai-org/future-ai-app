@@ -8,9 +8,8 @@ import { cn } from '@/lib/utils';
 
 type Answer = 'yes' | 'no' | null;
 
+const INITIAL_QUESTION_COUNT = 5;
 const LOAD_MORE_BATCH = 5;
-
-const EMPTY_MORE: readonly string[] = [];
 
 /** Deterministic “random” percentage per card (stable SSR + hydration). */
 function randomEstimationPercent(cardIndex: number): number {
@@ -34,21 +33,21 @@ function answerAt(map: Record<number, Exclude<Answer, null>>, i: number): Answer
 }
 
 export function PredictQuestionCards() {
-  const baseQuestions = copy.predict.questions;
-  const morePool = copy.predict.moreQuestions ?? EMPTY_MORE;
+  const pool = copy.predict.questions;
   const [extraShown, setExtraShown] = useState(0);
   const [answers, setAnswers] = useState<Record<number, Exclude<Answer, null>>>({});
 
-  const questions = useMemo(
-    () => [...baseQuestions, ...morePool.slice(0, extraShown)],
-    [baseQuestions, morePool, extraShown],
-  );
+  const visibleCount = Math.min(INITIAL_QUESTION_COUNT + extraShown, pool.length);
+
+  const questions = useMemo(() => pool.slice(0, visibleCount), [pool, visibleCount]);
+
+  const maxExtra = Math.max(0, pool.length - INITIAL_QUESTION_COUNT);
 
   function handleLoadMore() {
-    setExtraShown((n) => Math.min(n + LOAD_MORE_BATCH, morePool.length));
+    setExtraShown((n) => Math.min(n + LOAD_MORE_BATCH, maxExtra));
   }
 
-  const canLoadMore = extraShown < morePool.length;
+  const canLoadMore = visibleCount < pool.length;
 
   function setAnswer(index: number, value: 'yes' | 'no') {
     setAnswers((prev) => {
@@ -139,7 +138,7 @@ export function PredictQuestionCards() {
           );
         })}
       </ul>
-      {morePool.length > 0 && canLoadMore && (
+      {pool.length > INITIAL_QUESTION_COUNT && canLoadMore && (
         <div className="flex justify-center px-4 pb-4 mt-10 sm:mt-14 pt-2">
           <Button
             type="button"
