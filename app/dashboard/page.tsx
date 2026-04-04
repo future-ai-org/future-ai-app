@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { MiniChartWheel } from '@/components/chart/MiniChartWheel';
+import { DashboardTransitNews } from '@/components/chart/DashboardTransitNews';
 import { copy } from '@/lib/copy';
 import { reapplyWholeSignHouses } from '@/lib/astro/calculate';
 import type { ChartResult } from '@/lib/astro/types';
@@ -59,17 +60,17 @@ export default function DashboardPage() {
 
   if (status === 'loading' || status === 'unauthenticated') {
     return (
-      <main className="max-w-3xl mx-auto px-4 py-16">
+      <main className="max-w-6xl mx-auto px-4 py-16">
         <div className="text-center text-muted-foreground">loading…</div>
       </main>
     );
   }
 
   return (
-    <main className="max-w-3xl mx-auto px-4 pb-20">
-      <div className="pt-8 pb-6">
-        <h1 className="text-4xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
-          {copy.dashboard.title}
+    <main className="max-w-6xl mx-auto px-4 pb-20">
+      <div className="pt-8 pb-8 text-center">
+        <h1 className="text-5xl md:text-6xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
+          {copy.chart.titlePrefix} {copy.dashboard.title}
         </h1>
       </div>
 
@@ -95,27 +96,41 @@ export default function DashboardPage() {
                 </div>
               );
             }
+            const displayResult = reapplyWholeSignHouses(result);
             return (
-              <div className="mb-8 flex flex-col items-center">
-                <MiniChartWheel
-                  result={reapplyWholeSignHouses(result)}
-                  href={`/chart/${primary.id}`}
-                  label={primary.label}
-                />
-                <Link
-                  href={`/chart/${primary.id}/transits`}
-                  className="mt-4 text-sm text-violet-400 hover:text-violet-300 transition-colors"
-                >
-                  {copy.chart.checkTransits}
-                </Link>
-                <button
-                  type="button"
-                  disabled={deletingId === primary.id}
-                  onClick={() => handleDelete(primary.id)}
-                  className="mt-2 text-sm text-violet-400 hover:text-violet-300 transition-colors disabled:opacity-50"
-                >
-                  {deletingId === primary.id ? '…' : copy.dashboard.delete}
-                </button>
+              <div className="mb-12 mx-auto w-full max-w-6xl">
+                <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] gap-10 lg:gap-12 lg:items-center justify-items-center">
+                  <div className="flex w-full flex-col items-center text-center">
+                    <div className="w-full max-w-[min(420px,100%)]">
+                      <MiniChartWheel
+                        result={displayResult}
+                        href={`/chart/${primary.id}`}
+                        className="mx-auto"
+                        footer={
+                          <div className="flex flex-wrap items-center justify-center gap-2">
+                            <Link href={`/chart/${primary.id}/transits`}>
+                              <Button variant="secondary" type="button">
+                                {copy.chart.checkTransits}
+                              </Button>
+                            </Link>
+                            <Button
+                              variant="secondary"
+                              type="button"
+                              disabled={deletingId === primary.id}
+                              onClick={() => handleDelete(primary.id)}
+                            >
+                              {deletingId === primary.id ? '…' : copy.dashboard.delete}
+                            </Button>
+                          </div>
+                        }
+                      />
+                    </div>
+                  </div>
+                  <DashboardTransitNews
+                    natal={displayResult}
+                    className="w-full min-w-0 max-w-lg lg:max-w-none justify-self-stretch"
+                  />
+                </div>
               </div>
             );
           })()}
