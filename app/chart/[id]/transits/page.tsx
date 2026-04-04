@@ -113,7 +113,7 @@ export default function ChartTransitsPage() {
 
   if (status === 'loading' || status === 'unauthenticated') {
     return (
-      <main className="max-w-5xl mx-auto px-4 py-16">
+      <main className="max-w-5xl mx-auto px-5 sm:px-8 md:px-10 py-16">
         <div className="text-center text-muted-foreground">loading…</div>
       </main>
     );
@@ -121,7 +121,7 @@ export default function ChartTransitsPage() {
 
   if (loading || error) {
     return (
-      <main className="max-w-5xl mx-auto px-4 py-16">
+      <main className="max-w-5xl mx-auto px-5 sm:px-8 md:px-10 py-16">
         <Link href="/dashboard" className="text-violet-400 text-sm hover:text-violet-300">
           ← {copy.dashboard.backToDashboard}
         </Link>
@@ -144,21 +144,21 @@ export default function ChartTransitsPage() {
     : copy.chart.transitsForSavedChart(savedChartHeadingLabel(chart.label));
 
   return (
-    <main className="max-w-5xl mx-auto px-4 pb-20">
-      <div className="pt-8 pb-6 text-center">
+    <main className="max-w-5xl mx-auto px-5 sm:px-8 md:px-10 pb-20">
+      <div className="pt-10 sm:pt-12 pb-4 md:pb-5 text-center">
         <Link
           href="/dashboard"
           className="text-muted-foreground text-sm hover:text-violet-400 transition-colors"
         >
           ← {copy.dashboard.backToDashboard}
         </Link>
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight px-2 break-words">
+        <h1 className="text-4xl sm:text-6xl md:text-7xl font-serif mt-4 mb-0 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight px-2 break-words">
           {copy.chart.titlePrefix} {transitsHeadingText} {copy.chart.titleSuffix}
         </h1>
-        <p className="text-muted-foreground text-sm mt-2 font-bold">
+        <p className="text-muted-foreground text-sm mt-5 md:mt-6 font-bold">
           {copy.chart.transitsSubtitle(transitLabel)}
         </p>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-2 md:gap-3 font-bold">
+        <div className="mt-3.5 sm:mt-4 flex flex-wrap items-center justify-center gap-2 md:gap-3 font-bold">
           <div className="flex items-center gap-1">
             <Button variant="ghost" className="!py-1.5 !px-2.5 text-lg leading-none font-bold" onClick={() => adjustDate('year', -1)} title={copy.today.prevYear} aria-label={copy.today.prevYear}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">year</span></Button>
             <Button variant="ghost" className="!py-1.5 !px-2.5 text-lg leading-none font-bold" onClick={() => adjustDate('month', -1)} title={copy.today.prevMonth} aria-label={copy.today.prevMonth}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">month</span></Button>
