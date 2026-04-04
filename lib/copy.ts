@@ -181,7 +181,7 @@ export const copy = {
     subtitle:
       'ancient wisdom meets the AI age',
     tagline: '',
-    cta: 'calculate my chart',
+    cta: 'calculate the chart',
     features: [
       { icon: '☉', label: 'learn about yourself' },
       { icon: 'handshake', label: 'check compatibility with others' },
@@ -271,10 +271,11 @@ export const copy = {
     saving: 'saving…',
     success: 'chart saved.',
     signInToSave: 'sign in to save charts',
+    goToDashboard: 'go to dashboard',
   },
 
   form: {
-    sectionTitle: 'find your cosmic blueprint',
+    sectionTitle: 'find a cosmic blueprint',
     dateLabel: 'date of birth',
     timeLabel: 'time of birth',
     timeNotKnown: 'time not known (use 12pm)',
@@ -284,7 +285,7 @@ export const copy = {
     cityNotKnown: 'city not known',
     utcLabel: 'utc offset — adjust if DST applies',
     utcPlaceholder: 'e.g. -5 or +1',
-    submit: 'calculate my chart',
+    submit: 'calculate the chart',
     calculating: 'calculating…',
     errors: {
       noDate: 'please enter your birth date.',

@@ -6,7 +6,7 @@ const predictHeroGradient =
 
 export function HeroSection() {
   return (
-    <section className="flex flex-col items-center justify-center text-center px-4 pt-12 pb-6 md:pt-20 md:pb-10">
+    <section className="flex flex-col items-center justify-center text-center px-4 pt-12 pb-4 md:pt-20 md:pb-6">
       <h1 className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 sm:gap-x-4 text-center max-w-5xl">
         <span
           className={`text-5xl sm:text-6xl md:text-7xl leading-none shrink-0 ${predictHeroGradient}`}

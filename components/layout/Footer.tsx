@@ -31,14 +31,18 @@ export function Footer() {
     <footer className="mt-auto w-full border-t border-border/80 bg-footer">
       <div className="mx-auto max-w-6xl px-4 pt-6 pb-10 sm:px-6 sm:pb-12">
         <AstroFooterStrip transits={transits} />
-        <p className="mt-6 pt-2 pb-4 text-center text-xs font-semibold text-muted-foreground sm:pb-6 leading-snug" title={moon.phaseName}>
-          {moon.emoji} {moonLine}
-        </p>
-        <div className="mt-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left font-bold">
+        <div className="mt-6 pt-2 pb-4 sm:pb-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
           <p className="text-[0.65rem] text-muted-foreground">{copyrightText}</p>
-          <div className="flex items-center gap-4 text-[0.65rem] text-muted-foreground">
-            <Link href="/privacy" className="hover:text-foreground/80 transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-foreground/80 transition-colors">Terms</Link>
+          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-x-4 gap-y-2 text-[0.65rem] font-bold text-muted-foreground leading-snug">
+            <span className="text-center sm:text-right max-w-[min(100%,28rem)]" title={moon.phaseName}>
+              {moon.emoji} {moonLine}
+            </span>
+            <Link href="/privacy" className="hover:text-foreground/80 transition-colors shrink-0">
+              Privacy
+            </Link>
+            <Link href="/terms" className="hover:text-foreground/80 transition-colors shrink-0">
+              Terms
+            </Link>
           </div>
         </div>
       </div>

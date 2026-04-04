@@ -234,7 +234,7 @@ export default function TodayPage() {
             <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjust('month', -1)} title={copy.today.prevMonth} aria-label={copy.today.prevMonth}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">month</span></Button>
             <Button variant="ghost" className="!py-2 !px-3 text-xl leading-none font-bold" onClick={() => adjust('day', -1)} title={copy.today.prevDay} aria-label={copy.today.prevDay}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">day</span></Button>
           </div>
-          <span className="min-w-[160px] text-base text-foreground font-bold tabular-nums">
+          <span className="min-w-[11rem] sm:min-w-[13rem] text-lg sm:text-xl md:text-2xl text-foreground font-bold tabular-nums leading-tight">
             {formatChartDate(chartMoment, location)}
           </span>
           <Button variant="ghost" className="!py-2 !px-3 text-sm text-muted-foreground font-bold" onClick={() => setChartMoment(new Date())} title={copy.today.goToToday} aria-label={copy.today.goToToday}>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useSyncExternalStore } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { PredictInvestModal } from '@/components/home/PredictInvestModal';
@@ -25,8 +25,20 @@ function formatQuestionExpires(isoDate: string): string {
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-const INITIAL_QUESTION_COUNT = 5;
-const LOAD_MORE_BATCH = 5;
+/** Matches `grid-cols-2 lg:grid-cols-4` (Tailwind lg = 1024px). */
+const LG_MEDIA_QUERY = '(min-width: 1024px)';
+
+function useCardsPerRow(): number {
+  return useSyncExternalStore(
+    onStoreChange => {
+      const mq = window.matchMedia(LG_MEDIA_QUERY);
+      mq.addEventListener('change', onStoreChange);
+      return () => mq.removeEventListener('change', onStoreChange);
+    },
+    () => (window.matchMedia(LG_MEDIA_QUERY).matches ? 4 : 2),
+    () => 2,
+  );
+}
 
 /** Deterministic “random” percentage per card (stable SSR + hydration). */
 function randomEstimationPercent(cardIndex: number): number {
@@ -84,19 +96,19 @@ type InvestState = {
 
 export function PredictQuestionCards() {
   const pool = useMemo(() => normalizePool(copy.predict.questions), []);
-  const [extraShown, setExtraShown] = useState(0);
+  const cardsPerRow = useCardsPerRow();
+  /** Number of grid rows currently shown (each load more adds one row). */
+  const [rowsShown, setRowsShown] = useState(1);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [invest, setInvest] = useState<InvestState | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
-  const visibleCount = Math.min(INITIAL_QUESTION_COUNT + extraShown, pool.length);
+  const visibleCount = Math.min(rowsShown * cardsPerRow, pool.length);
 
   const questions = useMemo(() => pool.slice(0, visibleCount), [pool, visibleCount]);
 
-  const maxExtra = Math.max(0, pool.length - INITIAL_QUESTION_COUNT);
-
   function handleLoadMore() {
-    setExtraShown((n) => Math.min(n + LOAD_MORE_BATCH, maxExtra));
+    setRowsShown((r) => r + 1);
   }
 
   const canLoadMore = visibleCount < pool.length;
@@ -138,7 +150,7 @@ export function PredictQuestionCards() {
       ) : null}
       <ul
         aria-label={copy.predict.questionsAria}
-        className="mt-14 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-3 gap-y-8 sm:gap-x-4 sm:gap-y-10 w-full max-w-6xl mx-auto px-4 list-none"
+        className="mt-8 sm:mt-10 grid grid-cols-2 lg:grid-cols-4 gap-x-3 gap-y-8 sm:gap-x-4 sm:gap-y-10 w-full max-w-6xl mx-auto px-4 list-none"
       >
         {questions.map((item, i) => {
           const pct = randomEstimationPercent(i);
@@ -152,26 +164,26 @@ export function PredictQuestionCards() {
             <li key={cardKey} className="min-w-0 flex justify-center">
               <Card
                 className={cn(
-                  'w-full max-w-[11.5rem] sm:max-w-[13rem] flex flex-col p-3 sm:p-4 min-h-0',
+                  'w-full max-w-[13.5rem] sm:max-w-[15rem] lg:max-w-none flex flex-col p-3.5 sm:p-4 min-h-0',
                   isMc
-                    ? 'min-h-[15.75rem] sm:min-h-[17.25rem]'
-                    : 'aspect-[10/11] max-h-[min(100vw,27rem)]',
+                    ? 'min-h-[16.5rem] sm:min-h-[18.5rem]'
+                    : 'aspect-[10/11] max-h-[min(100vw,30rem)]',
                   'border-violet-500/20 bg-card/80',
                 )}
               >
-                <p className="shrink-0 text-left text-[0.5rem] sm:text-[0.55rem] font-semibold uppercase tracking-wide text-muted-foreground leading-tight line-clamp-1 mb-0.5">
+                <p className="shrink-0 text-left text-[0.6rem] sm:text-[0.65rem] font-semibold uppercase tracking-wide text-muted-foreground leading-tight line-clamp-1 mb-0.5">
                   {item.category}
                 </p>
-                <p className="shrink-0 text-left text-[0.65rem] sm:text-[0.7rem] font-bold text-foreground leading-tight line-clamp-5 sm:line-clamp-6">
+                <p className="shrink-0 text-left text-xs sm:text-sm font-bold text-foreground leading-snug line-clamp-5 sm:line-clamp-6">
                   {item.question}
                 </p>
 
-                <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center px-0.5 py-6 sm:py-7 gap-1.5">
-                  <p className="text-xs sm:text-sm font-bold text-muted-foreground leading-tight tracking-wide">
+                <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center px-0.5 py-5 sm:py-6 gap-2">
+                  <p className="text-sm sm:text-base font-bold text-muted-foreground leading-tight tracking-wide">
                     {copy.predict.estimationPrefix}
                   </p>
                   <p
-                    className="text-3xl sm:text-4xl font-serif font-bold tabular-nums leading-none tracking-tight bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent"
+                    className="text-4xl sm:text-5xl font-serif font-bold tabular-nums leading-none tracking-tight bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent"
                     aria-hidden
                   >
                     {pct}%
@@ -188,7 +200,7 @@ export function PredictQuestionCards() {
                       type="button"
                       variant={selected === 'yes' ? 'primary' : 'secondary'}
                       className={cn(
-                        '!px-2 !py-1.5 !text-[0.65rem] sm:!text-xs min-w-0 !leading-tight whitespace-nowrap',
+                        '!px-2.5 !py-2 !text-xs sm:!text-sm min-w-0 !leading-tight whitespace-nowrap',
                         selected === 'yes' &&
                           'ring-1 ring-violet-400/60 ring-offset-1 ring-offset-background',
                       )}
@@ -204,7 +216,7 @@ export function PredictQuestionCards() {
                       type="button"
                       variant={selected === 'no' ? 'primary' : 'secondary'}
                       className={cn(
-                        '!px-2 !py-1.5 !text-[0.65rem] sm:!text-xs min-w-0 !leading-tight whitespace-nowrap',
+                        '!px-2.5 !py-2 !text-xs sm:!text-sm min-w-0 !leading-tight whitespace-nowrap',
                         selected === 'no' &&
                           'ring-1 ring-violet-400/60 ring-offset-1 ring-offset-background',
                       )}
@@ -229,7 +241,7 @@ export function PredictQuestionCards() {
                         type="button"
                         variant={selected === opt ? 'primary' : 'secondary'}
                         className={cn(
-                          '!px-2 !py-1 !text-[0.6rem] sm:!text-[0.65rem] min-w-0 !leading-tight text-left justify-start',
+                          '!px-2.5 !py-1.5 !text-[0.65rem] sm:!text-xs min-w-0 !leading-tight text-left justify-start',
                           selected === opt &&
                             'ring-1 ring-violet-400/60 ring-offset-1 ring-offset-background',
                         )}
@@ -246,7 +258,7 @@ export function PredictQuestionCards() {
                     ))}
                   </div>
                 )}
-                <p className="shrink-0 pt-2 text-center text-[0.45rem] sm:text-[0.5rem] text-muted-foreground/90 leading-tight tabular-nums">
+                <p className="shrink-0 pt-2 text-center text-[0.55rem] sm:text-xs text-muted-foreground/90 leading-tight tabular-nums">
                   {copy.predict.questionExpiresPrefix}{' '}
                   {formatQuestionExpires(item.expiresAt)}
                 </p>
@@ -255,7 +267,7 @@ export function PredictQuestionCards() {
           );
         })}
       </ul>
-      {pool.length > INITIAL_QUESTION_COUNT && canLoadMore && (
+      {canLoadMore && (
         <div className="flex justify-center px-4 pb-4 mt-10 sm:mt-14 pt-2">
           <Button
             type="button"

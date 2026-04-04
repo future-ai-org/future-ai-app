@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 import { BirthDataForm, type ChartFormMeta } from '@/components/chart/BirthDataForm';
+import { Button } from '@/components/ui/Button';
 import { ChartResults } from '@/components/chart/ChartResults';
 import { SaveChart } from '@/components/chart/SaveChart';
 import { useChartCalculation } from '@/hooks/useChartCalculation';
@@ -19,9 +21,11 @@ export default function ChartPage() {
   const { state, calculate, reset } = useChartCalculation();
   const [formKey, setFormKey] = useState(0);
   const [chartMeta, setChartMeta] = useState<ChartFormMeta>(DEFAULT_CHART_META);
+  const [showDashboardAfterSave, setShowDashboardAfterSave] = useState(false);
   const hasUnknownTimeOrCity = chartMeta.timeNotKnown || chartMeta.cityNotKnown;
 
   const handleSubmit = (data: BirthData, options: ChartOptions, meta: ChartFormMeta) => {
+    setShowDashboardAfterSave(false);
     setChartMeta(meta);
     const hasUnknownTimeOrCity = meta.timeNotKnown || meta.cityNotKnown;
 
@@ -45,6 +49,7 @@ export default function ChartPage() {
   const handleSaved = () => {
     reset();
     setFormKey((k) => k + 1);
+    setShowDashboardAfterSave(true);
   };
 
   return (
@@ -60,6 +65,16 @@ export default function ChartPage() {
         onSubmit={handleSubmit}
         isLoading={state.status === 'calculating'}
       />
+
+      {showDashboardAfterSave && state.status === 'idle' ? (
+        <div className="mt-8 flex justify-center">
+          <Link href="/dashboard">
+            <Button type="button" variant="secondary" className="!px-5 !py-2.5 !text-sm">
+              {copy.saveChart.goToDashboard}
+            </Button>
+          </Link>
+        </div>
+      ) : null}
 
       {state.status === 'error' && (
         <p className="text-red-400 text-sm text-center mt-4">{state.message}</p>

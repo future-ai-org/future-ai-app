@@ -120,7 +120,7 @@ function CompatibilityContent() {
         >
           ← {copy.dashboard.backToDashboard}
         </Link>
-        <h1 className="text-5xl md:text-6xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
+        <h1 className="text-5xl md:text-6xl font-serif mt-4 mb-8 md:mb-10 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
           {copy.chart.titlePrefix} {copy.compatibility.title} {copy.chart.titleSuffix}
         </h1>
       </div>

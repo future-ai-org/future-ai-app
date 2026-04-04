@@ -80,7 +80,7 @@ export function TodayChartSection() {
               <Button variant="ghost" className="!py-1.5 !px-2.5 text-lg leading-none font-bold" onClick={() => adjust('month', -1)} title={copy.today.prevMonth} aria-label={copy.today.prevMonth}><span className="text-foreground">←</span><span className="text-xs text-muted-foreground ml-0.5">month</span></Button>
               <Button variant="ghost" className="!py-1.5 !px-2.5 text-lg leading-none font-bold" onClick={() => adjust('year', -1)} title={copy.today.prevYear} aria-label={copy.today.prevYear}><span className="text-foreground">←</span><span className="text-xs text-muted-foreground ml-0.5">year</span></Button>
             </div>
-            <span className="min-w-[140px] text-foreground font-bold tabular-nums">
+            <span className="min-w-[11rem] sm:min-w-[13rem] text-lg sm:text-xl md:text-2xl text-foreground font-bold tabular-nums leading-tight">
               {formatChartDate(chartMoment)}
             </span>
             <Button variant="ghost" className="!py-1.5 !px-2.5 text-xs text-muted-foreground font-bold" onClick={() => setChartMoment(new Date())} title={copy.today.goToToday} aria-label={copy.today.goToToday}>

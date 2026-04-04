@@ -201,9 +201,7 @@ export function PredictInvestModal({
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
       role="presentation"
-      onClick={e => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+      onClick={onClose}
     >
       <div
         className="absolute inset-0 bg-black/55 backdrop-blur-[2px]"
@@ -276,7 +274,7 @@ export function PredictInvestModal({
           </div>
         ) : showInsufficient ? (
           <div className="mt-6 space-y-4 text-center">
-            <p className="text-sm text-muted-foreground">{notEnoughMessage}</p>
+            <p className="text-sm font-bold text-muted-foreground">{notEnoughMessage}</p>
             <div className="flex flex-wrap items-center justify-center gap-2">
               <Link href="/dashboard">
                 <Button type="button" variant="primary" className="!px-4 !py-2 !text-sm">
@@ -342,31 +340,44 @@ export function PredictInvestModal({
               <p className="text-sm text-red-400/90">{p.investInvalidAmount ?? 'Invalid amount.'}</p>
             ) : null}
             {errorKey === NOT_ENOUGH_KEY ? (
-              <p className="text-sm text-red-400/90">{notEnoughMessage}</p>
+              <p className="text-sm font-bold text-red-400/90">{notEnoughMessage}</p>
             ) : null}
             {errorKey === 'generic' ? (
               <p className="text-sm text-red-400/90">{p.investErrorGeneric ?? 'Error'}</p>
             ) : null}
             {errorKey === NOT_ENOUGH_KEY ? (
-              <Link href="/dashboard">
-                <Button type="button" variant="primary" className="!px-4 !py-2 !text-sm">
-                  {p.investAddCoins ?? p.investGoDashboard ?? 'Add coins'}
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <Link href="/dashboard">
+                  <Button type="button" variant="primary" className="!px-4 !py-2 !text-sm">
+                    {p.investAddCoins ?? p.investGoDashboard ?? 'Add coins'}
+                  </Button>
+                </Link>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="!px-4 !py-2 !text-sm"
+                  disabled={submitting}
+                  onClick={onClose}
+                >
+                  {p.investCancel ?? 'Cancel'}
                 </Button>
-              </Link>
+              </div>
             ) : null}
-            <div className="flex flex-wrap gap-2 pt-1">
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
               <Button type="submit" variant="primary" disabled={submitting} className="!px-4 !py-2 !text-sm">
                 {submitting ? p.investSubmitting ?? '…' : p.investConfirm ?? 'Confirm'}
               </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                className="!px-4 !py-2 !text-sm"
-                disabled={submitting}
-                onClick={onClose}
-              >
-                {p.investCancel ?? 'Cancel'}
-              </Button>
+              {errorKey !== NOT_ENOUGH_KEY ? (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="!px-4 !py-2 !text-sm"
+                  disabled={submitting}
+                  onClick={onClose}
+                >
+                  {p.investCancel ?? 'Cancel'}
+                </Button>
+              ) : null}
             </div>
           </form>
         ) : null}
