@@ -170,9 +170,9 @@ export default function ChartTransitsPage() {
       <div className="flex flex-col lg:flex-row items-start justify-center gap-8 mt-8">
         <div className="flex flex-col items-center gap-6 shrink-0">
           <TransitsWheel natal={chart.chartResult} transit={transitResult} size={420} />
-          <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
+          <div className="flex flex-col items-center gap-1 text-sm text-muted-foreground text-center">
             <span><strong className="text-foreground">Outer wheel</strong> — current transits</span>
-            <span><strong className="text-foreground">Inner wheel</strong> — {chart.label} (natal)</span>
+            <span><strong className="text-foreground">Inner wheel</strong> — My chart (natal)</span>
           </div>
         </div>
         <div className="w-full lg:max-w-xl shrink-0">

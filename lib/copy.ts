@@ -220,7 +220,6 @@ export const copy = {
     deleteChart: 'delete chart',
     transitsTitle: 'transits',
     transitsSubtitle: (dateLabel: string) => `current sky as of ${dateLabel}`,
-    transitsTableTitle: 'natal and transits',
     transitsTableNatal: 'natal',
     transitsTableTransits: 'transits',
     transitsGaussianTitle: 'transit–natal influences',

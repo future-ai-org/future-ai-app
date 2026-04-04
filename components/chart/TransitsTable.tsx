@@ -75,9 +75,6 @@ export function TransitsTable({ natal, transit }: Props) {
 
   return (
     <Card>
-      <h2 className="text-xs text-violet-400 tracking-widest uppercase mb-3 border-b border-border pb-2">
-        {copy.chart.transitsTableTitle}
-      </h2>
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-sm min-w-[320px]">
           <thead>
