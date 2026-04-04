@@ -24,10 +24,15 @@ type Props = {
 
 const NOT_ENOUGH_KEY = 'not_enough';
 
-const choiceGradient =
+/** Same gradient treatment as `HeroSection` predict title. */
+const predictTitleRainbow =
   'bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent';
 
 type PredictInvestCopy = typeof copy.predict & {
+  investHeadlineVerb?: string;
+  investHeadlineIn?: string;
+  investHeadlineCoin?: string;
+  investHeadlineCoins?: string;
   investModalHowMany?: string;
   investBalanceLabel?: string;
   investSignInPrompt?: string;
@@ -198,6 +203,16 @@ export function PredictInvestModal({
   const showForm =
     status === 'authenticated' && !authRequired && !loadingBalance && balance >= 1;
 
+  const rawHeadlineAmount = Number.parseInt(amount.replace(/\D/g, ''), 10);
+  const headlineAmount =
+    showForm && Number.isFinite(rawHeadlineAmount) && rawHeadlineAmount >= 1
+      ? rawHeadlineAmount
+      : 1;
+  const headlineCoinWord =
+    headlineAmount === 1
+      ? (p.investHeadlineCoin ?? 'coin')
+      : (p.investHeadlineCoins ?? 'coins');
+
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
@@ -221,11 +236,17 @@ export function PredictInvestModal({
         <h2
           id={titleId}
           className={cn(
-            'text-center text-5xl font-serif font-bold uppercase tracking-tight sm:text-7xl md:text-8xl',
-            choiceGradient,
+            'text-center text-4xl font-serif font-extrabold leading-tight tracking-tight sm:text-6xl md:text-7xl lg:text-8xl',
+            predictTitleRainbow,
           )}
         >
-          {sideLabel}
+          <span className="inline-flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1">
+            <span>{p.investHeadlineVerb ?? 'invest'}</span>{' '}
+            <span className="tabular-nums">{headlineAmount}</span>{' '}
+            <span>{headlineCoinWord}</span>{' '}
+            <span>{p.investHeadlineIn ?? 'in'}</span>{' '}
+            <span>{sideLabel}</span>
+          </span>
         </h2>
         <p
           id={`${titleId}-question`}

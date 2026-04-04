@@ -9,6 +9,10 @@ import { Card } from '@/components/ui/Card';
 import { MiniChartWheel } from '@/components/chart/MiniChartWheel';
 import { DashboardTransitNews } from '@/components/chart/DashboardTransitNews';
 import { AstroCoinsPanel } from '@/components/dashboard/AstroCoinsPanel';
+import {
+  MyPredictionsSection,
+  type DashboardPredictionBet,
+} from '@/components/dashboard/MyPredictionsSection';
 import { copy } from '@/lib/copy';
 import { reapplyWholeSignHouses } from '@/lib/astro/calculate';
 import type { ChartResult } from '@/lib/astro/types';
@@ -30,6 +34,7 @@ export default function DashboardClient({ initialAstroCoins }: Props) {
   const { status } = useSession();
   const router = useRouter();
   const [charts, setCharts] = useState<SavedChartItem[]>([]);
+  const [predictions, setPredictions] = useState<DashboardPredictionBet[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   useEffect(() => {
@@ -40,10 +45,22 @@ export default function DashboardClient({ initialAstroCoins }: Props) {
     if (status !== 'authenticated') return;
 
     let cancelled = false;
-    fetch('/api/charts')
-      .then(res => res.json())
-      .then(data => {
-        if (!cancelled && data.charts) setCharts(data.charts);
+    setLoading(true);
+    Promise.all([
+      fetch('/api/charts').then(r => r.json()),
+      fetch('/api/predict/bets', { credentials: 'same-origin', cache: 'no-store' }).then(r =>
+        r.ok ? r.json() : Promise.resolve({ bets: [] }),
+      ),
+    ])
+      .then(([chartsData, betsData]) => {
+        if (cancelled) return;
+        if (chartsData.charts) setCharts(chartsData.charts);
+        const raw = betsData as { bets?: unknown };
+        if (Array.isArray(raw.bets)) {
+          setPredictions(raw.bets as DashboardPredictionBet[]);
+        } else {
+          setPredictions([]);
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -82,9 +99,10 @@ export default function DashboardClient({ initialAstroCoins }: Props) {
       <AstroCoinsPanel initialCoins={initialAstroCoins} />
 
       {loading ? (
-        <p className="text-muted-foreground text-sm">loading your charts…</p>
+        <p className="text-muted-foreground text-sm">loading your dashboard…</p>
       ) : (
         <>
+          <MyPredictionsSection bets={predictions} />
           {(() => {
             const primary = charts.find(c => c.isPrimary === true);
             if (!primary) return null;

@@ -2,7 +2,7 @@
   "heroIcon": "✦",
   "titleSuffix": "✦",
   "title": "predict the future",
-  "subtitle": "the empirical prediction engine",
+  "subtitle": "the cosmological prediction engine",
   "yes": "yes",
   "no": "no",
   "estimationPrefix": "astro prediction:",
@@ -280,6 +280,10 @@
       "expiresAt": "2026-08-01"
     }
   ],
+  "investHeadlineVerb": "invest",
+  "investHeadlineIn": "in",
+  "investHeadlineCoin": "coin",
+  "investHeadlineCoins": "coins",
   "investModalHowMany": "how many astro coins do you want on this pick?",
   "investBalanceLabel": "your balance",
   "investSignInPrompt": "sign in to invest astrocoins on predictions.",

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { PredictInvestModal } from '@/components/home/PredictInvestModal';
@@ -49,8 +49,8 @@ function randomEstimationPercent(cardIndex: number): number {
   return ((s >>> 0) % 73) + 18;
 }
 
-/** Placeholder % on yes/no buttons until real odds exist (same for every card). */
-const BUTTON_PLACEHOLDER_PCT = 50;
+/** Shown on yes/no buttons before odds load or when a question has no bets yet. */
+const MARKET_ODDS_PLACEHOLDER = '50%';
 
 /** Equal-split placeholder % per choice so options sum to 100 (e.g. 4 → 25% each). */
 function equalOptionPercent(optionIndex: number, optionCount: number): number {
@@ -94,6 +94,8 @@ type InvestState = {
   side: 'yes' | 'no';
 };
 
+type MarketOddsRow = { yes: string; no: string };
+
 export function PredictQuestionCards() {
   const pool = useMemo(() => normalizePool(copy.predict.questions), []);
   const cardsPerRow = useCardsPerRow();
@@ -102,6 +104,43 @@ export function PredictQuestionCards() {
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [invest, setInvest] = useState<InvestState | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [marketOdds, setMarketOdds] = useState<Record<number, MarketOddsRow>>({});
+  const [oddsRefreshKey, setOddsRefreshKey] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/predict/odds', { cache: 'no-store' })
+      .then(res => (res.ok ? res.json() : null))
+      .then((data: unknown) => {
+        if (cancelled || !data || typeof data !== 'object' || data === null) return;
+        const raw = (data as { odds?: unknown }).odds;
+        if (typeof raw !== 'object' || raw === null) return;
+        const next: Record<number, MarketOddsRow> = {};
+        for (const [key, entry] of Object.entries(raw)) {
+          const id = Number(key);
+          if (!Number.isFinite(id)) continue;
+          if (
+            typeof entry !== 'object' ||
+            entry === null ||
+            !('yesPercent' in entry) ||
+            !('noPercent' in entry)
+          ) {
+            continue;
+          }
+          const yesPercent = (entry as { yesPercent?: unknown }).yesPercent;
+          const noPercent = (entry as { noPercent?: unknown }).noPercent;
+          if (typeof yesPercent !== 'string' || typeof noPercent !== 'string') continue;
+          next[id] = { yes: yesPercent, no: noPercent };
+        }
+        setMarketOdds(next);
+      })
+      .catch(() => {
+        /* keep previous odds */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [oddsRefreshKey]);
 
   const visibleCount = Math.min(rowsShown * cardsPerRow, pool.length);
 
@@ -131,6 +170,7 @@ export function PredictQuestionCards() {
         side={invest?.side ?? 'yes'}
         onInvested={(cardIndex, side, coins) => {
           setSelection(cardIndex, side);
+          setOddsRefreshKey(k => k + 1);
           const predictCopy = copy.predict as { investSuccessToast?: string };
           const tpl = predictCopy.investSuccessToast ?? '';
           const msg = tpl
@@ -156,6 +196,9 @@ export function PredictQuestionCards() {
           const pct = randomEstimationPercent(i);
           const selected = selectionAt(answers, i);
           const isBinary = item.outcome_type === 'Binary';
+          const oddsRow = marketOdds[item.id];
+          const yesBtnPct = oddsRow?.yes ?? MARKET_ODDS_PLACEHOLDER;
+          const noBtnPct = oddsRow?.no ?? MARKET_ODDS_PLACEHOLDER;
           const options = item.options ?? [];
           const cardKey = `${item.id}-${item.question.slice(0, 24)}`;
           const isMc = item.outcome_type === 'Multiple Choice' && options.length > 0;
@@ -179,11 +222,11 @@ export function PredictQuestionCards() {
                 </p>
 
                 <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center px-0.5 py-5 sm:py-6 gap-2">
-                  <p className="text-sm sm:text-base font-bold text-muted-foreground leading-tight tracking-wide">
+                  <p className="pt-3 sm:pt-4 text-sm sm:text-base font-bold text-muted-foreground leading-tight tracking-wide">
                     {copy.predict.estimationPrefix}
                   </p>
                   <p
-                    className="text-4xl sm:text-5xl font-serif font-bold tabular-nums leading-none tracking-tight bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent"
+                    className="pb-3 sm:pb-4 text-4xl sm:text-5xl font-serif font-bold tabular-nums leading-none tracking-tight bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent"
                     aria-hidden
                   >
                     {pct}%
@@ -192,7 +235,7 @@ export function PredictQuestionCards() {
 
                 {isBinary ? (
                   <div
-                    className="shrink-0 flex justify-center gap-1 sm:gap-1.5 w-full pt-1"
+                    className="shrink-0 flex justify-center gap-1.5 sm:gap-2 w-full pt-1"
                     role="group"
                     aria-label={item.question}
                   >
@@ -200,7 +243,7 @@ export function PredictQuestionCards() {
                       type="button"
                       variant={selected === 'yes' ? 'primary' : 'secondary'}
                       className={cn(
-                        '!px-2.5 !py-2 !text-xs sm:!text-sm min-w-0 !leading-tight whitespace-nowrap',
+                        '!px-3.5 !py-2.5 !text-sm sm:!text-base min-w-0 !leading-tight whitespace-nowrap',
                         selected === 'yes' &&
                           'ring-1 ring-violet-400/60 ring-offset-1 ring-offset-background',
                       )}
@@ -209,14 +252,14 @@ export function PredictQuestionCards() {
                     >
                       <span className="inline-flex items-baseline gap-1 font-bold tabular-nums">
                         <span>{copy.predict.yes}</span>
-                        <span className="opacity-90">{BUTTON_PLACEHOLDER_PCT}%</span>
+                        <span className="opacity-90">{yesBtnPct}</span>
                       </span>
                     </Button>
                     <Button
                       type="button"
                       variant={selected === 'no' ? 'primary' : 'secondary'}
                       className={cn(
-                        '!px-2.5 !py-2 !text-xs sm:!text-sm min-w-0 !leading-tight whitespace-nowrap',
+                        '!px-3.5 !py-2.5 !text-sm sm:!text-base min-w-0 !leading-tight whitespace-nowrap',
                         selected === 'no' &&
                           'ring-1 ring-violet-400/60 ring-offset-1 ring-offset-background',
                       )}
@@ -225,7 +268,7 @@ export function PredictQuestionCards() {
                     >
                       <span className="inline-flex items-baseline gap-1 font-bold tabular-nums">
                         <span>{copy.predict.no}</span>
-                        <span className="opacity-90">{BUTTON_PLACEHOLDER_PCT}%</span>
+                        <span className="opacity-90">{noBtnPct}</span>
                       </span>
                     </Button>
                   </div>
@@ -258,7 +301,7 @@ export function PredictQuestionCards() {
                     ))}
                   </div>
                 )}
-                <p className="shrink-0 pt-2 text-center text-[0.55rem] sm:text-xs text-muted-foreground/90 leading-tight tabular-nums">
+                <p className="shrink-0 pt-4 text-center text-[0.55rem] sm:text-xs font-bold text-muted-foreground/90 leading-tight tabular-nums">
                   {copy.predict.questionExpiresPrefix}{' '}
                   {formatQuestionExpires(item.expiresAt)}
                 </p>

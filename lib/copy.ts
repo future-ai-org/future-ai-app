@@ -89,6 +89,12 @@ export const copy = {
   dashboard: {
     title: 'dashboard',
     yourChartAndTransits: 'your chart and transits',
+    myPredictions: 'my predictions',
+    myPredictionsEmpty: 'you have not placed any predictions yet.',
+    myPredictionsBrowse: 'go to predict',
+    myPredictionsCoins: 'astro coins',
+    myPredictionsOn: 'on',
+    myPredictionsInvested: 'invested',
     backToDashboard: 'back to dashboard',
     subtitle: 'saved charts',
     tabCharts: 'charts',
