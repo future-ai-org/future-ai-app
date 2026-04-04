@@ -1,6 +1,6 @@
 import { copy } from '@/lib/copy';
 
-/** Gradient on ✦ + title (matches other page titles). Subtitle uses solid purple below. */
+/** Gradient on ✦ + title (matches other page titles). Subtitle: soft gray, lighter than nav muted links. */
 const predictHeroGradient =
   'bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent';
 
@@ -18,7 +18,7 @@ export function HeroSection() {
           {copy.predict.titleSuffix}
         </span>
       </h1>
-      <p className="mt-5 max-w-2xl text-xl sm:text-2xl md:text-3xl font-semibold leading-snug px-2 text-violet-600 dark:text-violet-300">
+      <p className="mt-5 max-w-2xl text-xl sm:text-2xl md:text-3xl font-normal leading-snug px-2 text-foreground/45 dark:text-foreground/58">
         {copy.predict.subtitle}
       </p>
     </section>

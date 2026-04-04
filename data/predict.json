@@ -10,20 +10,187 @@
   "questionsAria": "quick questions",
   "loadMore": "load more",
   "questions": [
-    "have you ever had a chart calculated for your birth time and place?",
-    "do you notice when mercury is retrograde?",
-    "would you like timing hints for the next few weeks?",
-    "are you comparing your chart with someone else's?",
-    "do you check the moon sign from day to day?",
-    "do you feel shifts when the moon changes sign?",
-    "would you use a daily cosmic nudge if it were short?",
-    "are you curious about your venus sign in love?",
-    "do you track retrogrades on a calendar?",
-    "have you ever compared charts with a friend?",
-    "do you read rising sign horoscopes too?",
-    "would you like a heads-up before intense aspects?",
-    "are you into synastry or composite charts?",
-    "do you notice moods around the full moon?",
-    "have you explored your north node story?"
+    {
+      "id": 1,
+      "category": "Politics",
+      "question": "Will a G20 country elect a woman president before 2030?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 2,
+      "category": "Politics",
+      "question": "Will a woman lead PredictIt or Polymarket for the 2028 US race by Nov 2026?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 3,
+      "category": "Society",
+      "question": "Will the US pass federal paid parental leave by end of 2027?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 4,
+      "category": "Society",
+      "question": "Will any country add national paid menstrual leave by end of 2026?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 5,
+      "category": "Society",
+      "question": "Will reproductive rights expand in three or more US states in 2026?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 6,
+      "category": "Society",
+      "question": "Will 20+ countries sign a treaty on AI deepfake porn by Dec 2026?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 7,
+      "category": "Economics",
+      "question": "Will the US gender pay gap fall below 15% by end of 2027?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 8,
+      "category": "Economics",
+      "question": "Will VC to all-female founding teams top 3% in FY 2026?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 9,
+      "category": "Business",
+      "question": "Will a woman become CEO of a male-led Fortune 500 tech firm by end of 2026?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 10,
+      "category": "Business",
+      "question": "Will a women-led climate startup hit a $1B valuation before 2028?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 11,
+      "category": "Workplace",
+      "question": "Will women hold 35%+ of Fortune 500 executive roles by 2030?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 12,
+      "category": "Workplace",
+      "question": "Will remote work lift women's global workforce share measurably by 2026?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 13,
+      "category": "Workplace",
+      "question": "Will three Fortune 500 firms go mandatory four-day week by end of 2026?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 14,
+      "category": "Science & health",
+      "question": "Will a non-hormonal birth control pill win FDA approval before 2028?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 15,
+      "category": "Science & health",
+      "question": "Will US maternal deaths fall three years in a row by end of 2027?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 16,
+      "category": "Science & health",
+      "question": "Will OTC menopause hormone therapy reach US stores by Q4 2026?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 17,
+      "category": "Science & health",
+      "question": "Will a woman win the Nobel Prize in Physics in 2026 or 2027?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 18,
+      "category": "Science & health",
+      "question": "Will the WHO adopt a global women's mental health framework by 2026?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 19,
+      "category": "Science & health",
+      "question": "Which condition sees the biggest treatment breakthrough by 2029?",
+      "outcome_type": "Multiple Choice",
+      "options": ["Endometriosis", "PCOS", "Menopause", "Other"]
+    },
+    {
+      "id": 20,
+      "category": "Sports",
+      "question": "Will a women's league pass $5B in yearly global revenue before 2030?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 21,
+      "category": "Sports",
+      "question": "Will 2026 WNBA Finals peak ratings beat 2026 NBA East Finals?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 22,
+      "category": "Sports",
+      "question": "Will women's sports TV beat men's in a major US league in 2026?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 23,
+      "category": "Sports",
+      "question": "Will women match men's pay in any major sport by end of 2027?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 24,
+      "category": "Entertainment",
+      "question": "Will a woman direct the #1 global box office film in 2026?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 25,
+      "category": "Entertainment",
+      "question": "Will two women win Best Director Oscars in the 2020s?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 26,
+      "category": "Entertainment",
+      "question": "Who wins Album of the Year at the 69th Grammys?",
+      "outcome_type": "Multiple Choice",
+      "options": ["Chappell Roan", "Sabrina Carpenter", "Billie Eilish", "Other"]
+    },
+    {
+      "id": 27,
+      "category": "Tech & media",
+      "question": "Will a major social app ship AI anti-harassment with real metrics by 2026?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 28,
+      "category": "Tech & media",
+      "question": "Will a woman-led AI startup hit a $10B valuation before 2027?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 29,
+      "category": "Tech & media",
+      "question": "Will a woman-led podcast land a $100M+ exclusivity deal before 2027?",
+      "outcome_type": "Binary"
+    },
+    {
+      "id": 30,
+      "category": "Lifestyle",
+      "question": "Will a top-five beauty brand ban digital ad retouching by end of 2026?",
+      "outcome_type": "Binary"
+    }
   ]
 }

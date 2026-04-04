@@ -6,7 +6,15 @@ import { Button } from '@/components/ui/Button';
 import { copy } from '@/lib/copy';
 import { cn } from '@/lib/utils';
 
-type Answer = 'yes' | 'no' | null;
+type PredictOutcomeType = 'Binary' | 'Multiple Choice';
+
+type PredictQuestionItem = {
+  id: number;
+  category: string;
+  question: string;
+  outcome_type: PredictOutcomeType;
+  options?: string[];
+};
 
 const INITIAL_QUESTION_COUNT = 5;
 const LOAD_MORE_BATCH = 5;
@@ -20,22 +28,47 @@ function randomEstimationPercent(cardIndex: number): number {
   return ((s >>> 0) % 73) + 18;
 }
 
-/** Placeholder % shown on each button (not tied to selection). */
-function dumbButtonPercents(index: number): { yes: number; no: number } {
-  const yes = 52 + ((index * 23) % 41);
-  const no = 18 + ((index * 19) % 37);
-  return { yes, no };
+/** Placeholder % on yes/no buttons until real odds exist (same for every card). */
+const BUTTON_PLACEHOLDER_PCT = 50;
+
+/** Equal-split placeholder % per choice so options sum to 100 (e.g. 4 → 25% each). */
+function equalOptionPercent(optionIndex: number, optionCount: number): number {
+  if (optionCount <= 0) return 0;
+  const base = Math.floor(100 / optionCount);
+  const remainder = 100 - base * optionCount;
+  return optionIndex < remainder ? base + 1 : base;
 }
 
-function answerAt(map: Record<number, Exclude<Answer, null>>, i: number): Answer {
+function isPredictQuestionItem(q: unknown): q is PredictQuestionItem {
+  return (
+    typeof q === 'object' &&
+    q !== null &&
+    'id' in q &&
+    typeof (q as PredictQuestionItem).id === 'number' &&
+    'category' in q &&
+    typeof (q as PredictQuestionItem).category === 'string' &&
+    'question' in q &&
+    typeof (q as PredictQuestionItem).question === 'string' &&
+    'outcome_type' in q &&
+    ((q as PredictQuestionItem).outcome_type === 'Binary' ||
+      (q as PredictQuestionItem).outcome_type === 'Multiple Choice')
+  );
+}
+
+function normalizePool(raw: unknown): PredictQuestionItem[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter(isPredictQuestionItem);
+}
+
+function selectionAt(map: Record<number, string>, i: number): string | null {
   const v = map[i];
-  return v === 'yes' || v === 'no' ? v : null;
+  return typeof v === 'string' && v.length > 0 ? v : null;
 }
 
 export function PredictQuestionCards() {
-  const pool = copy.predict.questions;
+  const pool = useMemo(() => normalizePool(copy.predict.questions), []);
   const [extraShown, setExtraShown] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, Exclude<Answer, null>>>({});
+  const [answers, setAnswers] = useState<Record<number, string>>({});
 
   const visibleCount = Math.min(INITIAL_QUESTION_COUNT + extraShown, pool.length);
 
@@ -49,12 +82,12 @@ export function PredictQuestionCards() {
 
   const canLoadMore = visibleCount < pool.length;
 
-  function setAnswer(index: number, value: 'yes' | 'no') {
+  function setSelection(index: number, value: string) {
     setAnswers((prev) => {
-      const cur = answerAt(prev, index);
-      const nextVal = cur === value ? null : value;
+      const cur = prev[index];
+      const nextVal = cur === value ? undefined : value;
       const out = { ...prev };
-      if (nextVal === null) {
+      if (nextVal === undefined) {
         delete out[index];
       } else {
         out[index] = nextVal;
@@ -69,70 +102,112 @@ export function PredictQuestionCards() {
         aria-label={copy.predict.questionsAria}
         className="mt-14 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-3 gap-y-8 sm:gap-x-4 sm:gap-y-10 w-full max-w-6xl mx-auto px-4 list-none"
       >
-        {questions.map((question, i) => {
+        {questions.map((item, i) => {
           const pct = randomEstimationPercent(i);
-          const dumb = dumbButtonPercents(i);
-          const a = answerAt(answers, i);
+          const selected = selectionAt(answers, i);
+          const isBinary = item.outcome_type === 'Binary';
+          const options = item.options ?? [];
+          const cardKey = `${item.id}-${item.question.slice(0, 24)}`;
+          const isMc = item.outcome_type === 'Multiple Choice' && options.length > 0;
+
           return (
-            <li key={`${i}-${question.slice(0, 24)}`} className="min-w-0 flex justify-center">
+            <li key={cardKey} className="min-w-0 flex justify-center">
               <Card
                 className={cn(
-                  'w-full max-w-[11.5rem] sm:max-w-[13rem] aspect-square flex flex-col p-3 sm:p-4 min-h-0',
+                  'w-full max-w-[11.5rem] sm:max-w-[13rem] flex flex-col p-3 sm:p-4 min-h-0',
+                  isMc
+                    ? 'min-h-[14rem] sm:min-h-[15.5rem]'
+                    : 'aspect-square max-h-[min(100vw,24rem)]',
                   'border-violet-500/20 bg-card/80',
                 )}
               >
-                <p className="shrink-0 text-left text-[0.7rem] sm:text-xs font-bold text-foreground leading-snug line-clamp-4 sm:line-clamp-5">
-                  {question}
+                <p className="shrink-0 text-left text-[0.5rem] sm:text-[0.55rem] font-semibold uppercase tracking-wide text-muted-foreground leading-tight line-clamp-1 mb-0.5">
+                  {item.category}
+                </p>
+                <p className="shrink-0 text-left text-[0.65rem] sm:text-[0.7rem] font-bold text-foreground leading-tight line-clamp-5 sm:line-clamp-6">
+                  {item.question}
                 </p>
 
-                <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center px-0.5 py-1 gap-0">
-                  <p className="text-[0.6rem] sm:text-[0.65rem] font-bold text-muted-foreground leading-tight mb-1">
+                <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center px-0.5 py-0.5 gap-0">
+                  <p className="text-[0.55rem] sm:text-[0.6rem] font-bold text-muted-foreground leading-tight mb-0.5">
                     {copy.predict.estimationPrefix}
                   </p>
                   <p
-                    className="text-4xl sm:text-5xl font-serif font-bold tabular-nums leading-none tracking-tight bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent"
+                    className="text-3xl sm:text-4xl font-serif font-bold tabular-nums leading-none tracking-tight bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent"
                     aria-hidden
                   >
                     {pct}%
                   </p>
                 </div>
 
-                <div
-                  className="shrink-0 flex justify-center gap-1 sm:gap-1.5 w-full pt-1"
-                  role="group"
-                  aria-label={question}
-                >
-                  <Button
-                    type="button"
-                    variant={a === 'yes' ? 'primary' : 'secondary'}
-                    className={cn(
-                      '!px-2 !py-1.5 !text-[0.65rem] sm:!text-xs min-w-0 !leading-tight whitespace-nowrap',
-                      a === 'yes' && 'ring-1 ring-violet-400/60 ring-offset-1 ring-offset-background',
-                    )}
-                    aria-pressed={a === 'yes'}
-                    onClick={() => setAnswer(i, 'yes')}
+                {isBinary ? (
+                  <div
+                    className="shrink-0 flex justify-center gap-1 sm:gap-1.5 w-full pt-1"
+                    role="group"
+                    aria-label={item.question}
                   >
-                    <span className="inline-flex items-baseline gap-1 font-bold tabular-nums">
-                      <span>{copy.predict.yes}</span>
-                      <span className="opacity-90">{dumb.yes}%</span>
-                    </span>
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={a === 'no' ? 'primary' : 'secondary'}
-                    className={cn(
-                      '!px-2 !py-1.5 !text-[0.65rem] sm:!text-xs min-w-0 !leading-tight whitespace-nowrap',
-                      a === 'no' && 'ring-1 ring-violet-400/60 ring-offset-1 ring-offset-background',
-                    )}
-                    aria-pressed={a === 'no'}
-                    onClick={() => setAnswer(i, 'no')}
+                    <Button
+                      type="button"
+                      variant={selected === 'yes' ? 'primary' : 'secondary'}
+                      className={cn(
+                        '!px-2 !py-1.5 !text-[0.65rem] sm:!text-xs min-w-0 !leading-tight whitespace-nowrap',
+                        selected === 'yes' &&
+                          'ring-1 ring-violet-400/60 ring-offset-1 ring-offset-background',
+                      )}
+                      aria-pressed={selected === 'yes'}
+                      onClick={() => setSelection(i, 'yes')}
+                    >
+                      <span className="inline-flex items-baseline gap-1 font-bold tabular-nums">
+                        <span>{copy.predict.yes}</span>
+                        <span className="opacity-90">{BUTTON_PLACEHOLDER_PCT}%</span>
+                      </span>
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={selected === 'no' ? 'primary' : 'secondary'}
+                      className={cn(
+                        '!px-2 !py-1.5 !text-[0.65rem] sm:!text-xs min-w-0 !leading-tight whitespace-nowrap',
+                        selected === 'no' &&
+                          'ring-1 ring-violet-400/60 ring-offset-1 ring-offset-background',
+                      )}
+                      aria-pressed={selected === 'no'}
+                      onClick={() => setSelection(i, 'no')}
+                    >
+                      <span className="inline-flex items-baseline gap-1 font-bold tabular-nums">
+                        <span>{copy.predict.no}</span>
+                        <span className="opacity-90">{BUTTON_PLACEHOLDER_PCT}%</span>
+                      </span>
+                    </Button>
+                  </div>
+                ) : (
+                  <div
+                    className="shrink-0 grid grid-cols-1 gap-1 w-full pt-1"
+                    role="group"
+                    aria-label={item.question}
                   >
-                    <span className="inline-flex items-baseline gap-1 font-bold tabular-nums">
-                      <span>{copy.predict.no}</span>
-                      <span className="opacity-90">{dumb.no}%</span>
-                    </span>
-                  </Button>
-                </div>
+                    {options.map((opt, optIdx) => (
+                      <Button
+                        key={opt}
+                        type="button"
+                        variant={selected === opt ? 'primary' : 'secondary'}
+                        className={cn(
+                          '!px-2 !py-1 !text-[0.6rem] sm:!text-[0.65rem] min-w-0 !leading-tight text-left justify-start',
+                          selected === opt &&
+                            'ring-1 ring-violet-400/60 ring-offset-1 ring-offset-background',
+                        )}
+                        aria-pressed={selected === opt}
+                        onClick={() => setSelection(i, opt)}
+                      >
+                        <span className="font-bold tabular-nums truncate w-full">
+                          {opt}{' '}
+                          <span className="opacity-90 font-bold">
+                            {equalOptionPercent(optIdx, options.length)}%
+                          </span>
+                        </span>
+                      </Button>
+                    ))}
+                  </div>
+                )}
               </Card>
             </li>
           );
