@@ -124,6 +124,13 @@ export const copy = {
     askSend: 'Send',
     askError: 'Could not get a reply. Check ANTHROPIC_API_KEY in .env.',
     askEmpty: 'Ask a question above to chat.',
+    astroCoinsTitle: 'wallet',
+    astroCoinsLabel: 'astro coins',
+    astroCoinsDepositLabel: 'deposit (usd)',
+    astroCoinsDepositPlaceholder: '0.00',
+    astroCoinsDeposit: 'deposit',
+    astroCoinsBuy: 'buy astrocoins',
+    astroCoinsBuyNotice: 'checkout is not connected yet — this button is a placeholder.',
   },
 
   footer: {

@@ -18,7 +18,7 @@ export function HeroSection() {
           {copy.predict.titleSuffix}
         </span>
       </h1>
-      <p className="mt-5 md:mt-6 max-w-2xl text-lg sm:text-xl md:text-2xl font-serif font-medium text-muted-foreground text-center leading-snug tracking-tight px-2">
+      <p className="mt-5 md:mt-6 max-w-4xl text-lg sm:text-xl md:text-2xl font-serif font-medium text-muted-foreground text-center leading-snug tracking-tight px-2">
         {copy.predict.subtitle}
       </p>
     </section>

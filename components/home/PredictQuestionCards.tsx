@@ -13,8 +13,16 @@ type PredictQuestionItem = {
   category: string;
   question: string;
   outcome_type: PredictOutcomeType;
+  /** ISO date (YYYY-MM-DD), e.g. market close / resolution window. */
+  expiresAt: string;
   options?: string[];
 };
+
+function formatQuestionExpires(isoDate: string): string {
+  const d = new Date(`${isoDate}T12:00:00`);
+  if (Number.isNaN(d.getTime())) return isoDate;
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
 
 const INITIAL_QUESTION_COUNT = 5;
 const LOAD_MORE_BATCH = 5;
@@ -51,7 +59,9 @@ function isPredictQuestionItem(q: unknown): q is PredictQuestionItem {
     typeof (q as PredictQuestionItem).question === 'string' &&
     'outcome_type' in q &&
     ((q as PredictQuestionItem).outcome_type === 'Binary' ||
-      (q as PredictQuestionItem).outcome_type === 'Multiple Choice')
+      (q as PredictQuestionItem).outcome_type === 'Multiple Choice') &&
+    'expiresAt' in q &&
+    typeof (q as PredictQuestionItem).expiresAt === 'string'
   );
 }
 
@@ -116,8 +126,8 @@ export function PredictQuestionCards() {
                 className={cn(
                   'w-full max-w-[11.5rem] sm:max-w-[13rem] flex flex-col p-3 sm:p-4 min-h-0',
                   isMc
-                    ? 'min-h-[14rem] sm:min-h-[15.5rem]'
-                    : 'aspect-square max-h-[min(100vw,24rem)]',
+                    ? 'min-h-[15.75rem] sm:min-h-[17.25rem]'
+                    : 'aspect-[10/11] max-h-[min(100vw,27rem)]',
                   'border-violet-500/20 bg-card/80',
                 )}
               >
@@ -128,8 +138,8 @@ export function PredictQuestionCards() {
                   {item.question}
                 </p>
 
-                <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center px-0.5 py-0.5 gap-0">
-                  <p className="text-[0.55rem] sm:text-[0.6rem] font-bold text-muted-foreground leading-tight mb-0.5">
+                <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center px-0.5 py-6 sm:py-7 gap-1.5">
+                  <p className="text-[0.55rem] sm:text-[0.6rem] font-bold text-muted-foreground leading-tight">
                     {copy.predict.estimationPrefix}
                   </p>
                   <p
@@ -208,6 +218,10 @@ export function PredictQuestionCards() {
                     ))}
                   </div>
                 )}
+                <p className="shrink-0 pt-2 text-center text-[0.45rem] sm:text-[0.5rem] text-muted-foreground/90 leading-tight tabular-nums">
+                  {copy.predict.questionExpiresPrefix}{' '}
+                  {formatQuestionExpires(item.expiresAt)}
+                </p>
               </Card>
             </li>
           );

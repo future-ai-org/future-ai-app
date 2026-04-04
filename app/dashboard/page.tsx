@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { MiniChartWheel } from '@/components/chart/MiniChartWheel';
 import { DashboardTransitNews } from '@/components/chart/DashboardTransitNews';
+import { AstroCoinsPanel } from '@/components/dashboard/AstroCoinsPanel';
 import { copy } from '@/lib/copy';
 import { reapplyWholeSignHouses } from '@/lib/astro/calculate';
 import type { ChartResult } from '@/lib/astro/types';
@@ -78,6 +79,7 @@ export default function DashboardPage() {
         <p className="text-muted-foreground text-sm">loading your charts…</p>
       ) : (
         <>
+          <AstroCoinsPanel />
           {(() => {
             const primary = charts.find(c => c.isPrimary === true);
             if (!primary) return null;
@@ -172,7 +174,7 @@ export default function DashboardPage() {
                       <li key={chart.id}>
                         <Card className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                           <div className="min-w-0">
-                              <h3 className="font-medium text-foreground truncate">
+                              <h3 className="text-xl sm:text-2xl font-semibold text-foreground truncate leading-tight">
                                 {chart.label}
                               </h3>
                             <p className="text-sm text-muted-foreground truncate">{birthLabel}</p>

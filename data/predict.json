@@ -2,236 +2,282 @@
   "heroIcon": "✦",
   "titleSuffix": "✦",
   "title": "predict the future",
-  "subtitle": "Star power or star nonsense?",
+  "subtitle": "What would it take to empirically test astrological claims?",
   "yes": "yes",
   "no": "no",
   "estimationPrefix": "astro prediction:",
   "estimationPending": "—",
   "questionsAria": "quick questions",
   "loadMore": "load more",
+  "questionExpiresPrefix": "expires",
   "questions": [
     {
       "id": 1,
       "category": "Politics",
       "question": "Will the United States pass comprehensive federal AI regulation before 2027?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 2,
       "category": "Geopolitics",
       "question": "Will a formal ceasefire agreement be reached in the Russia-Ukraine conflict before 2027?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 3,
       "category": "Technology",
       "question": "Will a major tech company release a commercially available AGI-like system before 2030?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 4,
       "category": "Economics",
       "question": "Will the U.S. Federal Reserve cut interest rates at least three times in 2026?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 5,
       "category": "Climate",
       "question": "Will 2026 rank among the top three hottest years ever recorded globally?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 6,
       "category": "Technology",
       "question": "Which company will have the highest market capitalization at the end of 2026?",
       "outcome_type": "Multiple Choice",
-      "options": ["Apple", "Microsoft", "NVIDIA", "Alphabet", "Amazon", "Meta", "Other"]
+      "options": [
+        "Apple",
+        "Microsoft",
+        "NVIDIA",
+        "Alphabet",
+        "Amazon",
+        "Meta",
+        "Other"
+      ],
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 7,
       "category": "Politics",
       "question": "Will voter turnout in the 2026 U.S. midterm elections exceed 50% of eligible voters?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 8,
       "category": "Space",
       "question": "Will a private company successfully land humans on the Moon before 2030?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 9,
       "category": "Technology",
       "question": "Will AI-generated content account for more than 50% of internet content by 2028?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 10,
       "category": "Economics",
       "question": "Will global GDP growth exceed 3.5% in 2026?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 11,
       "category": "Health",
       "question": "Will a new WHO-declared global health emergency occur before the end of 2026?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 12,
       "category": "Energy",
       "question": "Will renewable energy account for more than 40% of global electricity generation by 2028?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 13,
       "category": "Technology",
       "question": "Will Apple release a mass-market AR or VR headset with over 10 million units sold in its first year?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 14,
       "category": "Geopolitics",
       "question": "Will China initiate a military blockade or invasion of Taiwan before 2030?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 15,
       "category": "Finance",
       "question": "Will Bitcoin reach a new all-time high before the end of 2026?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 16,
       "category": "Geopolitics",
       "question": "Will Iran reopen the Strait of Hormuz before May 1, 2026?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 17,
       "category": "Geopolitics",
       "question": "Will the U.S. attack Iranian power or desalination plants before April 15, 2026?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 18,
       "category": "Geopolitics",
       "question": "Will the missing U.S. service member shot down over Iran be recovered alive?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 19,
       "category": "Geopolitics",
       "question": "Will a formal ceasefire between the U.S.-Israel coalition and Iran be announced before July 2026?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 20,
       "category": "Geopolitics",
       "question": "Will Iran carry out strikes on Gulf bridges listed in its retaliation threat by May 2026?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 21,
       "category": "Politics",
       "question": "Will the U.S. formally withdraw from NATO before the end of 2026?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 22,
       "category": "Politics",
       "question": "Will the Supreme Court uphold birthright citizenship in Trump v. Barbara?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 23,
       "category": "Politics",
       "question": "Will Congress pass Trump's $1.5 trillion defense budget request in 2026?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 24,
       "category": "Politics",
       "question": "Will the DHS partial shutdown be fully resolved before June 2026?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 25,
       "category": "Politics",
       "question": "Will Trump's newly appointed Attorney General face a Senate confirmation challenge?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 26,
       "category": "Science & Space",
       "question": "Will the Artemis II crew successfully complete their lunar flyby and return safely to Earth?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 27,
       "category": "Science & Space",
       "question": "Will NASA launch Artemis III (crewed lunar landing) before the end of 2027?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 28,
       "category": "Technology & Law",
       "question": "Will the Meta/YouTube social media harm verdict survive appeal at the federal level?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 29,
       "category": "Technology & Law",
       "question": "Will Congress pass federal legislation regulating social media platform design for minors by 2027?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 30,
       "category": "Economics",
       "question": "Will oil prices exceed $120/barrel within 30 days due to Strait of Hormuz disruption?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 31,
       "category": "Economics",
       "question": "Will the U.S. stock market (S&P 500) fall more than 10% from its April 2026 level by June 2026?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 32,
       "category": "Military",
       "question": "Will Pete Hegseth resign or be removed as Secretary of Defense before January 2027?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 33,
       "category": "Military",
       "question": "Will the U.S. deploy ground troops to Iran before the end of 2026?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 34,
       "category": "International",
       "question": "Will the UK-led 40-nation coalition agree on concrete economic measures against Iran by May 2026?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 35,
       "category": "International",
       "question": "Will the U.S. lift sanctions on Venezuela's acting President Delcy Rodríguez lead to a formal diplomatic normalization by end of 2026?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 36,
       "category": "Politics",
       "question": "Will Democrats win control of the U.S. House of Representatives in the 2026 Midterm elections?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     },
     {
       "id": 37,
       "category": "Politics",
       "question": "Will any U.S. state successfully implement its own independent regulations for prediction markets by 2027?",
-      "outcome_type": "Binary"
+      "outcome_type": "Binary",
+      "expiresAt": "2026-08-01"
     }
   ]
 }
