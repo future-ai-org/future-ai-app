@@ -1,7 +1,11 @@
 .PHONY: dev server generate migrate migrate-dev build start lint typecheck test coverage check install clean
 
-# Development server (alias: dev)
+# Development server. Stops whatever is bound to 8066 (usually a stray `next dev`)
+# and clears a stale Turbopack lock so a fresh server can start.
 dev:
+	@for pid in $$(lsof -ti:8066 2>/dev/null); do kill $$pid 2>/dev/null || true; done
+	@sleep 0.4
+	@rm -f .next/dev/lock
 	npm run dev
 
 # Prisma
