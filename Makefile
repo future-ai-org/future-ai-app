@@ -25,7 +25,7 @@ build:
 	npx prisma generate
 	npm run build
 
-server:
+server:build
 	npm run start
 
 # Lint and typecheck
