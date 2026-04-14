@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { computeCompatibility, planetGlyph } from "./compatibility";
+import { getSymmetricPlacementScore } from "./compatibilityInterpretations";
 import type { ChartResult, BirthData } from "./types";
 
 function minimalChart(asc: number, label: string): ChartResult {
@@ -43,6 +44,17 @@ describe("compatibility", () => {
     });
     it("falls back to first letter for unknown names", () => {
       expect(planetGlyph("Xyzzy")).toBe("X");
+    });
+  });
+
+  describe("getSymmetricPlacementScore", () => {
+    it("uses 8 for earth–water or fire–air (complementary) element pairs", () => {
+      expect(
+        getSymmetricPlacementScore("Sun", 6, 12, undefined, "complementary").score,
+      ).toBe(8);
+      expect(
+        getSymmetricPlacementScore("Venus", 1, 1, undefined, "complementary").score,
+      ).toBe(8);
     });
   });
 });

@@ -52,7 +52,7 @@ export interface ChartOptions {
   lotOfVictory?: boolean;
 }
 
-/** Default options for the "chart of the moment" (today): include North Node, South Node, Lilith, Juno, Chiron. */
+/** Default options for the "current sky" (/today) chart: include North Node, South Node, Lilith, Juno, Chiron. */
 export const CHART_OF_MOMENT_OPTIONS: ChartOptions = {
   northNode: true,
   southNode: true,

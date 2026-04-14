@@ -156,7 +156,7 @@ export function NextConjunctions() {
       aria-roledescription="carousel"
       aria-label={copy.nextConjunctions.title}
     >
-      <h2 className="text-2xl font-serif font-bold text-center text-violet-400 mb-6">
+      <h2 className="text-3xl font-serif font-bold text-center text-violet-400 mb-6">
         {copy.nextConjunctions.title}
       </h2>
 

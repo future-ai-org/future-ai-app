@@ -24,7 +24,7 @@ So:
 
 1. **Env:** Set `DATABASE_URL` and (for migrations) `DIRECT_URL` from Supabase Dashboard → Project Settings → Database. Set `AUTH_SECRET` for NextAuth.
 2. **Runtime:** `lib/db.ts` builds `PrismaPg` with `DATABASE_URL` and instantiates `PrismaClient`. All API routes that use `prisma` hit Supabase Postgres.
-3. **Migrations:** Run `npx prisma migrate deploy` (or `migrate dev`). The CLI reads `prisma.config.ts` and uses `DIRECT_URL` (or `DATABASE_URL`) to apply migrations. Tables: `User`, `SavedChart`.
+3. **Migrations:** Run `npx prisma migrate deploy` or `make migrate` (or `migrate dev` / `make migrate-dev` locally). The CLI reads `prisma.config.ts` and uses `DIRECT_URL` (or `DATABASE_URL`) to apply migrations. Schema includes auth/charts (`User`, `SavedChart`, `FavoriteNews`), Stripe purchases (`StripePurchase`), astro coin balance + ledger (`User.astroCoins`, `AstroCoinLedger`), and predict wagers (`PredictBet`).
 4. **Persistence:** Data lives in Supabase. It’s persistent and shared across all app instances (e.g. every Vercel serverless invocation).
 
 ---
@@ -50,6 +50,7 @@ So:
 
    ```bash
    npx prisma migrate deploy
+   # or: make migrate
    ```
 
 4. **App:** Ensure `AUTH_SECRET` is set. Run the app; it will use `DATABASE_URL` to talk to Supabase.
@@ -64,10 +65,11 @@ So:
    - `DATABASE_URL` — Supabase **transaction** pooler URL with `?pgbouncer=true`.
    - `DIRECT_URL` — Supabase **direct/session** URL (for running migrations; optional on Vercel if you run migrations from CI/local).
    - `AUTH_SECRET` — same as local (e.g. from `npx auth secret`).
+   - (Optional) `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` — astro coin Checkout; see **[STRIPE.md](STRIPE.md)**.
 
 3. **Migrations:** Run them **before** or **after** deploy:
-   - **Option A:** In a GitHub Action (or similar): run `npx prisma migrate deploy` with `DIRECT_URL` (and `DATABASE_URL`) set.
-   - **Option B:** From your machine after deploy: `DIRECT_URL=... DATABASE_URL=... npx prisma migrate deploy`.
+   - **Option A:** In a GitHub Action (or similar): run `npx prisma migrate deploy` or `make migrate` with `DIRECT_URL` (and `DATABASE_URL`) set.
+   - **Option B:** From your machine after deploy: `DIRECT_URL=... DATABASE_URL=... npx prisma migrate deploy` (or `make migrate`).
    - **Option C:** Add a post-deploy script that runs `prisma migrate deploy` (Vercel doesn’t run arbitrary scripts by default, so CI or a one-off job is usually clearer).
 
 4. **Where data lives:** In **Supabase** only. Vercel only runs the app and stores env vars; all persistence is in Supabase Postgres.

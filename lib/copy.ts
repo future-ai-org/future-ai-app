@@ -1,17 +1,22 @@
+import predict from '@/data/predict.json';
+
 /**
  * Editable copy for the app. Change strings here to update text across the site.
+ * Predict page strings (hero + question cards) live in `data/predict.json`.
  */
 export const copy = {
   site: {
     title: 'future',
     tabTitle: 'Ancient Wisdom → AI Age',
-    description: 'future — start your journey and more.',
+    description: 'future — create a chart and more.',
     tagline: '',
   },
 
   nav: {
     home: 'home',
-    chart: 'start your journey',
+    predict: 'predict',
+    chartOfMoment: 'current sky',
+    chart: 'create a chart',
     todayChart: "today's chart",
     influence: 'influences',
     compatibility: 'compatibility',
@@ -82,14 +87,35 @@ export const copy = {
   },
 
   dashboard: {
-    title: 'Your Journey',
+    title: 'dashboard',
+    yourChartAndTransits: 'your chart and transits',
+    myPredictions: 'my predictions',
+    myPredictionsEmpty: 'you have not placed any predictions yet.',
+    myPredictionsBrowse: 'go to predict',
+    myPredictionsCoins: 'astro coins',
+    myPredictionsOn: 'on',
+    myPredictionsInvested: 'invested',
+    myPredictionsBetMore: 'bet more',
+    myPredictionsBetMoreHowMany: 'how many more coins do you want on this bet?',
+    myPredictionsBetMoreCurrent: 'current stake',
+    myPredictionsWithdraw: 'withdraw',
+    myPredictionsWithdrawStaked: 'staked',
+    myPredictionsWithdrawLabel: 'coins to return',
+    myPredictionsWithdrawHint:
+      'coins go back to your wallet. withdrawing your full stake removes this row.',
+    myPredictionsWithdrawConfirm: 'confirm',
+    myPredictionsWithdrawCancel: 'cancel',
+    myPredictionsWithdrawSubmitting: 'processing…',
+    myPredictionsWithdrawError: 'could not complete withdrawal.',
+    myPredictionsWithdrawInvalid: 'enter a valid number of coins.',
+    myPredictionsWithdrawTooMany: 'cannot withdraw more than you staked.',
     backToDashboard: 'back to dashboard',
     subtitle: 'saved charts',
     tabCharts: 'charts',
     tabInfluences: 'influences',
     tabAsk: 'ask',
     todayChart: "today's chart",
-    newChart: 'new chart',
+    addNewChart: 'add a new chart',
     myChart: 'my chart',
     addChart: 'add chart',
     otherCharts: 'other charts',
@@ -104,8 +130,7 @@ export const copy = {
     delete: 'delete',
     view: 'view',
     createdAt: 'saved',
-    setAsMyChart: 'set as my chart',
-    transitNewsTitle: 'upcoming to your chart',
+    transitNewsTitle: 'upcoming aspects for my chart',
     transitNewsNoneInRange: 'none in search range',
     /** Inline verb phrase between transit sign and natal planet (see DashboardTransitNews). */
     transitNewsAspectVerb: {
@@ -119,6 +144,16 @@ export const copy = {
     askSend: 'Send',
     askError: 'Could not get a reply. Check ANTHROPIC_API_KEY in .env.',
     askEmpty: 'Ask a question above to chat.',
+    astroCoinsTitle: 'wallet',
+    astroCoinsLabel: 'astro coins',
+    astroCoinsAmountLabel: 'amount (usd)',
+    astroCoinsAmountPlaceholder: '10.00',
+    astroCoinsBuyStripe: 'buy with card',
+    astroCoinsAmountRequired: 'enter an amount (minimum $10 usd).',
+    astroCoinsBuyStripeHint: '10 coins per $1 usd. minimum charge $10.',
+    astroCoinsCheckoutError: 'could not start checkout. try again.',
+    astroCoinsPurchaseSuccess: 'payment complete — your balance was updated.',
+    astroCoinsPurchaseCancelled: 'checkout was cancelled.',
   },
 
   footer: {
@@ -128,8 +163,9 @@ export const copy = {
     moonTargetFull: 'full',
     moonTargetNew: 'new',
     links: [
-      { label: 'home', href: '/' },
-      { label: 'start your journey', href: '/chart' },
+      { label: 'predict', href: '/' },
+      { label: 'current sky', href: '/today' },
+      { label: 'create a chart', href: '/chart' },
       { label: 'influences', href: '/influence' },
       { label: 'compatibility', href: '/compatibility' },
       { label: 'dashboard', href: '/dashboard' },
@@ -142,7 +178,6 @@ export const copy = {
     chart2: 'chart 2',
     selectSaved: 'saved chart',
     calculateNew: 'calculate new',
-    chooseChart: 'choose a chart',
     yourCharts: 'your saved charts',
     noCharts: 'No saved charts. Calculate one above or go to dashboard.',
     planetsInHouses: (name: string) => `${name}'s planets in the other's houses`,
@@ -165,12 +200,14 @@ export const copy = {
     subtitle:
       'ancient wisdom meets the AI age',
     tagline: '',
-    cta: 'calculate my chart',
+    cta: 'calculate the chart',
     features: [
       { icon: '☉', label: 'learn about yourself' },
       { icon: 'handshake', label: 'check compatibility with others' },
     ],
   },
+
+  predict,
 
   notFound: {
     title: 'page not found',
@@ -208,8 +245,9 @@ export const copy = {
 
   chart: {
     back: '← back',
-    title: 'start your journey',
+    title: 'create a chart',
     titlePrefix: '✦',
+    titleSuffix: '✦',
     tagline: '',
     back15m: '−15m',
     forward15m: '+15m',
@@ -218,15 +256,30 @@ export const copy = {
     see3D: 'see it in 3D',
     checkTransits: 'check transits',
     deleteChart: 'delete chart',
-    transitsTitle: 'transits',
+    transitsForMyChart: 'transits for my chart',
+    transitsForSavedChart: (label: string) => `transits for ${label}`,
     transitsSubtitle: (dateLabel: string) => `current sky as of ${dateLabel}`,
     transitsTableNatal: 'natal',
     transitsTableTransits: 'transits',
-    transitsGaussianTitle: 'transit–natal influences',
+    transitNatalInfluencesTableTitle: 'transit–natal influences table',
+    transitNatalInfluencesPlotsTitle: 'transit–natal influences plots',
+    /** Snapshot table on /chart/[id]/transits: major aspects at the selected moment. */
+    transitNatalSnapshotNone: 'no major transit–natal aspects in orb at this moment.',
+    transitNatalSnapshotColTransit: 'transit',
+    transitNatalSnapshotColNatal: 'natal',
+    transitNatalSnapshotColSigns: 'signs',
+    /** Whole-sign house of the natal planet in the birth chart. */
+    transitNatalSnapshotColNatalHouse: 'natal house',
+    natalAspectsTitle: 'natal major aspects',
+    natalAspectsNone: 'no major aspects in orb for listed bodies.',
+    natalAspectsColPoint1: 'point 1',
+    natalAspectsColAspect: 'aspect',
+    natalAspectsColPoint2: 'point 2',
+    natalAspectsColOrb: 'orb',
   },
 
   today: {
-    title: "chart of the moment",
+    title: 'current sky',
     subtitle: 'current transits in San Francisco',
     goToToday: 'go back to today',
     prevDay: '1 day before',
@@ -251,10 +304,11 @@ export const copy = {
     saving: 'saving…',
     success: 'chart saved.',
     signInToSave: 'sign in to save charts',
+    goToDashboard: 'go to dashboard',
   },
 
   form: {
-    sectionTitle: 'find your cosmic blueprint',
+    sectionTitle: 'find a cosmic blueprint',
     dateLabel: 'date of birth',
     timeLabel: 'time of birth',
     timeNotKnown: 'time not known (use 12pm)',
@@ -264,7 +318,7 @@ export const copy = {
     cityNotKnown: 'city not known',
     utcLabel: 'utc offset — adjust if DST applies',
     utcPlaceholder: 'e.g. -5 or +1',
-    submit: 'calculate my chart',
+    submit: 'calculate the chart',
     calculating: 'calculating…',
     errors: {
       noDate: 'please enter your birth date.',
@@ -304,7 +358,6 @@ export const copy = {
 
   ascendant: {
     title: 'ascendant (rising sign)',
-    risingSuffix: '— rising sign',
     mcLabel: 'mc (midheaven):',
     houseLabel: (n: number) => `house ${n}:`,
   },

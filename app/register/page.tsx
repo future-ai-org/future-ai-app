@@ -32,8 +32,8 @@ export default function RegisterPage() {
           <Link href="/" className="text-violet-400 text-sm hover:text-violet-300 transition-colors">
             ← {copy.site.title}
           </Link>
-          <h1 className="text-3xl font-serif mt-4 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
-            {copy.auth.registerTitle}
+          <h1 className="text-4xl font-serif mt-4 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
+            {copy.chart.titlePrefix} {copy.auth.registerTitle} {copy.chart.titleSuffix}
           </h1>
         </div>
         <Card>
@@ -50,8 +50,8 @@ export default function RegisterPage() {
           <Link href="/" className="text-violet-400 text-sm hover:text-violet-300 transition-colors">
             ← {copy.site.title}
           </Link>
-          <h1 className="text-3xl font-serif mt-4 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
-            {copy.auth.registerTitle}
+          <h1 className="text-4xl font-serif mt-4 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
+            {copy.chart.titlePrefix} {copy.auth.registerTitle} {copy.chart.titleSuffix}
           </h1>
         </div>
         <Card>
@@ -70,8 +70,8 @@ export default function RegisterPage() {
         <Link href="/" className="text-violet-400 text-sm hover:text-violet-300 transition-colors">
           ← {copy.site.title}
         </Link>
-        <h1 className="text-3xl font-serif mt-4 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
-          {copy.auth.registerTitle}
+        <h1 className="text-4xl font-serif mt-4 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
+          {copy.chart.titlePrefix} {copy.auth.registerTitle} {copy.chart.titleSuffix}
         </h1>
       </div>
       <Card>

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { ChartResults } from '@/components/chart/ChartResults';
 import { copy } from '@/lib/copy';
+import { savedChartHeadingLabel } from '@/lib/utils';
 import type { ChartResult } from '@/lib/astro/types';
 
 export default function ViewSavedChartPage() {
@@ -56,7 +57,7 @@ export default function ViewSavedChartPage() {
     return (
       <main className="max-w-5xl mx-auto px-4 py-16">
         <Link href="/dashboard" className="text-violet-400 text-sm hover:text-violet-300">
-          ← {copy.dashboard.title}
+          ← {copy.dashboard.backToDashboard}
         </Link>
         <p className={`text-center mt-8 ${error ? 'text-red-400' : 'text-muted-foreground'}`}>{error || 'loading…'}</p>
       </main>
@@ -72,10 +73,10 @@ export default function ViewSavedChartPage() {
           href="/dashboard"
           className="text-muted-foreground text-sm hover:text-violet-400 transition-colors"
         >
-          ← {copy.dashboard.title}
+          ← {copy.dashboard.backToDashboard}
         </Link>
-        <h1 className="text-5xl md:text-6xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
-          {copy.chart.titlePrefix} {chart.label}
+        <h1 className="text-6xl md:text-7xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
+          {copy.chart.titlePrefix} {savedChartHeadingLabel(chart.label)} {copy.chart.titleSuffix}
         </h1>
       </div>
       <ChartResults result={chart.chartResult} />

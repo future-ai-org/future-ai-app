@@ -29,11 +29,16 @@
 
 - `make dev` or `npm run dev` — development server
 - `make build` / `make start` — production build and run
+- `make generate` — `prisma generate` (client from schema)
+- `make migrate` — `prisma migrate deploy` (apply migrations; needs `DIRECT_URL` / `DATABASE_URL`)
+- `make migrate-dev` — `prisma migrate dev` (local schema changes)
 - `make lint` — ESLint
 - `make typecheck` — TypeScript check
 - `make test` — run tests (Vitest)
 - `make install` — install dependencies
 - `make clean` — remove `.next` and `node_modules`
+
+**Astro coins / Stripe:** balance and ledger live in Postgres (`User.astroCoins`, `AstroCoinLedger`); setup is in **docs/STRIPE.md**.
 
 ## Pre-commit
 

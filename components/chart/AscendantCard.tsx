@@ -14,7 +14,7 @@ export function AscendantCard({ result, showMc = true }: Props) {
 
   return (
     <Card className="mb-4 min-w-[20rem] w-full max-w-lg">
-      <h2 className="text-xs text-violet-400 tracking-widest uppercase mb-3 border-b border-border pb-2">
+      <h2 className="text-xs font-bold text-violet-400 tracking-widest uppercase mb-3 border-b border-border pb-2">
         {copy.ascendant.title}
       </h2>
 
@@ -22,8 +22,8 @@ export function AscendantCard({ result, showMc = true }: Props) {
         <div className="text-4xl text-fuchsia-300 mb-1">
           {ascInfo.glyph} {ascInfo.sign}
         </div>
-        <div className="text-sm text-muted-foreground">
-          {ascInfo.deg}° {ascInfo.min}&apos; {copy.ascendant.risingSuffix}
+        <div className="text-sm font-bold text-foreground">
+          {ascInfo.deg}° {ascInfo.min}&apos;
         </div>
       </div>
 

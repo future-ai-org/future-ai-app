@@ -17,8 +17,8 @@ export default function SolarSystemPage() {
   return (
     <div className="mx-auto max-w-6xl px-3 sm:px-4 pb-6">
       <header className="pt-8 pb-6 text-center scroll-mt-20">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif mt-4 mb-1 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
-          {copy.chart.titlePrefix} {copy.solarSystem.title}
+        <h1 className="text-5xl sm:text-6xl md:text-7xl font-serif mt-4 mb-1 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
+          {copy.chart.titlePrefix} {copy.solarSystem.title} {copy.chart.titleSuffix}
         </h1>
       </header>
       <SolarSystemClient />

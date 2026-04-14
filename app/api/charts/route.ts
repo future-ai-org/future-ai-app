@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       typeof body.label === 'string'
         ? body.label.trim()
         : isPrimary
-          ? 'My chart'
+          ? 'my chart'
           : '';
     const birthData = body.birthData;
     const chartResult = body.chartResult;

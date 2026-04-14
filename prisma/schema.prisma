@@ -7,14 +7,18 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  email         String         @unique
-  passwordHash  String?        // null for OAuth-only users
-  name          String?
-  image         String?
-  createdAt     DateTime       @default(now())
-  savedCharts   SavedChart[]
-  favoriteNews  FavoriteNews[]
+  id              String           @id @default(cuid())
+  email           String           @unique
+  passwordHash    String?          // null for OAuth-only users
+  name            String?
+  image           String?
+  astroCoins      Int              @default(0)
+  createdAt       DateTime         @default(now())
+  savedCharts      SavedChart[]
+  favoriteNews     FavoriteNews[]
+  stripePurchases  StripePurchase[]
+  astroCoinLedgers AstroCoinLedger[]
+  predictBets      PredictBet[]
 }
 
 model FavoriteNews {
@@ -37,4 +41,41 @@ model SavedChart {
   birthData  String   // JSON string of BirthData
   chartResult String  // JSON string of ChartResult
   createdAt  DateTime @default(now())
+}
+
+model StripePurchase {
+  id             String   @id @default(cuid())
+  sessionId      String   @unique
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coins          Int
+  amountUsdCents Int
+  createdAt      DateTime @default(now())
+}
+
+/** Append-only ledger: every balance change is recorded (credits, debits). */
+model AstroCoinLedger {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  delta        Int
+  balanceAfter Int
+  reason       String
+  refId        String?
+  createdAt    DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model PredictBet {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId Int
+  side       String
+  coins      Int
+  createdAt  DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([questionId])
 }

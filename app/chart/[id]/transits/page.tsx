@@ -6,9 +6,11 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { TransitsWheel } from '@/components/chart/TransitsWheel';
 import { TransitsTable } from '@/components/chart/TransitsTable';
+import { TransitNatalAspectsSnapshot } from '@/components/chart/TransitNatalAspectsSnapshot';
 import { TransitNatalGaussianPlot } from '@/components/chart/TransitNatalGaussianPlot';
 import { Button } from '@/components/ui/Button';
 import { copy } from '@/lib/copy';
+import { savedChartHeadingLabel } from '@/lib/utils';
 import { calculateChart } from '@/lib/astro/calculate';
 import { CHART_OF_MOMENT_OPTIONS } from '@/lib/astro/types';
 import type { BirthData, ChartResult } from '@/lib/astro/types';
@@ -56,7 +58,11 @@ export default function ChartTransitsPage() {
   const router = useRouter();
   const { status } = useSession();
   const id = typeof params.id === 'string' ? params.id : '';
-  const [chart, setChart] = useState<{ label: string; chartResult: ChartResult } | null>(null);
+  const [chart, setChart] = useState<{
+    label: string;
+    isPrimary?: boolean;
+    chartResult: ChartResult;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [transitDate, setTransitDate] = useState<Date>(() => new Date());
@@ -107,7 +113,7 @@ export default function ChartTransitsPage() {
 
   if (status === 'loading' || status === 'unauthenticated') {
     return (
-      <main className="max-w-5xl mx-auto px-4 py-16">
+      <main className="max-w-5xl mx-auto px-5 sm:px-8 md:px-10 py-16">
         <div className="text-center text-muted-foreground">loading…</div>
       </main>
     );
@@ -115,9 +121,9 @@ export default function ChartTransitsPage() {
 
   if (loading || error) {
     return (
-      <main className="max-w-5xl mx-auto px-4 py-16">
+      <main className="max-w-5xl mx-auto px-5 sm:px-8 md:px-10 py-16">
         <Link href="/dashboard" className="text-violet-400 text-sm hover:text-violet-300">
-          ← {copy.dashboard.title}
+          ← {copy.dashboard.backToDashboard}
         </Link>
         <p className={`text-center mt-8 ${error ? 'text-red-400' : 'text-muted-foreground'}`}>{error || 'loading…'}</p>
       </main>
@@ -133,22 +139,26 @@ export default function ChartTransitsPage() {
     timeStyle: 'short',
   });
 
+  const transitsHeadingText = chart.isPrimary
+    ? copy.chart.transitsForMyChart
+    : copy.chart.transitsForSavedChart(savedChartHeadingLabel(chart.label));
+
   return (
-    <main className="max-w-5xl mx-auto px-4 pb-20">
-      <div className="pt-8 pb-6 text-center">
+    <main className="max-w-5xl mx-auto px-5 sm:px-8 md:px-10 pb-20">
+      <div className="pt-10 sm:pt-12 pb-4 md:pb-5 text-center">
         <Link
           href="/dashboard"
           className="text-muted-foreground text-sm hover:text-violet-400 transition-colors"
         >
-          ← {copy.dashboard.title}
+          ← {copy.dashboard.backToDashboard}
         </Link>
-        <h1 className="text-5xl md:text-6xl font-serif mt-4 mb-2 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
-          {copy.chart.titlePrefix} {copy.chart.transitsTitle}
+        <h1 className="text-4xl sm:text-6xl md:text-7xl font-serif mt-4 mb-0 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight px-2 break-words">
+          {copy.chart.titlePrefix} {transitsHeadingText} {copy.chart.titleSuffix}
         </h1>
-        <p className="text-muted-foreground text-sm mt-2 font-bold">
+        <p className="text-muted-foreground text-base sm:text-lg md:text-xl mt-5 md:mt-6 font-bold text-balance px-2">
           {copy.chart.transitsSubtitle(transitLabel)}
         </p>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-2 md:gap-3 font-bold">
+        <div className="mt-3.5 sm:mt-4 flex flex-wrap items-center justify-center gap-2 md:gap-3 font-bold">
           <div className="flex items-center gap-1">
             <Button variant="ghost" className="!py-1.5 !px-2.5 text-lg leading-none font-bold" onClick={() => adjustDate('year', -1)} title={copy.today.prevYear} aria-label={copy.today.prevYear}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">year</span></Button>
             <Button variant="ghost" className="!py-1.5 !px-2.5 text-lg leading-none font-bold" onClick={() => adjustDate('month', -1)} title={copy.today.prevMonth} aria-label={copy.today.prevMonth}><span className="text-foreground">←</span><span className="text-sm text-muted-foreground ml-0.5">month</span></Button>
@@ -179,6 +189,7 @@ export default function ChartTransitsPage() {
           <TransitsTable natal={chart.chartResult} transit={transitResult} />
         </div>
       </div>
+      <TransitNatalAspectsSnapshot natal={chart.chartResult} transit={transitResult} />
       <TransitNatalGaussianPlot
           natal={chart.chartResult}
           transitDate={transitDate}

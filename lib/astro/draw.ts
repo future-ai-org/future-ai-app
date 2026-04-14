@@ -367,22 +367,23 @@ export function drawTransitWheel(
   // ---- Outer circle + outer zodiac band ----
   ctx.beginPath();
   ctx.arc(cx, cy, R, 0, 2 * Math.PI);
-  ctx.strokeStyle = isLight ? 'rgba(100, 90, 130, 0.45)' : 'rgba(120, 110, 140, 0.5)';
+  ctx.strokeStyle = isLight ? 'rgba(85, 105, 160, 0.5)' : 'rgba(95, 115, 165, 0.55)';
   ctx.lineWidth = 2;
   ctx.stroke();
 
+  // Outer (transit) zodiac: cool blue–violet so it reads separately from the inner (natal) wheel
   const zodiacFills = isLight
     ? [
-        'rgba(200, 192, 220, 0.7)', 'rgba(210, 202, 228, 0.65)', 'rgba(190, 182, 212, 0.72)',
-        'rgba(205, 198, 222, 0.68)', 'rgba(195, 186, 216, 0.7)', 'rgba(208, 200, 225, 0.66)',
-        'rgba(188, 178, 208, 0.71)', 'rgba(202, 194, 218, 0.69)', 'rgba(198, 190, 214, 0.7)',
-        'rgba(206, 198, 224, 0.67)', 'rgba(192, 184, 210, 0.71)', 'rgba(204, 196, 220, 0.68)',
+        'rgba(195, 208, 235, 0.75)', 'rgba(205, 215, 238, 0.72)', 'rgba(188, 202, 232, 0.76)',
+        'rgba(200, 212, 236, 0.73)', 'rgba(192, 206, 230, 0.75)', 'rgba(208, 218, 240, 0.71)',
+        'rgba(186, 200, 228, 0.76)', 'rgba(202, 214, 236, 0.73)', 'rgba(196, 210, 232, 0.74)',
+        'rgba(204, 216, 238, 0.72)', 'rgba(190, 204, 230, 0.75)', 'rgba(206, 218, 242, 0.71)',
       ]
     : [
-        'rgba(80, 72, 100, 0.4)', 'rgba(100, 90, 120, 0.35)', 'rgba(60, 55, 75, 0.45)',
-        'rgba(90, 80, 110, 0.38)', 'rgba(70, 65, 90, 0.42)', 'rgba(95, 85, 115, 0.36)',
-        'rgba(65, 58, 82, 0.43)', 'rgba(85, 78, 105, 0.37)', 'rgba(75, 68, 95, 0.41)',
-        'rgba(88, 82, 108, 0.38)', 'rgba(62, 56, 78, 0.44)', 'rgba(92, 86, 112, 0.36)',
+        'rgba(48, 58, 92, 0.45)', 'rgba(55, 65, 98, 0.4)', 'rgba(42, 52, 82, 0.48)',
+        'rgba(52, 62, 95, 0.42)', 'rgba(45, 55, 88, 0.44)', 'rgba(58, 68, 100, 0.39)',
+        'rgba(44, 54, 85, 0.46)', 'rgba(54, 64, 96, 0.41)', 'rgba(48, 58, 90, 0.43)',
+        'rgba(56, 66, 99, 0.4)', 'rgba(42, 52, 84, 0.47)', 'rgba(53, 63, 97, 0.39)',
       ];
   for (let h = 0; h < 12; h++) {
     const startAngle = eclToCanvas(drawCusps[h]);
@@ -395,8 +396,8 @@ export function drawTransitWheel(
     ctx.fillStyle = zodiacFills[h];
     ctx.fill();
   }
-  // Ring where transit planets sit: same solid color as inner house band (your chart’s planet ring)
-  const planetRingFill = isLight ? 'rgba(230, 224, 242, 0.95)' : 'rgba(45, 40, 58, 0.9)';
+  // Ring where transit planets sit (outer wheel) — cool tone; inner natal uses a separate warm fill
+  const planetRingFill = isLight ? 'rgba(214, 224, 248, 0.96)' : 'rgba(34, 44, 72, 0.93)';
   ctx.beginPath();
   ctx.arc(cx, cy, outerZodiacInner, 0, 2 * Math.PI);
   ctx.arc(cx, cy, innerWheelOuterR, 0, 2 * Math.PI, true);
@@ -408,18 +409,18 @@ export function drawTransitWheel(
     ctx.beginPath();
     ctx.moveTo(cx + innerWheelOuterR * Math.cos(a), cy + innerWheelOuterR * Math.sin(a));
     ctx.lineTo(cx + R * Math.cos(a), cy + R * Math.sin(a));
-    ctx.strokeStyle = isLight ? 'rgba(120, 110, 150, 0.5)' : 'rgba(70, 65, 85, 0.55)';
+    ctx.strokeStyle = isLight ? 'rgba(100, 120, 175, 0.45)' : 'rgba(90, 105, 145, 0.5)';
     ctx.lineWidth = 1;
     ctx.stroke();
   }
-  const zodiacGlyphColor = isLight ? '#2d1b4e' : '#8b7ab8';
+  const outerZodiacGlyphColor = isLight ? '#1e3558' : '#9eb8e8';
   for (let h = 0; h < 12; h++) {
     const cusp = drawCusps[h];
     const nextCusp = drawCusps[(h + 1) % 12];
     const midLon = cusp + mod360(nextCusp - cusp) / 2;
     const midAngle = eclToCanvas(midLon);
     const glyphR = R - zodiacW * 0.5;
-    ctx.fillStyle = zodiacGlyphColor;
+    ctx.fillStyle = outerZodiacGlyphColor;
     ctx.font = `bold ${R * 0.065}px "Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Symbols", sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -427,7 +428,7 @@ export function drawTransitWheel(
   }
   ctx.beginPath();
   ctx.arc(cx, cy, outerZodiacInner, 0, 2 * Math.PI);
-  ctx.strokeStyle = isLight ? 'rgba(110, 100, 140, 0.5)' : 'rgba(100, 92, 120, 0.5)';
+  ctx.strokeStyle = isLight ? 'rgba(90, 110, 165, 0.55)' : 'rgba(100, 120, 175, 0.55)';
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
@@ -460,7 +461,7 @@ export function drawTransitWheel(
     const lonForAngle = n <= 1 ? wedgeCenter : wedgeCenter + (i - (n - 1) / 2) * (spreadDeg / Math.max(1, n - 1));
     const angle = eclToCanvas(lonForAngle);
     const glyph = PLANET_GLYPHS[p.name] ?? p.name.charAt(0);
-    ctx.fillStyle = isLight ? '#2d2640' : '#e0d8f0';
+    ctx.fillStyle = isLight ? '#1a3050' : '#c5daf8';
     ctx.font = `${R * 0.062}px "Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Symbols", sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -470,15 +471,27 @@ export function drawTransitWheel(
   // ---- Divider circle (between transit and natal) ----
   ctx.beginPath();
   ctx.arc(cx, cy, innerWheelOuterR, 0, 2 * Math.PI);
-  ctx.strokeStyle = isLight ? 'rgba(120, 110, 150, 0.6)' : 'rgba(140, 130, 170, 0.6)';
+  ctx.strokeStyle = isLight ? 'rgba(140, 100, 120, 0.55)' : 'rgba(160, 110, 130, 0.55)';
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
   // ---- Inner (natal) wheel: same sign divisions as outer (0°, 30°, 60°...) so everything aligns ----
   const risingSignIndex = signOf(natal.asc); // whole-sign: house 1 = this sign, house 2 = next, etc.
+  // Inner (natal) zodiac: warm rose–mauve to contrast the outer transit wheel
   const innerZodiacFills = isLight
-    ? ['rgba(200, 192, 220, 0.6)', 'rgba(210, 202, 228, 0.55)', 'rgba(190, 182, 212, 0.62)', 'rgba(205, 198, 222, 0.58)', 'rgba(195, 186, 216, 0.6)', 'rgba(208, 200, 225, 0.56)', 'rgba(188, 178, 208, 0.61)', 'rgba(202, 194, 218, 0.59)', 'rgba(198, 190, 214, 0.6)', 'rgba(206, 198, 224, 0.57)', 'rgba(192, 184, 210, 0.61)', 'rgba(204, 196, 220, 0.58)']
-    : ['rgba(80, 72, 100, 0.35)', 'rgba(100, 90, 120, 0.3)', 'rgba(60, 55, 75, 0.4)', 'rgba(90, 80, 110, 0.33)', 'rgba(70, 65, 90, 0.37)', 'rgba(95, 85, 115, 0.31)', 'rgba(65, 58, 82, 0.38)', 'rgba(85, 78, 105, 0.32)', 'rgba(75, 68, 95, 0.36)', 'rgba(88, 82, 108, 0.33)', 'rgba(62, 56, 78, 0.39)', 'rgba(92, 86, 112, 0.31)'];
+    ? [
+        'rgba(228, 208, 218, 0.72)', 'rgba(235, 215, 222, 0.68)', 'rgba(222, 200, 212, 0.74)',
+        'rgba(232, 212, 220, 0.7)', 'rgba(225, 205, 215, 0.73)', 'rgba(238, 218, 225, 0.67)',
+        'rgba(220, 198, 210, 0.74)', 'rgba(230, 210, 218, 0.69)', 'rgba(226, 206, 216, 0.72)',
+        'rgba(234, 214, 222, 0.68)', 'rgba(218, 200, 212, 0.73)', 'rgba(236, 216, 224, 0.67)',
+      ]
+    : [
+        'rgba(85, 58, 72, 0.42)', 'rgba(92, 65, 78, 0.38)', 'rgba(78, 52, 65, 0.44)',
+        'rgba(88, 62, 75, 0.4)', 'rgba(82, 56, 70, 0.42)', 'rgba(95, 68, 80, 0.37)',
+        'rgba(80, 54, 68, 0.43)', 'rgba(90, 64, 76, 0.39)', 'rgba(84, 58, 72, 0.41)',
+        'rgba(93, 66, 79, 0.38)', 'rgba(76, 50, 64, 0.44)', 'rgba(91, 65, 77, 0.39)',
+      ];
+  const innerZodiacGlyphColor = isLight ? '#4a2840' : '#e8c4d4';
   // Inner zodiac band (sign wedges aligned with outer)
   for (let h = 0; h < 12; h++) {
     const startAngle = eclToCanvas(drawCusps[h]);
@@ -497,7 +510,7 @@ export function drawTransitWheel(
     ctx.beginPath();
     ctx.moveTo(cx + innerZodiacInner * Math.cos(a), cy + innerZodiacInner * Math.sin(a));
     ctx.lineTo(cx + innerWheelOuterR * Math.cos(a), cy + innerWheelOuterR * Math.sin(a));
-    ctx.strokeStyle = isLight ? 'rgba(120, 110, 150, 0.5)' : 'rgba(70, 65, 85, 0.55)';
+    ctx.strokeStyle = isLight ? 'rgba(150, 105, 125, 0.45)' : 'rgba(120, 80, 95, 0.5)';
     ctx.lineWidth = 1;
     ctx.stroke();
   }
@@ -508,7 +521,7 @@ export function drawTransitWheel(
     const midLon = cusp + mod360(nextCusp - cusp) / 2;
     const midAngle = eclToCanvas(midLon);
     const glyphR = innerWheelOuterR - innerZodiacW * 0.5;
-    ctx.fillStyle = zodiacGlyphColor;
+    ctx.fillStyle = innerZodiacGlyphColor;
     ctx.font = `bold ${R * 0.048}px "Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Symbols", sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -516,12 +529,12 @@ export function drawTransitWheel(
   }
   ctx.beginPath();
   ctx.arc(cx, cy, innerZodiacInner, 0, 2 * Math.PI);
-  ctx.strokeStyle = isLight ? 'rgba(110, 100, 140, 0.5)' : 'rgba(100, 92, 120, 0.5)';
+  ctx.strokeStyle = isLight ? 'rgba(145, 100, 120, 0.55)' : 'rgba(130, 85, 100, 0.55)';
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
   // ---- Inner house band: same sign boundaries (so pie aligns); house numbers by whole-sign (1 = rising sign) ----
-  const houseFill = isLight ? 'rgba(230, 224, 242, 0.95)' : 'rgba(45, 40, 58, 0.9)';
+  const houseFill = isLight ? 'rgba(244, 228, 234, 0.97)' : 'rgba(58, 38, 48, 0.93)';
   for (let h = 0; h < 12; h++) {
     const startAngle = eclToCanvas(drawCusps[h]);
     const endAngle = eclToCanvas(drawCusps[(h + 1) % 12]);
@@ -538,7 +551,7 @@ export function drawTransitWheel(
     ctx.beginPath();
     ctx.moveTo(cx + houseBandInner * Math.cos(a), cy + houseBandInner * Math.sin(a));
     ctx.lineTo(cx + innerZodiacInner * Math.cos(a), cy + innerZodiacInner * Math.sin(a));
-    ctx.strokeStyle = isLight ? 'rgba(120, 110, 150, 0.5)' : 'rgba(70, 65, 85, 0.55)';
+    ctx.strokeStyle = isLight ? 'rgba(150, 105, 125, 0.45)' : 'rgba(120, 80, 95, 0.5)';
     ctx.lineWidth = 1;
     ctx.stroke();
   }
@@ -547,7 +560,7 @@ export function drawTransitWheel(
     const midLon = drawCusps[h] + 15;
     const midA = eclToCanvas(midLon);
     const numR = (innerCircleR + houseBandInner) * 0.5;
-    ctx.fillStyle = isLight ? 'rgba(60, 50, 90, 0.95)' : 'rgba(190, 182, 210, 0.95)';
+    ctx.fillStyle = isLight ? 'rgba(90, 45, 58, 0.95)' : 'rgba(230, 190, 205, 0.95)';
     ctx.font = `600 ${R * 0.036}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -555,16 +568,16 @@ export function drawTransitWheel(
   }
   ctx.beginPath();
   ctx.arc(cx, cy, houseBandInner, 0, 2 * Math.PI);
-  ctx.strokeStyle = isLight ? 'rgba(120, 110, 150, 0.45)' : 'rgba(110, 100, 130, 0.5)';
+  ctx.strokeStyle = isLight ? 'rgba(145, 100, 120, 0.45)' : 'rgba(125, 85, 100, 0.5)';
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
   // ---- Center circle ----
   ctx.beginPath();
   ctx.arc(cx, cy, innerCircleR, 0, 2 * Math.PI);
-  ctx.fillStyle = isLight ? 'rgba(248, 246, 252, 0.98)' : 'rgba(18, 16, 26, 0.98)';
+  ctx.fillStyle = isLight ? 'rgba(252, 246, 248, 0.98)' : 'rgba(28, 20, 26, 0.98)';
   ctx.fill();
-  ctx.strokeStyle = isLight ? 'rgba(110, 100, 140, 0.4)' : 'rgba(100, 90, 125, 0.4)';
+  ctx.strokeStyle = isLight ? 'rgba(140, 100, 118, 0.4)' : 'rgba(115, 80, 95, 0.45)';
   ctx.lineWidth = 1;
   ctx.stroke();
 
@@ -593,7 +606,7 @@ export function drawTransitWheel(
     const planetR = natalPlanetRBase - radiusOffset;
     const angle = eclToCanvas(lon);
     const glyph = PLANET_GLYPHS[p.name] ?? p.name.charAt(0);
-    ctx.fillStyle = isLight ? '#2d2640' : '#c8b8e0';
+    ctx.fillStyle = isLight ? '#3d2030' : '#f0c8d8';
     ctx.font = `${R * 0.045}px "Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Symbols", sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

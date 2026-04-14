@@ -11,14 +11,27 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'lat and lon are required' }, { status: 400 });
   }
 
+  const parsedLat = Number(lat);
+  const parsedLon = Number(lon);
+  if (
+    !Number.isFinite(parsedLat) ||
+    !Number.isFinite(parsedLon) ||
+    parsedLat < -90 ||
+    parsedLat > 90 ||
+    parsedLon < -180 ||
+    parsedLon > 180
+  ) {
+    return NextResponse.json({ error: 'lat/lon must be valid coordinates' }, { status: 400 });
+  }
+
   const apiKey = process.env.TIMEZONEDB_API_KEY;
   if (!apiKey) {
     return NextResponse.json({ error: 'timezone backend not configured' }, { status: 500 });
   }
 
   const url = `${TIMEZONEDB_BASE}?key=${encodeURIComponent(apiKey)}&format=json&by=position&lat=${encodeURIComponent(
-    lat,
-  )}&lng=${encodeURIComponent(lon)}`;
+    String(parsedLat),
+  )}&lng=${encodeURIComponent(String(parsedLon))}`;
 
   try {
     const res = await fetch(url);

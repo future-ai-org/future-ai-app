@@ -37,8 +37,8 @@ export default function LoginErrorPage() {
         <Link href="/login" className="text-violet-400 text-sm hover:text-violet-300 transition-colors">
           {copy.auth.errors.backToLogin}
         </Link>
-        <h1 className="text-3xl font-serif mt-4 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
-          {copy.auth.errors.configTitle}
+        <h1 className="text-4xl font-serif mt-4 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
+          {copy.chart.titlePrefix} {copy.auth.errors.configTitle} {copy.chart.titleSuffix}
         </h1>
       </div>
       <Suspense fallback={<Card><p className="text-muted-foreground text-sm">loading…</p></Card>}>

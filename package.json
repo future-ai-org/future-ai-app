@@ -6,6 +6,7 @@
     "dev": "next dev -p 8066",
     "build": "next build",
     "start": "next start -p 8066",
+    "predict:build": "node scripts/generate-predict-data.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
@@ -36,6 +37,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",
+    "stripe": "^18.5.0",
     "tailwind-merge": "^3.5.0",
     "three": "^0.183.2"
   },

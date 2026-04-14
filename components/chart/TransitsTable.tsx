@@ -12,17 +12,17 @@ interface Props {
   transit: ChartResult;
 }
 
-type RowPosition = { name: string; longitude: number; house: number; retrograde?: boolean };
+type RowPosition = { name: string; longitude: number; retrograde?: boolean };
 
 function byName(
   result: ChartResult,
 ): Map<string, RowPosition> {
   const map = new Map<string, RowPosition>();
   for (const p of result.planets) {
-    map.set(p.name, { name: p.name, longitude: p.longitude, house: p.house, retrograde: p.retrograde });
+    map.set(p.name, { name: p.name, longitude: p.longitude, retrograde: p.retrograde });
   }
   for (const p of result.points ?? []) {
-    map.set(p.name, { name: p.name, longitude: p.longitude, house: p.house, retrograde: p.retrograde });
+    map.set(p.name, { name: p.name, longitude: p.longitude, retrograde: p.retrograde });
   }
   return map;
 }
@@ -59,10 +59,6 @@ function PositionCell({ pos }: { pos: RowPosition | undefined }) {
       <span className="font-symbols mr-1 text-[#2d1b4e] dark:text-[#8b7ab8]">{f.glyph}</span>
       {f.sign} {f.deg}°{f.min}&apos;
       {pos.retrograde && <span className="text-red-400 text-xs ml-0.5">℞</span>}
-      {' · '}
-      <span className="bg-muted rounded px-1.5 py-0.5 text-xs text-muted-foreground">
-        {copy.planetTable.house} {pos.house}
-      </span>
     </td>
   );
 }
@@ -79,13 +75,13 @@ export function TransitsTable({ natal, transit }: Props) {
         <table className="w-full border-collapse text-sm min-w-[320px]">
           <thead>
             <tr>
-              <th className="text-left text-xs text-muted-foreground font-normal tracking-wider pb-2 px-1">
+              <th className="text-left text-xs text-muted-foreground font-bold tracking-wider pb-2 px-1">
                 {copy.planetTable.planet}
               </th>
-              <th className="text-left text-xs text-muted-foreground font-normal tracking-wider pb-2 px-1">
+              <th className="text-left text-xs text-muted-foreground font-bold tracking-wider pb-2 px-1">
                 {copy.chart.transitsTableNatal}
               </th>
-              <th className="text-left text-xs text-muted-foreground font-normal tracking-wider pb-2 px-1">
+              <th className="text-left text-xs text-muted-foreground font-bold tracking-wider pb-2 px-1">
                 {copy.chart.transitsTableTransits}
               </th>
             </tr>

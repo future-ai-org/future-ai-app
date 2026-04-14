@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { Button } from '@/components/ui/Button';
@@ -77,13 +76,10 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <main className="max-w-md mx-auto px-4 py-16">
-      <div className="text-center mb-8">
-        <Link href="/" className="text-violet-400 text-sm hover:text-violet-300 transition-colors">
-          ← {copy.site.title}
-        </Link>
-        <h1 className="text-3xl font-serif mt-4 bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent">
-          {copy.auth.loginTitle}
+    <main className="max-w-md mx-auto px-4 sm:px-6 py-16">
+      <div className="text-center mb-12 md:mb-14 pb-2">
+        <h1 className="text-6xl md:text-7xl font-serif bg-gradient-to-r from-violet-400 to-fuchsia-300 bg-clip-text text-transparent leading-tight px-2 break-words">
+          {copy.chart.titlePrefix} {copy.auth.loginTitle} {copy.chart.titleSuffix}
         </h1>
       </div>
       <Suspense fallback={<Card><p className="text-muted-foreground text-sm">loading…</p></Card>}>
