@@ -7,7 +7,7 @@ const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, '..');
 
 const predictPath = path.join(repoRoot, 'data', 'predict.json');
-const questionSourcePath = path.join(repoRoot, 'data', 'predict-questions.json');
+const questionSourcePath = path.join(repoRoot, 'docs', 'predict-questions-source.json');
 
 function fail(message) {
   throw new Error(`[predict:build] ${message}`);
@@ -110,7 +110,7 @@ async function main() {
     questionSource === null ||
     !Array.isArray(questionSource.questions)
   ) {
-    fail('data/predict-questions.json must contain a top-level "questions" array');
+    fail('docs/predict-questions-source.json must contain a top-level "questions" array');
   }
 
   const takenIds = new Set();

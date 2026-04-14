@@ -1,18 +1,18 @@
 # Predict Questions E2E
 
-This project now treats `data/predict-questions.json` as the source of truth for prediction question strings.
+This project now treats `docs/predict-questions-source.json` as the source of truth for prediction question strings.
 
 `data/predict.json` remains the runtime file consumed by the app, and is generated via script.
 
 ## Files
 
-- `data/predict-questions.json`: author-friendly question content (strings and market config)
+- `docs/predict-questions-source.json`: author-friendly question content (strings and market config)
 - `scripts/generate-predict-data.mjs`: validator + generator
 - `data/predict.json`: generated runtime payload used by `copy.predict`
 
 ## Add A New Question
 
-1. Open `data/predict-questions.json`.
+1. Open `docs/predict-questions-source.json`.
 2. Append a new object inside `questions`.
 3. Fill:
    - `category` (string)
@@ -65,7 +65,7 @@ After generating:
 
 ## Recommended Team Workflow
 
-1. Edit only `data/predict-questions.json` for question updates.
+1. Edit only `docs/predict-questions-source.json` for question updates.
 2. Run `npm run predict:build`.
 3. Review generated `data/predict.json` diff.
 4. Run lint/typecheck/tests.
