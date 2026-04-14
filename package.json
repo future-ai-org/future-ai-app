@@ -6,6 +6,7 @@
     "dev": "next dev -p 8066",
     "build": "next build",
     "start": "next start -p 8066",
+    "predict:build": "node scripts/generate-predict-data.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
