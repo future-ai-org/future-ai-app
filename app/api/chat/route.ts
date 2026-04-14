@@ -55,7 +55,12 @@ export async function POST(request: Request) {
 
     if (!res.ok) {
       const err = await res.text();
-      console.error('Anthropic API error', res.status, err);
+      const requestId = res.headers.get('request-id') ?? res.headers.get('x-request-id');
+      console.error('Anthropic API error', {
+        status: res.status,
+        requestId,
+        details: process.env.NODE_ENV === 'development' ? err : undefined,
+      });
       return NextResponse.json(
         {
           error:

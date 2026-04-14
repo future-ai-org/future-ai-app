@@ -45,3 +45,15 @@ Stripe and Astro Coins setup: [docs/STRIPE.md](docs/STRIPE.md).
 ## Stack
 
 Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, Prisma, Vitest.
+
+<br>
+
+---
+
+## TODO
+
+<br>
+
+- training / fine-tuning the AI for astro
+- infra, deplopyment, etc.
+
