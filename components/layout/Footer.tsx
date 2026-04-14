@@ -4,6 +4,7 @@ import { copy } from '@/lib/copy';
 import { getCurrentTransits } from '@/lib/astro/currentTransits';
 import { getMoonPhaseInfo } from '@/lib/astro/moonPhase';
 import { ConditionalAstroFooterStrip } from './ConditionalAstroFooterStrip';
+import { HomePredictFooterStrip } from './HomePredictFooterStrip';
 
 export function Footer() {
   // Without this, production can prerender/cache the layout with `new Date()` from build time.
@@ -30,6 +31,7 @@ export function Footer() {
   return (
     <footer className="mt-auto w-full border-t border-border/80 bg-footer">
       <div className="mx-auto max-w-6xl px-4 pt-6 pb-10 sm:px-6 sm:pb-12">
+        <HomePredictFooterStrip />
         <ConditionalAstroFooterStrip transits={transits} />
         <div className="mt-6 pt-2 pb-4 sm:pb-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
           <p className="text-[0.65rem] text-muted-foreground">{copyrightText}</p>
